@@ -20,4 +20,9 @@ It's a perfect replacement for jquery in all aspects
 And much more, it's shines on it's modern design and 
 Is holding reasonable standards needed in the future. 
 
+# installing to your project
 
+
+
+
+# Quick documentation 
