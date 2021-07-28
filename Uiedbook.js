@@ -8,12 +8,10 @@ AND CONDUCT OF USE OF THE BSD
 LINCENSE AS YOU PROCEED TO
 USE THIS SOFTWARE
  */
-(function(window){
 
  "use strict";
-function u(){
-let _s = {};
-_s.css = (name,sel,properties)=>{
+
+let css = (name,sel,properties)=>{
 
 /*
  This module for creating
@@ -44,7 +42,7 @@ document.head.append(styleTag)
 }
 /////////////%%%%%%%%%////////////
 // second s module
-_s.media = (value,...properties)=>{
+let media = (value,...properties)=>{
 /*
  This module for creating
  css  media styles 
@@ -85,7 +83,7 @@ aniStyleTag.innerHTML = totalAnimation
 document.head.append(aniStyleTag)
 
 }
-_s.animate = (name,...properties)=>{
+let animate = (name,...properties)=>{
 
 /*
  This module for creating
@@ -121,7 +119,7 @@ document.head.append(aniStyleTag)
 }
 ///////%%%%%%%%%%%%////////////
 // third module
-_s.xprt = (design) =>{
+let xprt = (design) =>{
 /*
 the acronym =>
 $$$$$$$$$$$$$$$$$$
@@ -150,7 +148,7 @@ if(templates[i][0] == design){
 return templates[i];
 }}};
 /////// 4th module
-_s.build = (type,content,parent,ifCache) =>{
+let build = (type,content,parent,ifCache) =>{
 /*
 this for building css styles,
 html makeup and javascript to
@@ -189,7 +187,7 @@ document.body.append(scr);
 }}}};
 ///////%%%%%%%%%%%%////////////
 // 5th module
-_s.xhr = (url, type,ifJSON) =>{
+let xhr = (url, type,ifJSON) =>{
 ifJSON === "undefined" ? ifJSON = false : ifJSON
 const xhr = new XMLHttpRequest();
 let result = null;
@@ -222,7 +220,7 @@ result =  xhr.onload = function() {
 }
 ///////%%%%%%%%%%%%////////////
 // 6th module
-_s.$ = (...uied) =>{
+let u = (...uied) =>{
 
 let eU = uied.length,
 [el,ifAll,orNum] = uied,
@@ -290,7 +288,7 @@ createdElement.insertAdjacentHTML("afterend","<"+type+" "+addedAtrr+"></"+type+"
  attr: (attribute_object)=>{
  if(typeof attribute_object !== "object") return;
  for(const [prop, attr] of object.entries(attribute_object)){
-if(prop===null){
+if(prop==null){
  return e.getAttribute(atr);
  }else {
 e.setAttribute(prop, attr);
@@ -299,7 +297,7 @@ e.setAttribute(prop, attr);
  
  }, 
  removeAttr: (atr)=>{
- if(attr === null){return};
+ if(attr == null){return};
  e.removeAttribute(atr)
  },
  html: (code)=>{
@@ -333,7 +331,35 @@ e.setAttribute(prop, attr);
  }, 
  remove: (ind)=>{
  e.removeChild(e.childNodes[ind])
+ },
+
+
+ fullScreen: () =>{
+ return {
+ toggle: ()=>{
+ function toggleFullScreen() {
+ if (!document.fullscreenElement) {
+ e.requestFullscreen().catch(err => {
+ alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
+ });
+ } else {
+ document.exitFullscreen();
  }
+ }
+ },
+ set: ()=>{
+ e.requestFullscreen().catch(err => {
+ alert(`Error! failure attempting to enable
+ full-screen mode: ${err.message}
+ (${err.name})`);
+ });
+ },
+ exist: ()=>{
+ document.exitFullscreen();
+ }
+ }}
+ 
+ 
  
  
   }
@@ -342,7 +368,7 @@ e.setAttribute(prop, attr);
 
 ///////%%%%%%%%%%%%////////////
 // 7th module
-_s.isEmptyObject = function( obj ) {
+let isEmptyObject = function( obj ) {
 		var name;
 
 		for ( name in obj ) {
@@ -351,7 +377,7 @@ _s.isEmptyObject = function( obj ) {
 		return true;
 	}
 		
-_s.each = function( obj, callback ) {
+let each = function( obj, callback ) {
 	var length, i = 0;
 	
 	if ( typeof obj === "object") {
@@ -374,14 +400,14 @@ _s.each = function( obj, callback ) {
 	
 	
 	
-_s.globalEval = function( code, options, doc ) {
-	new	DOMEval( code, { nonce: options && options.nonce }, doc );
+let globalEval = function( code, options, doc ) {
+		DOMEval( code, { nonce: options && options.nonce }, doc );
 	}
 	
-_s.error = ( msg ) =>{
+let error = ( msg ) =>{
 		throw new Error( msg );
-	},
-_s.get = (...uied) =>{
+	};
+let get = (...uied) =>{
 let [el,ifAll,orNum] = uied,e,elArr = document.querySelectorAll(el);
 
 if(uied.length === 1){
@@ -392,31 +418,31 @@ e = elArr;
 }else{
 if(uied.length === 3){
 e = elArr[orNum];
-}}}
+}}};
 return e;
 }
 
 ///////%%%%%%%%%%%%////////////
 // 8th module
 
-_s.cacheBox = [];
-_s.cache = (fn) => {
+let cacheBox = [];
+let cache = (fn) => {
 /*if(document.querySelector('style') === null){
 const sty = document.createElement("style")
 document.head.append(sty)
 }*/
-_s.cacheBox.push(fn)
+cacheBox.push(fn)
 }
-_s.startCache = ()=>{
+let startCache = ()=>{
 window.addEventListener("load", ()=>{
-_s.cacheBox.forEach((fn)=>{
+cacheBox.forEach((fn)=>{
 fn();
 })
 })
 }
 ///////%%%%%%%%%%%%////////////
 // 9th module
-_s.script = (code,ifCache) =>{
+let script = (code,ifCache) =>{
 /*
 for putting javascript code
 in script tags into the
@@ -436,60 +462,36 @@ document.body.append(scr);
 }
 };
 
-_s.rad = (fro,to) => {
+let rad = (fro,to) => {
 let num = to - fro;
 return Math.floor(Math.random() * Math.floor(num));
 }
 
 
-/* fullScreen api */
 
-_s.fullScreen = (object) =>{
-obj = typeof object !== "string"? document.body : document.querySelector(object);
-return {
-toggle: ()=>{
-function toggleFullScreen() {
-  if (!document.fullscreenElement) {
-    obj.requestFullscreen().catch(err => {
-      alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
-    });
-  } else {
-    document.exitFullscreen();
-  }
-}
-},
-set: ()=>{
-obj.requestFullscreen().catch(err => {
-alert(`Error! failure attempting to enable
- full-screen mode: ${err.message}
-  (${err.name})`);
-});
-},
-exist: ()=>{
-document.exitFullscreen();
-}
-}};
+
+
 
 //timer
-_s.timer = (fuc,ti=1) =>{
+let timer = (fuc,ti=1) =>{
     let code="()=>{"+fuc+"}";
     setTimeout(eval(code),ti*1000);
 }
 //classmaker
-_s.makeClass = (name,stylings) =>{
+let makeClass = (name,stylings) =>{
     let clas=document.createElement("style")
     let styling ="."+name+"{"+stylings+"}"
     clas.innerHTML= styling;
     document.body.appendChild(clas)
 }
 //make elem
-_s.create = (type = 'div',id = '') =>{
+let create = (type = 'div',id = '') =>{
     let element = document.createElement(type)
     element.setAttribute("id",id)
     document.body.appendChild(element)
     return element;
 }
-_s.download = function(type, source, name){
+let download = function(type, source, name){
 
 const file = new Blob([source.buffer],{ type: type});
 const fileURL = URL.createObjectURL(file);
@@ -505,7 +507,7 @@ return linkElement;
 }
 
 
-_s.debounce = (func, delay) =>{
+let debounce = (func, delay) =>{
   function k() {
     setInterval(() => func.apply(this, arguments), delay)
   };
@@ -515,31 +517,31 @@ k();
 
 
 
-_s.callStack  = [];
-_s.keep = (id,runtime, multiple)=>{
+let callStack  = [];
+let keep = (id,runtime, multiple)=>{
 let callOjb = typeof id === "object"? id : null;
 multiple = typeof multiple === "undefined"? true: multiple;
 if(typeof id === "string" && typeof runtime === "number" && multiple){
 for(;runtime > 0; runtime--){
-_s.callStack.push(id)
+ callStack.push(id)
 }
 }else{
 if(callOjb !== null){
 for(let [k,v] of Object.entries(callOjb)){
 for(;v> 0; v--){
-_s.callStack.push(k)
+callStack.push(k)
 }
 }}else{
 if(!multiple && bank.callStack.indexOf(id) > - 1){
 return;
 }else{
 for(;runtime > 0; runtime--){
-_s.callStack.push(id)
+callStack.push(id)
 }
 }
 }} 
 };
-_s.log = (message)=>{
+let log = (message)=>{
 if(message){
 console.log(message)
 }else{
@@ -548,44 +550,44 @@ console.log(_s.callStack)
 return _s.callStack;
 }}};
 
-_s.check = (id) =>{
+let check = (id) =>{
 let ind = _s.callStack.indexOf(id)
 if(ind > -1){
-_s.callStack.splice(ind,1)
+callStack.splice(ind,1)
 return true;
 }else return false};
 
 
-_s.store = (name, value )=>{
+let store = (name, value )=>{
 localStorage.setItem(name , JSON.stringify(value))
 }
-_s.retrieve = (name )=>{
+let retrieve = (name )=>{
 localStorage.getItem(name);
 }
 
-_s.remove = (name) =>{
+let remove = (name) =>{
 localStorage.removeItem(name);
 
-};
-_s.getKey = (index)=>{
+}
+let getKey = (index)=>{
 window.localStorage.key(index);
-};
-_s.clear = ()=>{
+}
+let clear = ()=>{
 localStorage.clear();
-};
+}
 
 
 
 
-_s.onKeys = (keymap,callback)=>{
+let onKeys = (keymap,callback)=>{
 window.addEventListener("keydown", e =>{
-e.preventDefault();
-_s.keep(e.key,1,false);
+e.preventDefault()
+keep(e.key,1,false);
 });
 window.addEventListener("keyup", e => {
 let h = [];
 for(let i = 0; i < keymap.length; i++){
-if(_s.check(keymap[i])) {
+if(check(keymap[i])) {
 h.push("i");
 }else{
 return;
@@ -593,10 +595,6 @@ return;
 if(h.length === keymap.length) return callback();
 })};
 
-
-
-return _s;
-}
 
 
 
@@ -622,11 +620,11 @@ frame = document.createElement("div"),
 i = 0,
 highTimeOut = 3600;
 const put = (child,timing)=>{
-builds.push(child);
+builds.push(child)
 if(timing === "undefined"){
 timing = highTimeOut}
-duration.push(timing);
-};
+duration.push(timing)
+}
 
 const start = () =>{
 frame.style.height = "100vh";
@@ -634,17 +632,17 @@ frame.style.width = "100vh";
 frame.style.position = "fixed";
 frame.style.zIndex = "101";
 frame.style.backgroundColor = "black";
-document.body.append(frame);
+document.body.append(frame)
 
 const Grabin = (i)=>{
 setTimeout(()=>{
-frame.append(builds[i]);
+frame.append(builds[i])
 },
-duration[i]);
-};
+duration[i])
+}
 const Grabout = (i)=>{
 builds[i].parentNode.removeChild(builds[i]);
-};
+}
 while(i < builds.length){
 
 Grabin(i);
@@ -769,27 +767,15 @@ return _s;
 
 
 
-if(window){
-/*initialising global window variables,
-to work in a browser environment
-*/
-if(typeof(window.u) === 'undefined'){
-    window.u = u();
-  }
- 
-if(typeof(window.i) === 'undefined'){
-window.i = i();
-};
-}else{
+
 /*
 
 time to export those packages
 so that they are available 
 in a node js environment*/
 
-module.exports = {u,i};
-}
-})(window)
+//module.exports = {u,i};
+
 
 
 
