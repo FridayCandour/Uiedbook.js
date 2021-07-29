@@ -1,0 +1,49 @@
+
+/home/user/Uiedbook.js/Uiedbook.js
+   14:7   error    'css' is assigned a value but never used                                   no-unused-vars
+   44:7   error    'media' is assigned a value but never used                                 no-unused-vars
+   84:7   error    'animate' is assigned a value but never used                               no-unused-vars
+   91:7   warning  'styS' is never reassigned. Use 'const' instead                            prefer-const
+   92:5   warning  'styE' is never reassigned. Use 'const' instead                            prefer-const
+   95:5   warning  'proplen' is never reassigned. Use 'const' instead                         prefer-const
+  120:7   error    'build' is assigned a value but never used                                 no-unused-vars
+  163:7   error    'xhr' is assigned a value but never used                                   no-unused-vars
+  168:3   error    'result' is assigned a value but never used                                no-unused-vars
+  195:7   error    'u' is assigned a value but never used                                     no-unused-vars
+  266:34  error    'object' is not defined                                                    no-undef
+  267:18  error    Expected '===' and instead saw '=='                                        eqeqeq
+  275:11  error    'attr' is not defined                                                      no-undef
+  275:16  error    Expected '===' and instead saw '=='                                        eqeqeq
+  341:7   error    'isEmptyObject' is assigned a value but never used                         no-unused-vars
+  350:7   error    'each' is assigned a value but never used                                  no-unused-vars
+  372:7   error    'error' is assigned a value but never used                                 no-unused-vars
+  375:7   error    'get' is assigned a value but never used                                   no-unused-vars
+  397:7   error    'cache' is assigned a value but never used                                 no-unused-vars
+  404:7   error    'startCache' is assigned a value but never used                            no-unused-vars
+  413:7   error    'script' is assigned a value but never used                                no-unused-vars
+  433:7   error    'rad' is assigned a value but never used                                   no-unused-vars
+  439:7   error    'timer' is assigned a value but never used                                 no-unused-vars
+  441:14  error    eval can be harmful                                                        no-eval
+  444:7   error    'makeClass' is assigned a value but never used                             no-unused-vars
+  451:7   error    'create' is assigned a value but never used                                no-unused-vars
+  457:7   error    'download' is assigned a value but never used                              no-unused-vars
+  471:7   error    'debounce' is assigned a value but never used                              no-unused-vars
+  472:38  error    'arguments' is not defined                                                 no-undef
+  485:17  warning  'k' is never reassigned. Use 'const' instead                               prefer-const
+  501:7   error    'log' is assigned a value but never used                                   no-unused-vars
+  520:7   error    'store' is assigned a value but never used                                 no-unused-vars
+  523:7   error    'retrieve' is assigned a value but never used                              no-unused-vars
+  527:7   error    'remove' is assigned a value but never used                                no-unused-vars
+  530:7   error    'getKey' is assigned a value but never used                                no-unused-vars
+  533:7   error    'clear' is assigned a value but never used                                 no-unused-vars
+  537:7   error    'onKeys' is assigned a value but never used                                no-unused-vars
+  542:36  error    'e' is defined but never used                                              no-unused-vars
+  566:10  error    'i' is defined but never used                                              no-unused-vars
+  652:22  error    Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  723:23  error    'entities' is not defined                                                  no-undef
+  724:9   error    'entity' is not defined                                                    no-undef
+  724:18  error    'entities' is not defined                                                  no-undef
+  725:24  error    'entity' is not defined                                                    no-undef
+
+✖ 44 problems (40 errors, 4 warnings)
+
