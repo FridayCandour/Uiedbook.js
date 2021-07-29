@@ -21,9 +21,9 @@ const css = (name, sel, properties) => {
     properties = sel;
     sel = "";
   }
-  let styS = "" + name + sel + "" + "{",
-    styE = "}",
-    style = "",
+  const styS = "" + name + sel + "" + "{";
+  const styE = "}";
+  let style = "",
     totalStyle = "/*inputted css style by uiedbook api*/";
 
   for (const [k, v] of Object.entries(properties)) {
@@ -49,17 +49,17 @@ const media = (value, ...properties) => {
  */
 
   /*    @media only screen and ( max-height: 700px) {
-    .app {
-    margin-bottom: 10px;
-    }
-  }*/
+	  .app {
+		margin-bottom: 10px;
+	  }
+	}*/
 
-  let styS = "@media only screen and (" + value + ") " + "{",
-    styE = "}",
-    style = " ",
-    aniSty = " ",
-    proplen = properties.length,
-    totalAnimation,
+  const styS = "@media only screen and (" + value + ") " + "{",
+    styE = "}";
+  let style = " ",
+    aniSty = " ";
+  const proplen = properties.length;
+  let totalAnimation,
     Animation = "    ";
   const animationStep = num => {
     for (const [k, v] of Object.entries(properties[num][1])) {
@@ -117,37 +117,6 @@ const animate = (name, ...properties) => {
 };
 ///////%%%%%%%%%%%%////////////
 // third module
-const xprt = design => {
-  /*
-the acronym =>
-$$$$$$$$$$$$$$$$$$
-$ x for extra    $
-$ p for prebuilt $
-$ r for reusable $
-$ t for template $
-$$$$$$$$$$$$$$$$$$
-
-this module should be used for
-adding or  showing casing pre-
-designed templaes that users
-can choose from or customise
------------------------------
-actually it is an array like
-["design nane",
-["layout code"],
-[styles or animations]]
-
-simple but how does the layout
-parser do this?
-*/
-  const templates = [];
-  for (let i = 0; i < templates.length; i++) {
-    if (templates[i][0] == design) {
-      return templates[i];
-    }
-  }
-};
-/////// 4th module
 const build = (type, content, parent, ifCache) => {
   /*
 this for building css styles,
@@ -224,20 +193,20 @@ const xhr = (url, type, ifJSON) => {
 ///////%%%%%%%%%%%%////////////
 // 6th module
 const u = (...uied) => {
-  let eU = uied.length,
-    [el, ifAll, orNum] = uied,
-    all = false,
-    e,
-    elArr = document.querySelectorAll(el);
+  const eU = uied.length,
+    [el, ifAll_OrNum] = uied;
+  let all = false,
+    e;
   if (eU === 1 && typeof el === "string") {
     e = document.querySelector(el);
   } else {
-    if (eU === 2 && typeof ifAll === "string") {
+    if (eU === 2 && typeof ifAll_OrNum !== "number") {
       //all el is being grabbed from the dom
       all = true;
+      e = document.querySelectorAll(el);
     } else {
-      if (typeof orNum === "number") {
-        e = elArr[orNum];
+      if (typeof ifAll_OrNum === "number") {
+        e = document.querySelectorAll(el)[ifAll_OrNum];
       }
     }
   }
@@ -249,7 +218,7 @@ const u = (...uied) => {
         if (!all) {
           e.style[k] = v;
         } else {
-          elArr.forEach(element => {
+          e.forEach(element => {
             element.style[k] = v;
           });
         }
@@ -257,9 +226,8 @@ const u = (...uied) => {
     },
 
     appendto: (type, attribute, number) => {
-      let createdElement = document.createElement(type),
-        id,
-        addedAtrr = "";
+      const createdElement = document.createElement(type);
+      let addedAtrr = "";
       for (const [k, v] of Object.entries(attribute)) {
         createdElement[k] = v;
         addedAtrr += " " + k + '="' + v + '"';
@@ -270,7 +238,7 @@ const u = (...uied) => {
           createdElement.insertAdjacentHTML("afterend", "<" + type + " " + addedAtrr + "></" + type + ">");
         }
       } else {
-        elArr.forEach(element => {
+        e.forEach(element => {
           element.append(createdElement);
           for (let i = 0; i < number; i++) {
             createdElement.insertAdjacentHTML("afterend", "<" + type + " " + addedAtrr + "></" + type + ">");
@@ -288,7 +256,7 @@ const u = (...uied) => {
         /*console.log(e,evft)*/
         return e.addEventListener(type, evft);
       } else {
-        return elArr.forEach(element => {
+        return e.forEach(element => {
           element.addEventListener(type, evft);
         });
       }
@@ -297,7 +265,7 @@ const u = (...uied) => {
       if (typeof attribute_object !== "object") return;
       for (const [prop, attr] of object.entries(attribute_object)) {
         if (prop == null) {
-          return e.getAttribute(atr);
+          return e.getAttribute(prop);
         } else {
           e.setAttribute(prop, attr);
         }
@@ -345,14 +313,12 @@ const u = (...uied) => {
     fullScreen: () => {
       return {
         toggle: () => {
-          function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-              e.requestFullscreen().catch(err => {
-                alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
-              });
-            } else {
-              document.exitFullscreen();
-            }
+          if (!document.fullscreenElement) {
+            e.requestFullscreen().catch(err => {
+              alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+          } else {
+            document.exitFullscreen();
           }
         },
         set: () => {
@@ -403,26 +369,21 @@ const each = function (obj, callback) {
   return obj;
 };
 
-const globalEval = function (code, options, doc) {
-  DOMEval(code, { nonce: options && options.nonce }, doc);
-};
-
 const error = msg => {
   throw new Error(msg);
 };
 const get = (...uied) => {
-  let [el, ifAll, orNum] = uied,
-    e,
-    elArr = document.querySelectorAll(el);
+  const [el, ifAll_OrNum] = uied;
+  let e;
 
   if (uied.length === 1) {
     e = document.querySelector(el);
   } else {
-    if (uied.length === 2) {
-      e = elArr;
+    if (uied.length === 2 && typeof ifAll_OrNum !== "number") {
+      e = document.querySelectorAll(el);
     } else {
-      if (uied.length === 3) {
-        e = elArr[orNum];
+      if (typeof ifAll_OrNum === "number") {
+        e = document.querySelectorAll(el)[ifAll_OrNum];
       }
     }
   }
@@ -508,10 +469,7 @@ const download = function (type, source, name) {
 };
 
 const debounce = (func, delay) => {
-  function k() {
-    setInterval(() => func.apply(this, arguments), delay);
-  }
-  k();
+  setInterval(() => func.apply(this, arguments), delay);
 };
 
 const callStack = [];
@@ -530,7 +488,7 @@ const keep = (id, runtime, multiple) => {
         }
       }
     } else {
-      if (!multiple && bank.callStack.indexOf(id) > -1) {
+      if (!multiple && callStack.indexOf(id) > -1) {
         return;
       } else {
         for (; runtime > 0; runtime--) {
@@ -544,15 +502,15 @@ const log = message => {
   if (message) {
     console.log(message);
   } else {
-    if (_s.callStack.length > 0) {
-      console.log(_s.callStack);
-      return _s.callStack;
+    if (callStack.length > 0) {
+      console.log(callStack);
+      return callStack;
     }
   }
 };
 
 const check = id => {
-  const ind = _s.callStack.indexOf(id);
+  const ind = callStack.indexOf(id);
   if (ind > -1) {
     callStack.splice(ind, 1);
     return true;
@@ -609,11 +567,20 @@ function i() {
   const _s = {};
 
   _s.timeLine = (function () {
-    let builds = [],
+    /*
+the timeLine is an interface
+where everything the are
+sequenced on (frames or game views),
+every new layer has its own
+lifespan and if not given will
+will be killed when it reaches the
+highTimeOut value
+*/
+    const builds = [],
       duration = [],
       frame = document.createElement("div"),
-      i = 0,
       highTimeOut = 3600;
+    let i = 0;
     const put = (child, timing) => {
       builds.push(child);
       if (timing === "undefined") {
@@ -661,6 +628,13 @@ function i() {
   })();
 
   _s.canvas = (id, h, w) => {
+    /*
+this is used for creating
+pixel stable game views across
+all screen width with little or no
+pixelation problem try and see the magic
+*/
+
     const canv = document.createElement("canvas"),
       context = canv.getContext("2d");
     canv.id = id;
@@ -688,6 +662,11 @@ function i() {
     return canv;
   };
   _s.appendCanvas = (id, h, w, parent) => {
+    /*
+same as above but with a
+parent to append directly
+*/
+
     let par = document.querySelector(parent);
     if (typeof parent === "undefined") par = document.body;
     par.style.margin = "0px";
@@ -699,6 +678,10 @@ function i() {
     return cv;
   };
   _s.entity = (x, y, w, h, imgs) => {
+    /*
+ game sprits
+
+*/
     this.x = x;
     this.y = y;
     this.width = w;
@@ -718,21 +701,24 @@ function i() {
       };
     }
 
-    if (this.y <= 0 || this.y + this.height >= game.gameFieldHeight()) {
-      this.direction *= -1;
-    }
+    /*if( this.y <= 0 || this.y+this.height >= game.gameFieldHeight() ) {
+	   this.direction *= -1;
+   };*/
   };
 
   // Renderer Object
   _s.renderer = (function () {
+    /*
+game rendering algorithm, under development
+stay safe!
+*/
     const _drawEntity = (context, player) => {
       context.drawImage(player.film, player.x, player.y, player.width, player.height);
     };
     function _render() {
-      let $ = document.querySelector("canvas").getContext("2d"),
-        i,
-        entity,
-        entities = game.entities();
+      const $ = document.querySelector("canvas").getContext("2d");
+      let i;
+      //let entity, entities = game.entities();
 
       for (i = 0; i < entities.length; i++) {
         entity = entities[i];
@@ -759,39 +745,39 @@ in a node js environment*/
 
 /*
 
-  // Game Object
+		// Game Object
 var game = (function () {
-  var _gameFieldHeight = 200;
-  var _entities = [];
+	var _gameFieldHeight = 200;
+	var _entities = [];
 
-  function _start() {
-    _entities.push(new Player(100, 175));
-    _entities.push(new Enemy(20, 25));
-    _entities.push(new Enemy(80, 25));
-    _entities.push(new Enemy(160, 25));
+	function _start() {
+		_entities.push(new Player(100, 175));
+		_entities.push(new Enemy(20, 25));
+		_.push(new Enemy(80, 25));
+		_entities.push(new Enemy(160, 25));
 
-    window.requestAnimationFrame(this.update.bind(this));
-  }
+		window.requestAnimationFrame(this.update.bind(this));
+	}
 
-  function _update() {
-    physics.update();
+	function _update() {
+		physics.update();
 
-    var i;
-    for( i=0; i<_entities.length; i++) {
-      _entities[i].update();
-    }
+		var i;
+		for( i=0; i<_entities.length; i++) {
+			_entities[i].update();
+		}
 
-    renderer.render();
+		renderer.render();
 
-    window.requestAnimationFrame(this.update.bind(this));
-  }
+		window.requestAnimationFrame(this.update.bind(this));
+	}
 
-  return {
-    start: _start,
-    update: _update,
-    entities: function () { return _entities; },
-    gameFieldHeight: function () { return _gameFieldHeight; }
-  };
+	return {
+		start: _start,
+		update: _update,
+		entities: function () { return _entities; },
+		gameFieldHeight: function () { return _gameFieldHeight; }
+	};
 
 })();
 
@@ -804,7 +790,7 @@ game.start();
 
 /*
 if( this.y <= 0 || this.y+this.height >= game.gameFieldHeight() ) {
-     this.direction *= -1;
+	   this.direction *= -1;
    }
 };
 
