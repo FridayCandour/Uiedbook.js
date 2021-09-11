@@ -22,7 +22,11 @@ Is holding reasonable standards needed in the future.
 
 # installing to your project
 using npm
-<addr>n pm i uiedbook</addr>
+
+
+```n pm i uiedbook
+
+```
 
 
 
