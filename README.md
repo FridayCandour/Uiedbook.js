@@ -21,13 +21,22 @@ And much more, it's shines on it's modern design and
 Is holding reasonable standards needed in the future. 
 
 # installing to your project
-using npm
+
+you can download the library manually to your 
+project folder or you can use npm on the terminal
 
 
 ```
 npm i uiedbook
 ```
 
+# linking to your project
 
+on your html add the following or edit per the directory
+you placed Uiedbook 
+
+```
+<script src="Uiedbook/Uiedbook.js" type="module"></script>
+```
 
 # Quick documentation 
