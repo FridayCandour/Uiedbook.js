@@ -24,9 +24,7 @@ Is holding reasonable standards needed in the future.
 using npm
 
 
-```n pm i uiedbook
-
-```
+```npm i uiedbook```
 
 
 
