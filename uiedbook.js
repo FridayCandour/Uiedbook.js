@@ -162,41 +162,75 @@ animate("popanimation",
 
 
 // in construction
-let build = (type,content,parent,ifCache) =>{
+// let build = (type,content,parent,ifCache) =>{
 /*this for building css styles,
 html makeup and javascript to the dom
 if you don't want to do it on the html 
 file
 */
-if(typeof parent !== "string"){
-[ifCache,parent] = [parent,ifCache];
+
+
+
+// if(typeof parent !== "string"){
+// [ifCache,parent] = [parent,ifCache];
+// }
+// if(type === "html"){
+// if(typeof parent === 'undefined'){
+// parent = "body";
+// };
+// document.querySelector(parent).insertAdjacentHTML("beforeend",content);
+// }else{
+// if(type === "css"){
+// let aniStyleTag = document.querySelector('style');
+// if(aniStyleTag === null){
+// document.head.append(document.createElement("style"));
+// aniStyleTag = document.querySelector('style');
+// }
+// aniStyleTag.media = "screen";
+// aniStyleTag.insertAdjacentHTML("beforeend",content);
+// }else{
+// if(type === "javascript" || type === "js"){
+// if(!ifCache || typeof ifCache === "undefined"){
+// let scr = document.createElement("script");
+// scr.insertAdjacentHTML("beforeend",content);
+// document.body.append(scr);
+// }else{
+// window.onload = () =>{
+// let scr = document.createElement("script");
+// scr.insertAdjacentHTML("beforeend",content);
+// document.body.append(scr);
+// }}}}}}
+
+
+
+
+
+
+const build = (...layouts) =>{
+    // structure ----   {type: "div", id: "div", on: "click"}
+    /*
+    every layout should be an
+     object with values necessary
+      for for the described layout
+    */
+   
+   let i = layouts.lenght;
+   while (i > 0) {
+    let elem = document.createElement(layouts[i].type)
+    
+
+    i--;
+   }
 }
-if(type === "html"){
-if(typeof parent === 'undefined'){
-parent = "body";
-};
-document.querySelector(parent).insertAdjacentHTML("beforeend",content);
-}else{
-if(type === "css"){
-let aniStyleTag = document.querySelector('style');
-if(aniStyleTag === null){
-document.head.append(document.createElement("style"));
-aniStyleTag = document.querySelector('style');
-}
-aniStyleTag.media = "screen";
-aniStyleTag.insertAdjacentHTML("beforeend",content);
-}else{
-if(type === "javascript" || type === "js"){
-if(!ifCache || typeof ifCache === "undefined"){
-let scr = document.createElement("script");
-scr.insertAdjacentHTML("beforeend",content);
-document.body.append(scr);
-}else{
-window.onload = () =>{
-let scr = document.createElement("script");
-scr.insertAdjacentHTML("beforeend",content);
-document.body.append(scr);
-}}}}}}
+    
+
+
+
+
+
+
+
+
 
 
 
@@ -224,7 +258,7 @@ const xhr = function (type, url){
 
 
 
-let u = (...uied) =>{
+const u = (...uied) =>{
     /*
     the u function is a powerful 
     selector function with added 
@@ -289,7 +323,7 @@ config(obj){
         e[k] = v;
     }
     }else{
-        return;
+         throw new Error(`the variable is not an object ${obj}`);
     }
 },
 /*
@@ -302,36 +336,60 @@ u(object).config({
 
 */
 
- appendto(type,attribute,number = 1){
+ appendTo(type,attribute,number = 1){
 // for adding new elements more powerfully
 if(typeof attribute === "undefined" || typeof type === "undefined"){
   throw new Error("type or attribute not given | not enough parameters to work with");
-  return;
   }
- const createdElement = document.createElement(type);
- let addedAtrr = "";
- for (const [k, v] of Object.entries(attribute)) {
- createdElement[k] = v;
-addedAtrr += ' '+k+'="'+v+'"'
- }
-if(!all){
-e.append(createdElement)
-for(let i = 0; i < number - 1; i++){
-createdElement.insertAdjacentHTML("afterend","<"+type+" "+addedAtrr+"></"+type+">")
+
+let frag = new DocumentFragment();
+if (!all) {
+    for (let i = 0; i < number; i++) {
+        const element = document.createElement(type);
+        for (const [k, v] of Object.entries(attribute)) {
+            element[k] = v;
+            }
+            frag.append(element)
+    }    
+    e.append(frag)
+}else{
+    for (let i = 0; i < number; i++) {
+        const element = document.createElement(type);
+        for (const [k, v] of Object.entries(attribute)) {
+            element[k] = v;
+            }
+            frag.append(element)
+    }
+
+    e.forEach( (el) =>{ el.append(frag)})
 }
-  }else{
-  e.forEach(element =>{
-  element.append(createdElement)
-  for(let i = 0; i < number; i++){
-  createdElement.insertAdjacentHTML("afterend","<"+type+" "+addedAtrr+"></"+type+">")
-  }})
-  }
-  return createdElement;
+
+return ;
+
+//  const createdElement = document.createElement(type);
+//  let addedAtrr = "";
+//  for (const [k, v] of Object.entries(attribute)) {
+//  createdElement[k] = v;
+// addedAtrr += ' '+k+'="'+v+'"'
+//  }
+// if(!all){
+// e.append(createdElement)
+// for(let i = 0; i < number - 1; i++){
+// createdElement.insertAdjacentHTML("afterend","<"+type+" "+addedAtrr+"></"+type+">")
+// }
+//   }else{
+//   e.forEach(element =>{
+//   element.append(createdElement)
+//   for(let i = 0; i < number; i++){
+//   createdElement.insertAdjacentHTML("afterend","<"+type+" "+addedAtrr+"></"+type+">")
+//   }})
+//   }
+//   return createdElement;
   },
 /*
  *** HOW TO USE ***
 
-u("#container").appendto("div"{
+u("#container").appendTo("div"{
     className: "newdiv",
     id: "newdiv"
 }, 5)
@@ -611,11 +669,11 @@ u("#container").fullscreen().set()
 
 const isEmptyObject = function( obj ) {
     // for checking for empty objects
-		for (let name in obj ) {
-			return false;
-		}
-		return true;
-	}
+        for (let name in obj ) {
+            return false;
+        }
+        return true;
+    }
 
       /*
  *** HOW TO USE ***
@@ -625,26 +683,87 @@ isEmptyObject(obj);
 
 */
 
+function isArray(q){
+for(let e in q){
+e = e * 1;
+if((e + 1) === 1){
+return true;
+}else{
+return false;
+}}}
+
+
+/*
+ *** HOW TO USE ***
+ 
+ const array = [1,2,3,4,5]
+ 
+isArray(array);
+// true
+
+const obj = {food: "bean", num: 44}
+
+isArray(obj);
+// false
+*/
+
 
   const each = function( obj, callback ) {
-	let length, i = 0;
-	if ( typeof obj === "object") {
-	length = obj.length;
-	for ( ; i < length; i++ ) {
-	if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
-	break;
-	}}} else {
-	for ( i in obj ) {
-	if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
-	break;
-	}}}	
-	return obj;
-	}
+    let length, i = 0;
+    if ( typeof obj == "object") {
+    length = obj.length;
+    for ( ; i < length; i++ ) {
+    if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
+    console.log(obj[i])
+    break;
+    }}} else {
+    for ( i in obj ) {
+    if ( callback.call( obj[ i ]) === false ) {
+    break;
+    }}} 
+    return obj;
+    }
 
 /*
  *** HOW TO USE ***
 each(obj, function);
 */
+
+
+
+
+
+function intersect(target,opt,callback){
+const {root, rootMargin,threshold} = opt,
+options = {
+  root: root,
+  rootMargin: rootMargin,
+  threshold: threshold
+},
+observer = new IntersectionObserver(callback, options),
+child = document.querySelector(target);
+observer.observe(child);
+}
+
+
+/*
+*** HOW TO USE ***
+
+function call(){
+console.log("intersect(targert,opt,callback)")
+}
+intersect("span",{
+root: null,
+    rootMargin: "0px",
+    threshold: 0.6
+},call)
+
+
+*/
+
+
+
+
 
 	
 const error = ( msg ) =>{
@@ -733,7 +852,7 @@ timer(
 */
 
 
-const Class = (name,stylings) =>{
+const makeClass = (name,stylings) =>{
     //for making css classes
     let clas = document.createElement("style");
     let styling =""+name+"{"+stylings+"}";
@@ -851,7 +970,7 @@ localStorage.clear();
 
 
 
-const onKeys = (keys,callback,object = window, lock = true)=>{
+const onKeys = (keys,callback,object = document, lock = true)=>{
     // for handling even more complicated key events,
     // it's built with the grandmother algorimth or code
 if(!keys || !callStack){
@@ -898,7 +1017,7 @@ onKeys(["arrowRight","control"],callback,container);
 
 */
 
-const continuesKeys = (keys,callback, delay = 0, object = window,  lock = true)=>{
+const continuesKeys = (keys,callback, delay = 0, object = document,  lock = true)=>{
     // under construction!!!!!!!
     if(!keys || !callStack){
     throw new Error("no keys or callbacks given");
@@ -927,6 +1046,7 @@ function checkKeys(e){
             if (lock) {
                 e.preventDefault();
             }
+            console.log(delay);
             debounce(()=> callback.call(e),delay);
             num = 0;
             callStack = [];
@@ -952,91 +1072,140 @@ continuesKeys(["arrowRight","control"],callback,500,true,container);
 
 
 
+function swipe(item){
+    let caller = {},
+    startX = 0,
+    startY = 0;
 
-function swipe(item = document.body){
-    let startX = 0,
-    startY = 0,
-    dir = [],
-    l = dir.length;
-    
+    if (typeof item === "object") {
+        for ( const [k,v] of Object.entries(item)) {
+            caller[k] = v;
+        }
+    }else{
+        throw new Error("no call given for the swipe handler")
+    }
+
+
     function handleTouchStart(e) { 
      startX = e.changedTouches[0].screenX;  
      startY = e.changedTouches[0].screenY;
      }
-     
+
      function handleTouchEnd(e) {
         const diffX = e.changedTouches[0].screenX - startX;   
-        const diffY = e.changedTouches6[0].screenY - startY;   
+        const diffY = e.changedTouches[0].screenY - startY;   
         const ratioX = Math.abs(diffX / diffY);   
         const ratioY = Math.abs(diffY / diffX);   
         const absDiff = Math.abs(ratioX > ratioY ? diffX : diffY); 
         
         
-        if (absDiff < 30) {     
-        return false;   
+        if (absDiff < 10) {
+        if (caller.touch) {
+            callback.touch(caller.touch)
+        }
         }    
         if (ratioX > ratioY) { 
-         if (diffX >= 0) { 
-           console.log('right swipe');
-           dir.push(1)
+            // left and right
+         if (diffX >= 0) {
+              if (caller.right) {
+                callback.right(caller.right)
+        }
            } else {      
-           console.log('left swipe');
-            dir.push(2)
+              if (caller.left) {
+                callback.left(caller.left)
+        }
              }  
-         } else {     
-           if (diffY >= 0) {     
-             console.log('down swipe');
-             dir.push(3)
-           } else {       
 
-           console.log('up swipe'); 
-           dir.push(4)
+             // up and down
+
+         } else {
+           if (diffY >= 0) {     
+             if (caller.down) {
+                callback.down(caller.down)
+        }
+           } else {       
+              if (caller.up) {
+                     callback.up(caller.up)
+        }
            }   
            } 
+         
            }
     
-    u(item).on("touchstart",handleTouchStart)
-    u(item).on("touchend",handleTouchEnd)
-    
-    return {
+    document.body.addEventListener("touchstart",handleTouchStart)
+    document.body.addEventListener("touchend",handleTouchEnd)
+
+      let callback = {
+        touch(callback){
+            return callback()
+        },
         right(callback){
-            if( dir[l] === 1){
-            console.log(dir,l)
             return callback();
-            }
             },
 
     left(callback){
-        if(dir[l] === 2){
         return callback()
-        }
         },
 
         down(callback){
-            if(dir[l] === 3){
             return callback()
-            }
             },
 
     up(callback){
-        if(dir[l] === 4){
-            console.log("up we go")
         return callback()
-
-        }
-        }
-};
+        }};
     }
+
     
 
 
 
-/*
+ /*
  *** HOW TO USE ***
-let body = get("body")
-swipe(body).up(()=> console.log("up we go"))
 
-*/
+    function touch(){
+     console.log("touching")
+    }
+    
+    
+
+    function up(){
+     console.log("swipe up")
+    }
+    
+
+    function down(){
+     console.log("swipe down")
+    }
+    
+
+    function right(){
+     console.log("swipe right")
+    }
+
+
+    function left(){
+     console.log("swipe left")
+    }
+
+
+
+    let obj = {down: down,
+               touch: touch,
+               up: up,
+               right: right,
+               left: left
+           }
+
+    swipe(obj)
+
+
+
+ */
+
+
+
+
 
 
 
@@ -1058,7 +1227,7 @@ for 2D rendering */
  2. a movable background image
  3. ......
 */
-const buildCanvas = function (id,h = window.innerHeight, w = window.innerWidth) {
+const buildCanvas = function (id, w = window.innerWidth , h = window.innerHeight) {
 /*this is used for creating
 pixel stable game views across
 all screen width with no pixelation 
@@ -1132,7 +1301,8 @@ return frame;
 // and the callback can be used to run a function
 // perculiar to this effect. 
 function mount(template,callback){
-if (games.length === 1) {
+    u("body").appendTo("div",{id: "RE_gameframe"});
+    if (games.length === 1) {
     return
 }else{
  games.push(template);    
@@ -1148,7 +1318,7 @@ function flow(fram){
 // and manathe dom
 const start = () =>{
 if(games.length < 1 || games.length > 1){
-    throw new Error("RE: mount() should be called and given a built game world")
+    throw new Error("RE: re.mount() should be called and given a built game world")
 return;
 };
 
@@ -1159,7 +1329,6 @@ boxSizing: "border-box",
 border: "none"
 })
 
-let gameframe = u("body").appendto("div",{id: "RE_gameframe"});
 u("#RE_gameframe").style({
 width: "100vw",height: "100vh",
 position: "fixed",
@@ -1172,23 +1341,21 @@ flexDirection: "column",
 justifyContent: "center",alignItems: "center",
 margin: "0px", padding: "0px",
 boxSizing: "border-box"});
+let gameframe = get("#RE_gameframe");
 flow(gameframe)
 }
 // this stops the game 
 const cancel = ()=>{
   let fram =  get("#RE_gameframe");
     fram.innerHTML = "";
-    fram.append(vsg())
+    renderer.toggleRendering();
+    // fram.append(vsg())
 }
 
 const widget = function (name,chil){
     this.wig = document.createElement("div");
     this.wig.className = name;
     this.wig.id = name;
-    if (!chil) {
-        chil = "RE: no children structure given for this widget";
-    }
-    this.wig.append(chil)
     document.body.append(this.wig)
     return this.wig;
 }
@@ -1255,7 +1422,7 @@ function getAud(id) {
     if (p) {
      return p;   
     }else{
-        throw new Error('RE: image of id "'+id+'" not found');
+        throw new Error('RE: audio id "'+id+'" not found');
     }
 }
 
@@ -1298,49 +1465,44 @@ const entity = function (name,painter,behaviors) {
  /*an entity is any object or thing
  that can be added to the game world*/
 
-    this.id = name || "none"// name of the entity for identification
-    this.painter = painter || {}// callback for paint the entity 
-    this.width = 0; // width of entiity
-    this.height = 0; // height of entity
-    this.spritWidth = 0;
-    this.spritHeight = 0;
-    this.top = 0; // distance from the top of the canvas
-    this.left = 0; // distance from the left of the canvas
-    this.velocityX = 0; // velocity on the x axis
-    this.velocityY = 0; // velocity on the y axis
-    this.visible = true; // to check if the entity is displayed should be turned off when not 
+    //this.id = name || "none" //name of the entity for identification can be used out side here******
+    this.name = name || "none"
+    this.painter = painter || {}// callback for paint the entity     can be used out side here******
+    this.width = 0; // width of entiity                              can be used out side here******
+    this.height = 0; // height of entity                             can be used out side here******
+    // this.spritWidth = 0;                                              
+    // this.spritHeight = 0;
+    this.top = 0; // distance from the top of the canvas              can be used out side here******
+    this.left = 0; // distance from the left of the canvas            can be used out side here******
+    // this.velocityX = 0; // velocity on the x axis
+    // this.velocityY = 0; // velocity on the y axis
+    this.visible = true; // to check if the entity is displayed        can be used out side here****** 
     this.behaviors = behaviors; // this is a callback to add additional properties to the entity at runtime
-    this.frame = 0;
-    this.timer = 0;
-    this.delete = false;
-    this.border = true;
-
+    // this.frame = 0;                                  
+    // this.timer = 0;
+    this.delete = false;//  to delete an entity                        can be used out side here******
+    this.border = true;//   to make the entity observer sides or not   can be used out side here******
+    this.isHit = false;
 };
 
 entity.prototype = { 
     // this algorimth is for calling the paint function
     // to make it functional when seen at runtime
-update(context){
+update(context,lastDeltalTime){
   if(typeof this.painter.update !== "undefined" && this.visible){
-   this.painter.update(this,context);
+   this.painter.update(this,context,lastDeltalTime);
   }
   else{
     // throw new Error(`RE: entity with name of ${this.name} has no update function`);
   }
 },
-paint(context){
-    if(typeof this.painter.execute !== "undefined" && this.visible){
-        this.painter.execute(this);
-    }
-
+paint(context,lastDeltalTime){
 if(typeof this.painter.paint !== "undefined" && this.visible){
-    this.painter.paint(this,context);
+    this.painter.paint(this,context,lastDeltalTime);
 }else{
     throw new Error(`RE: entity with name of ${this.name} has no paint function`);
 }},
-observeBorder(canvas){
-    let h = canvas.height,
-    w = canvas.width;
+observeBorder(w,h){
     if(this.top <= 0) {
         this.top *= 0;
     }else{
@@ -1356,12 +1518,13 @@ observeBorder(canvas){
      }
  };
 },
-run(context){
+run(context,lastDeltalTime){
     // here the entity don't have to be visble
     if(typeof this.behaviors !== "undefined"){
-       this.behaviors(this,context);
+       this.behaviors(this,context,lastDeltalTime);
    }
-}}
+}
+}
 
 const imgPainter = function (img,delay = 1) {
     this.image = img;
@@ -1386,53 +1549,34 @@ imgPainter.prototype  = {
 // spritesheet in successful orders
 const spriteSheetPainter = function (img, horizontal = 1,vertical = 1,delay = 1) {
     this.image = img;
-    this.framesWidth = this.image.width / horizontal;
-    this.framesHeight = this.image.height / vertical;       
+    this.framesWidth = Math.round(this.image.width / horizontal);
+    this.framesHeight = Math.round(this.image.height / vertical);       
     this.horizontalPictures = horizontal;
     this.verticalPictures = vertical;
     this.frameHeightCount = 0;
     this.frameWidthCount = 0; 
     this.range = 0;
     this.delay = delay;
+    this.isLastImage = false;
     this.animateAllFrames = true;
     this.animate = true;
-    this.animateVerticalFrame = false;
-    this.animateHorizontalFrame = false;
     this.changeSheet = function (img, horizontal = 0, vertical = 0, delay = 1){
         this.image = img;
-        this.framesWidth = this.image.width / horizontal;
-        this.framesHeight = this.image.height / vertical;       
+        this.framesWidth = Math.round(this.image.width / horizontal);
+        this.framesHeight = Math.round(this.image.height / vertical);       
         this.horizontalPictures = horizontal;
         this.verticalPictures = vertical;
         this.delay = delay;
     };
 
-    this.animateFrameOf = function (frameHeight,axis) {
-        if(axis === true){
-        this.frameHeightCount = frameHeight;
+    this.animateFrameOf = function (frameY = 0) {
+        this.frameHeightCount = frameY;
         if (this.frameWidthCount <= (this.horizontalPictures - 2)){
             this.frameWidthCount++;
-                    }else{
-                        this.frameWidthCount = 0;
-                    }
         }else{
-            this.frameWidthCount = frameHeight;
-            if (this.frameHeightCount <= (this.verticalPictures - 2)){
-                this.frameHeightCount++;
-                        }else{
-                            this.frameHeightCount = 0;
-                        }
-        }
-        
-
-       }
-       
-       this.setAllFrameTo = function (frame) {
-        this.frameHeightCount = frame;
-        this.frameWidthCount = frame;         
-       }
-
-
+            this.frameWidthCount = 0;
+        } 
+    }
 }
 
 
@@ -1440,19 +1584,12 @@ spriteSheetPainter.prototype  = {
  update() {
     this.range++;
     if (this.range % this.delay === 0 && this.animate) {
-        if (typeof this.animateVerticalFrame === 'number') {
-            this.animateFrameOf(this.animateVerticalFrame)
-        }
-
-        if (typeof this.animateHorizontalFrame === 'number') {
-            this.animateFrameOf(this.animateHorizontalFrame)
-        
-        }
           if (this.animateAllFrames) {
         if (this.frameHeightCount < (this.verticalPictures - 1)) {
             if (this.frameWidthCount <= (this.horizontalPictures - 2)){
                this.frameWidthCount++;
             }else{
+                this.isLastImage = true;
                 this.frameWidthCount = 0;
                 this.frameHeightCount++;
             }
@@ -1467,11 +1604,19 @@ spriteSheetPainter.prototype  = {
 if (this.range > 100) {
     this.range = 1;
 }
+
+
+
+
 },
  paint(entity,context) {
     context.drawImage(this.image, this.framesWidth * this.frameWidthCount,this.framesHeight * this.frameHeightCount,this.framesWidth,this.framesHeight,entity.left,entity.top,entity.width,entity.height);        
     }
 }
+
+
+
+
 
  const audio = function (audio) {
     this.audio = audio;
@@ -1489,39 +1634,81 @@ audio.prototype  = {
     }else{
         this.audio.pause()
     }
-    }
+  },
+  continuesPlay(){
+      // sorry 
+  }
 }
 
 
- let bgPainter = function (img,increaseRate = 0,delay = 1) {  
-    //  still under construction
+const bgPainter = function ( img, speed = 10 , up, left) {  
     this.image = img;
-    this.increaseRate = increaseRate;
-    this.delay = delay;
-    this.range = 1;
+    this.range = 0;
+    this.speed = speed; 
+    this.top = 0;
+    this.left = 0;
+    this.width = this.image.width;
+    this.height = this.image.height;
+    this.GoesUp = up;
+    this.GoesLeft = left;
  };
 bgPainter.prototype  = {
+    update(){
+     if (this.GoesLeft) {
+        if (this.left <= -this.width) {
+            this.left = 0;
+        }
+    this.left = this.left - this.speed;
+     }
+
+     if (this.GoesUp) {
+        if (this.top >= this.height) {
+            this.top = 0;
+        }
+    this.top += this.speed;
+     }
+    },
 paint(canvas) {
-    this.range++
-    if (this.range % this.delay === 0) {
         const context = canvas.getContext("2d");
-        context.drawImage(this.image,0,0,canvas.width,canvas.height);   
-    }
-    },
-    shiftRight(){
-        // this.left + this.increaseRate
-    },
-    shiftLeft(){
-        // this.left - this.increaseRate
-    },
-    shiftUp(){
-        // this.top - this.increaseRate
-    },
-    shiftDown(){
-    //   this.top + this.increaseRate
+        context.drawImage(this.image, this.left, this.top, canvas.width, this.height);   
+        if (this.GoesLeft) {
+            context.drawImage(this.image, this.left + this.width, this.top, canvas.width, canvas.height);    
+        }else{
+            context.drawImage(this.image, this.left, this.top  - this.height, canvas.width, this.height);
+        }
+        
     }
 }
 
+
+
+
+
+
+
+
+
+
+const physics = (function () {
+function detectCollision(ent,name, reduce = 0){
+    for (let j = 0; j < name.length; j++) { 
+        if (ent.left + reduce > name[j].left + name[j].width || ent.left + ent.width < name[j].left + reduce || ent.top > name[j].top + name[j].height || ent.top + ent.height < name[j].top + reduce) {
+            // console.log("no collisions");
+            // return false;
+            continue;
+         }else{
+            // console.log(`${ent.name} has collided with name of ${name[j].name}`);
+            // return true;
+            name[j].isHit = true;
+         }
+    }
+}
+        
+return {
+    detectCollision: detectCollision,
+}
+}
+)()
 
 
 
@@ -1529,11 +1716,13 @@ paint(canvas) {
 const renderer = (function () {
     //game rendering algorithm
     let canvas,
+    id, // for pauding os playing the game
     context,
     // variables for the timing
     fps,
     // background varible
-    bg,
+    bg = [],
+    pause = false,
     // entity storage array
         lastdt = 0,
         nextdt = 0,
@@ -1541,32 +1730,51 @@ const renderer = (function () {
         entitysArray = [];    
 
 
-        function bgPaint(url,ratio,increaseRate){
-                    bg = null;
-              let bgImg =   new bgPainter(url,ratio,increaseRate);
-                  bg = bgImg;
+        function bgPaint( img, speed , up, left){
+              let bgImg =   new bgPainter( img, speed , up, left);
+                  bg.push(bgImg);
+                  return bgImg;
                 }
+
                 function animatebg(canvas){
-                    if (bg === null) return;
-                   bg.paint(canvas);
+                    if (bg === []) return false;
+                    bg.forEach((b)=>{
+                   b.paint(canvas);
+                   b.update();
+                 })
                 }
-            
-            
+                          
             function _assemble(...players) {
                 if(!players) throw new Error("RE: No players assembled");
                 players.forEach(player =>{
-                    entitysArray.push(player)
+                    entitysArray.push(player);
                 });
                 return entitysArray;
             }
-    
+    function copyCanvasTo(c,opacity,border){
+        const cx = c.getContext("2d");
+        cx.drawImage(canvas,0,0,c.width,c.height);
+        c.style.opacity = opacity;
+        c.style.borderRadius = border;
+        return c;
+    }
 
+    function toggleRendering(){
+        if (pause) {
+            window.requestAnimationFrame(animate);
+            return pause = false;
+        }else{
+            window.cancelAnimationFrame(id)
+            return pause = true;
+        }
+    }
+
+let wew;
     function animate(dt){
-        window.requestAnimationFrame(animate);   
+        id = window.requestAnimationFrame(animate);   
         deltaTime = dt - lastdt;
           lastdt = dt;
-          nextdt += deltaTime;
-        //   console.log(dt);
+          nextdt += Math.round(deltaTime);
         if (nextdt > fps) {
             try {
                 context.clearRect(0,0,canvas.width,canvas.height);  
@@ -1576,9 +1784,11 @@ const renderer = (function () {
                         entitysArray.splice(i,1);
                         --i;
                     }
+                    
                   if (ent.border) {
-                      ent.observeBorder(canvas);
+                      ent.observeBorder(canvas.width,canvas.height);
                   }
+                //   console.log(entitysArray);
                       ent.update(context,dt);
                       ent.run(context,dt);
                       ent.paint(context,dt);
@@ -1589,6 +1799,7 @@ const renderer = (function () {
         }
         nextdt = 0;                
     }
+
 
     function _render(canv,fpso = 0) {
         if (!canv) { throw new Error("RE: game needs to be rendered EXP: renderer.render(canvas)")}
@@ -1601,23 +1812,29 @@ const renderer = (function () {
 return {
 render: _render,
 assemble: _assemble,
-entities: function () {return _entities},
+toggleRendering: toggleRendering,
 backgroundImage: bgPaint,
+copyCanvasTo: copyCanvasTo, 
 }})();
 
 
-
-
-
 if (typeof module !== "undefined") {
-const uiedbook = module.exports = { u ,onKeys ,
-    getKey ,remove ,retrieve ,store ,
-    log ,check ,keep ,
-    download ,create ,makeClass ,timer ,
-    rad ,cache ,get , debounce, 
-    error ,each ,isEmptyObject ,xhr ,
-    build ,animate ,media ,css ,
-    buildCanvas ,appendCanvas ,entity ,re
-    ,renderer , continuesKeys, swipe }; 
-    // 32 apis exposed
+const uiedbook = module.exports = { 
+    css, media, animate,
+    build, xhr, u,  
+    isEmptyObject, isArray,
+    each, intersect, error,
+    get, cache, rad, timer,
+    makeClass, create,
+    download, debounce,
+    keep, check, log,
+    store, retrieve,
+    remove, getKey,
+    clear, onKeys,
+    continuesKeys, swipe,
+    buildCanvas, appendCanvas,
+    re, entity, imgPainter,
+    spriteSheetPainter, audio,
+    bgPainter, renderer}; 
+    // 39 apis contexts
 }
