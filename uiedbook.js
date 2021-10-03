@@ -1,8 +1,17 @@
 /*
  @publisher : friday candour;
  @project : uiedbook library;
- @copyright-lincense :  MIT;
- */
+ @copyright-lincense :  Apache;
+
+
+
+                                  Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+ 
+ 
+YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WITH THIS MODULE 
+*/
 
 "use strict";
 const css = (name, sel, properties) => {
@@ -99,13 +108,15 @@ media("min-width: 790px",
 const animate = (name, ...properties) => {
   /*This is for creating css  
  animations  using javascipt*/
-  let styS = "@keyframes " + name + " " + "{",
+  const styS = "@keyframes " + name + " " + "{",
     styE = "}",
-    style = " ",
+    proplen = properties.length;
+
+  let style = " ",
     aniSty = " ",
-    proplen = properties.length,
-    totalAnimation = null,
-    Animation = "  ";
+    Animation = "  ",
+    totalAnimation = null;
+
   const animationStep = num => {
     for (const [k, v] of Object.entries(properties[num][1])) {
       style += "" + k + ": " + v + ";";
@@ -128,7 +139,7 @@ const animate = (name, ...properties) => {
 };
 
 /*
-
+*** HOW TO USE ***
 animate("popanimation",
 ["from",
 {
@@ -150,58 +161,117 @@ animate("popanimation",
 */
 
 // in construction
-// let build = (type,content,parent,ifCache) =>{
-/*this for building css styles,
-html makeup and javascript to the dom
-if you don't want to do it on the html 
-file
-*/
-
-// if(typeof parent !== "string"){
-// [ifCache,parent] = [parent,ifCache];
-// }
-// if(type === "html"){
-// if(typeof parent === 'undefined'){
-// parent = "body";
-// };
-// document.querySelector(parent).insertAdjacentHTML("beforeend",content);
-// }else{
-// if(type === "css"){
-// let aniStyleTag = document.querySelector('style');
-// if(aniStyleTag === null){
-// document.head.append(document.createElement("style"));
-// aniStyleTag = document.querySelector('style');
-// }
-// aniStyleTag.media = "screen";
-// aniStyleTag.insertAdjacentHTML("beforeend",content);
-// }else{
-// if(type === "javascript" || type === "js"){
-// if(!ifCache || typeof ifCache === "undefined"){
-// let scr = document.createElement("script");
-// scr.insertAdjacentHTML("beforeend",content);
-// document.body.append(scr);
-// }else{
-// window.onload = () =>{
-// let scr = document.createElement("script");
-// scr.insertAdjacentHTML("beforeend",content);
-// document.body.append(scr);
-// }}}}}}
-
 const build = (...layouts) => {
-  // structure ----   {type: "div", id: "div", on: "click"}
-  /*
-    every layout should be an
-     object with values necessary
-      for for the described layout
-    */
+  let i = 1;
+  function createElement(type = "", op = {}, chil) {
+    const element = document.createElement(type);
+    for (const [k, v] of Object.entries(op)) {
+      element[k] = v;
+    }
+    if (chil) {
+      if (isArray(chil)) {
+        const frag = new DocumentFragment();
+        // templating testing should be done here
+        chil.forEach(ch => {
+          frag.append(ch);
+        });
+        element.append(frag);
+      } else {
+        element.append(chil);
+      }
+    }
+    // return the element after building the dom objects
+    return element;
+  }
 
-  let i = layouts.lenght;
-  while (i > 0) {
-    // const elem = document.createElement(layouts[i].type);
-
-    i--;
+  if (typeof layouts[0] === "object") {
+    i = layouts.lenght;
+    const frag = new DocumentFragment();
+    while (i > 0) {
+      // templating testing should be done here
+      const ele = createElement(layouts[i][0], layouts[i][1], layouts[i][2]);
+      frag.append(ele);
+      i--;
+    }
+    return frag;
+  } else {
+    if (typeof layouts[0] === "string") {
+      // templating testing should be done here
+      const element = createElement(layouts[0], layouts[1], layouts[2]);
+      return element;
+    }
   }
 };
+
+const buildTo = (child, parent) => {
+  if (typeof parent === "string") {
+    [...document.querySelectorAll(parent)].forEach(par => par.appendChild(child));
+  } else {
+    parent.append(child);
+  }
+};
+// /*
+const p = build(
+  "div",
+  {
+    title: "title",
+    innerText: "am a title",
+    onclick: function () {
+      console.log("i was clicked");
+    }
+  },
+  build("span", { innerText: "am a span", title: "title" })
+);
+// div.class#id
+
+buildTo(p, "body");
+
+// */
+
+/*
+here is the awesome uiedbook router
+*/
+const routes = {};
+const route = function (path = "/", templateId, controller) {
+  const link = document.createElement("a");
+  link.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
+  routes[path] = { templateId: templateId, controller: controller };
+  return link;
+};
+const router = function (e) {
+  e.preventDefault();
+  const url = window.location.hash.slice(1) || "/";
+  const route = routes[url];
+  if (route) {
+    route.controller();
+  }
+  // path = path ? path : "";
+  //   if (this.mode === "history") {
+  //     history.pushState(null, null, this.root + this.clearSlashes(path));
+  //   } else {
+  //     window.location.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
+  //   }
+};
+window.addEventListener("hashchange", router);
+window.addEventListener("load", router);
+
+/*
+HOW TO USE
+
+
+route("/", "home", function () {
+  get("div").innerText = " welcome to the home page";
+  console.log("we are at the home page");
+});
+
+const about = route("/about", "about", function () {
+  get("div").innerText = " welcome to the about page";
+  get("a").href = about;
+  console.log("we are at the about page");
+});
+
+
+*/
 
 // in construction
 const xhr = function (type, url) {
@@ -639,8 +709,11 @@ const isEmptyObject = function (obj) {
 
 /*
  *** HOW TO USE ***
-let obj = {};
-isEmptyObject(obj);
+let objA = { a: "kd" };
+let objB = {};
+console.log(isEmptyObject(objA));
+// false
+console.log(isEmptyObject(objB));
 // true
 
 */
@@ -765,17 +838,6 @@ const rad = num => {
 rad(5);
 // you will get random values from 0 to 5
 */
-const timer = (fuc, ti = 1) => {
-  //for writting timed expression without a function wrapper
-  const code = "()=>{" + fuc + "}";
-  setTimeout(eval(code), ti * 1000);
-};
-/*
- *** HOW TO USE ***
-timer(
-    console.log("the code is running every 2 seconds")
-, 2);
-*/
 
 const makeClass = (name, stylings) => {
   //for making css classes
@@ -843,10 +905,11 @@ const keep = function (id, time) {
     }
   } else {
     if (callObj !== null) {
+      // eslint-disable-next-line prefer-const
       for (let [k, v] of Object.entries(callObj)) {
         if (callStack.indexOf(k) > -1) {
           callStack.splice(id, 1);
-          return;
+          return true;
         } else {
           for (; v > 0; v--) {
             callStack.push(k);
@@ -1163,6 +1226,7 @@ problem try and see the magic */
     ],
     deviceRatio = window.devicePixelRatio,
     backingRatio = backingStores.reduce(function (prev, curr) {
+      // eslint-disable-next-line no-prototype-builtins
       return context.hasOwnProperty(curr) ? context[curr] : 1;
     }),
     ratio = deviceRatio / backingRatio;
@@ -1544,8 +1608,28 @@ spriteSheetPainter.prototype = {
   }
 };
 
-const audio = function (audio) {
+const speaker = function (text, language = "", volume = 1, rate = 1, pitch = 1) {
+  // common languages (not supported by all browsers)
+  // en - english,  it - italian, fr - french,  de - german, es - spanish
+  // ja - japanese, ru - russian, zh - chinese, hi - hindi,  ko - korean
+
+  // build utterance and speak
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = language;
+  utterance.volume = volume * 0.3 * 3;
+  utterance.rate = rate;
+  utterance.pitch = pitch;
+  speechSynthesis.speak(utterance);
+};
+
+const speakerStop = () => speechSynthesis && speechSynthesis.cancel();
+
+// play mp3 or wav audio from a local file or url
+const audio = function (audio, loop = 0, volumeScale = 1) {
   this.audio = audio;
+  this.audio.loop = loop;
+  this.audio.volume = volumeScale * 0.3;
+  return this.audio;
 };
 audio.prototype = {
   play() {
@@ -1560,9 +1644,6 @@ audio.prototype = {
     } else {
       this.audio.pause();
     }
-  },
-  continuesPlay() {
-    // sorry
   }
 };
 
@@ -1632,17 +1713,17 @@ const physics = (function () {
 const renderer = (function () {
   //game rendering algorithm
   let canvas,
-    id, // for pauding os playing the game
+    id, // for pausing or playing the game
     context,
     // variables for the timing
     fps,
     // background varible
-    bg = [],
-    pause = false,
-    // entity storage array
     lastdt = 0,
     nextdt = 0,
-    deltaTime,
+    pause = false,
+    deltaTime;
+  const bg = [],
+    // entity storage array
     entitysArray = [];
 
   function bgPaint(img, speed, up, left) {
@@ -1733,47 +1814,52 @@ const renderer = (function () {
   };
 })();
 
+const uiedbook = {
+  css,
+  media,
+  animate,
+  build,
+  buildTo,
+  xhr,
+  u,
+  isEmptyObject,
+  isArray,
+  each,
+  intersect,
+  error,
+  get,
+  rad,
+  makeClass,
+  create,
+  download,
+  debounce,
+  keep,
+  check,
+  log,
+  store,
+  retrieve,
+  remove,
+  getKey,
+  clear,
+  onKeys,
+  continuesKeys,
+  swipe,
+  buildCanvas,
+  appendCanvas,
+  re,
+  entity,
+  imgPainter,
+  spriteSheetPainter,
+  audio,
+  bgPainter,
+  renderer,
+  speaker,
+  speakerStop,
+  physics,
+  route
+};
+// 37 apis contexts
+
 if (typeof module !== "undefined") {
-  const uiedbook = {
-    css,
-    media,
-    animate,
-    build,
-    xhr,
-    u,
-    isEmptyObject,
-    isArray,
-    each,
-    intersect,
-    error,
-    get,
-    rad,
-    timer,
-    makeClass,
-    create,
-    download,
-    debounce,
-    keep,
-    check,
-    log,
-    store,
-    retrieve,
-    remove,
-    getKey,
-    clear,
-    onKeys,
-    continuesKeys,
-    swipe,
-    buildCanvas,
-    appendCanvas,
-    re,
-    entity,
-    imgPainter,
-    spriteSheetPainter,
-    audio,
-    bgPainter,
-    renderer
-  };
-  module.exports = uiedbook;
-  // 39 apis contexts
-}
+  module["exports"] = uiedbook;
+} else window.uiedbook = uiedbook;
