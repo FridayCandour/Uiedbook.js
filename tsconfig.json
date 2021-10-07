@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["ES2021", "DOM"],
+    "target": "ESNext",
+    "declaration": true
+  },
+  "include": ["uiedbook.ts"]
+}

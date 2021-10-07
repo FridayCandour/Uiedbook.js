@@ -10,10 +10,11 @@
                         http://www.apache.org/licenses/
  
  
-YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WITH THIS MODULE
+YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WITH THIS MODULE 
 */
+
 /** This is for creating css styles using javascipt */
-export const css = (name, sel, properties) => {
+export const css = (name: string, sel: string | Record<string, string>, properties?: Record<string, string>): void => {
   if (typeof sel === "object") {
     properties = sel;
     sel = "";
@@ -36,6 +37,7 @@ export const css = (name, sel, properties) => {
   styleTag.innerHTML = totalStyle;
   document.head.append(styleTag);
 };
+
 /*
 
 css("#container",
@@ -45,8 +47,9 @@ css("#container",
     background-color: "#ff9800"
 })
 */
+
 /** This is for creating css @media styles using javascipt */
-export const media = (value, ...properties) => {
+export const media = (value: string, ...properties: [string, Record<string, string>][]): void => {
   const styS = "@media only screen and (" + value + ") " + "{",
     styE = "}";
   let style = "  ",
@@ -54,7 +57,7 @@ export const media = (value, ...properties) => {
   const proplen = properties.length;
   let totalAnimation,
     Animation = "  ";
-  const animationStep = num => {
+  const animationStep = (num: number) => {
     for (const [k, v] of Object.entries(properties[num][1])) {
       style += "" + k + ": " + v + ";";
     }
@@ -74,7 +77,8 @@ export const media = (value, ...properties) => {
   aniStyleTag.innerHTML = totalAnimation;
   document.head.append(aniStyleTag);
 };
-/*
+
+/* 
 
 
 the media function is used in the following format
@@ -99,16 +103,19 @@ media("min-width: 790px",
 
 
 */
+
 /** This is for creating css animations using javascipt */
-export const animate = (name, ...properties) => {
+export const animate = (name: string, ...properties: [string, Record<string, string>][]): void => {
   const styS = "@keyframes " + name + " " + "{",
     styE = "}",
     proplen = properties.length;
+
   let style = " ",
     aniSty = " ",
     Animation = "  ",
     totalAnimation = null;
-  const animationStep = num => {
+
+  const animationStep = (num: number) => {
     for (const [k, v] of Object.entries(properties[num][1])) {
       style += "" + k + ": " + v + ";";
     }
@@ -128,6 +135,7 @@ export const animate = (name, ...properties) => {
   aniStyleTag.innerHTML = totalAnimation;
   document.head.append(aniStyleTag);
 };
+
 /*
 *** HOW TO USE ***
 animate("popanimation",
@@ -149,10 +157,13 @@ animate("popanimation",
 
 
 */
+
 /** in construction */
-export const build = (...layouts) => {
+export const build = (
+  ...layouts: (string | Record<string, unknown> | DocumentFragment | HTMLElement)[]
+): DocumentFragment | HTMLElement => {
   let i = 1;
-  function createElement(type = "", op = {}, chil) {
+  function createElement(type = "", op: Record<string, string> = {}, chil: string | Node | (string | Node)[]) {
     const element = document.createElement(type);
     for (const [k, v] of Object.entries(op)) {
       element.setAttribute(k, v);
@@ -172,6 +183,7 @@ export const build = (...layouts) => {
     // return the element after building the dom objects
     return element;
   }
+
   if (typeof layouts[0] === "object") {
     i = layouts.length;
     const frag = new DocumentFragment();
@@ -191,7 +203,8 @@ export const build = (...layouts) => {
   }
   return new DocumentFragment();
 };
-export const buildTo = (child, parent) => {
+
+export const buildTo = (child: Node, parent: string | HTMLElement): void => {
   if (typeof parent === "string") {
     Array.from(document.querySelectorAll(parent)).forEach(par => par.appendChild(child));
   } else {
@@ -211,17 +224,20 @@ const p = build(
   build("span", { innerText: "am a span", title: "title" })
 );
 // div.class#id
+
 buildTo(p, "body");
+
 // */
-const routes = {};
-export const route = function (path = "/", templateId, controller) {
+
+const routes: Record<string, { templateId: string; controller: () => any }> = {};
+export const route = function (path = "/", templateId: string, controller: () => any): HTMLAnchorElement {
   const link = document.createElement("a");
   link.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
   routes[path] = { templateId: templateId, controller: controller };
   return link;
 };
 /** here is the awesome uiedbook router */
-const router = function (e) {
+const router = function (e: Event): void {
   e.preventDefault();
   const url = window.location.hash.slice(1) || "/";
   const route = routes[url];
@@ -237,6 +253,7 @@ const router = function (e) {
 };
 window.addEventListener("hashchange", router);
 window.addEventListener("load", router);
+
 /*
 HOW TO USE
 
@@ -254,8 +271,9 @@ const about = route("/about", "about", function () {
 
 
 */
+
 /** in construction */
-export const xhr = function (type, url) {
+export const xhr = function (type: string, url: string | URL): (this: XMLHttpRequest) => any {
   // for sending requests
   const xhrRequest = new XMLHttpRequest();
   let result = null;
@@ -266,8 +284,9 @@ export const xhr = function (type, url) {
   xhrRequest.send();
   return result;
 };
+
 /** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more save, fast and efficient. */
-export const u = (...uied) => {
+export const u = (...uied: any[]) => {
   const eU = uied.length,
     [el, ifAll_OrNum] = uied;
   let all = false,
@@ -290,8 +309,10 @@ export const u = (...uied) => {
     }
   }
   if (!e) throw new Error('element "' + el + '" not found');
+
   // the funny parts or extra methods that can be used
   // to manipulate dom  elements are below!
+
   return {
     // for styling
     style(obj) {
@@ -306,15 +327,16 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").style({
-        width: "100%",
-        height: "100%",
-        color: "black"
-    })
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").style({
+    width: "100%",
+    height: "100%",
+    color: "black"
+})
+
+*/
+
     config(obj) {
       // for manipulating objects
       if (obj) {
@@ -326,19 +348,21 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u(object).config({
-        name: "object",
-        powerof: (pow, n){ return Math.pow(pow, n)}
-    })
-    
-    */
+ *** HOW TO USE ***
+
+u(object).config({
+    name: "object",
+    powerof: (pow, n){ return Math.pow(pow, n)}
+})
+
+*/
+
     appendTo(type, attribute, number = 1) {
       // for adding new elements more powerfully
       if (typeof attribute === "undefined" || typeof type === "undefined") {
         throw new Error("type or attribute not given | not enough parameters to work with");
       }
+
       const frag = new DocumentFragment();
       if (!all) {
         for (let i = 0; i < number; i++) {
@@ -357,11 +381,14 @@ export const u = (...uied) => {
           }
           frag.append(element);
         }
+
         e.forEach(el => {
           el.append(frag);
         });
       }
+
       return;
+
       //  const createdElement = document.createElement(type);
       //  let addedAtrr = "";
       //  for (const [k, v] of Object.entries(attribute)) {
@@ -383,14 +410,15 @@ export const u = (...uied) => {
       //   return createdElement;
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").appendTo("div"{
-        className: "newdiv",
-        id: "newdiv"
-    }, 5)
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").appendTo("div"{
+    className: "newdiv",
+    id: "newdiv"
+}, 5)
+
+*/
+
     // advance event listener
     on(type, callback) {
       function evft(e) {
@@ -406,14 +434,16 @@ export const u = (...uied) => {
         });
       }
     },
+
     /*
-     *** HOW TO USE ***
-    
-    u("#container").on("click", ()=>{
-        console.log("clicked!")
-    })
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").on("click", ()=>{
+    console.log("clicked!")
+})
+
+*/
+
     // for adding attributes to the dom elements
     attr(attribute_object) {
       if (typeof attribute_object !== "object") return;
@@ -436,14 +466,15 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").attr({
-        className: "container",
-        id: "container"
-    })
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").attr({
+    className: "container",
+    id: "container"
+})
+
+*/
+
     // for removing attributes from dom elements
     removeAttr(attr) {
       if (attr === null) {
@@ -456,11 +487,11 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").removeAttr("className")
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").removeAttr("className")
+
+*/
     // for adding inner html contents to the dom elements
     html(code) {
       if (!all) {
@@ -470,11 +501,11 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").html("<div> hello am a div </div>")
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").html("<div> hello am a div </div>")
+
+*/
     // for adding text to the dom elements
     text(text) {
       if (!all) {
@@ -484,12 +515,12 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").html("hello am text")
-    
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").html("hello am text")
+
+
+*/
     // for adding class to the dom elements
     addClass(clas) {
       if (!all) {
@@ -499,12 +530,14 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").addClass(".class")
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").addClass(".class")
+
+*/
+
     // for removing class from the dom elements
+
     removeClass(clas) {
       if (!all) {
         e.classList.remove(clas);
@@ -513,12 +546,13 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").removeClass(".class")
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").removeClass(".class")
+
+*/
     // for hiding the dom elements
+
     hide() {
       if (!all) {
         e.style.display = "none";
@@ -527,11 +561,11 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").hide()
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").hide()
+
+*/
     // for toggling the display of elements
     toggleClass() {
       if (!all) {
@@ -549,12 +583,13 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").toggleClass(".class")
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").toggleClass(".class")
+
+*/
     // for displaying the dom elements
+
     show() {
       if (!all) {
         e.style.display = "block";
@@ -563,12 +598,13 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").show()
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").show()
+
+*/
     // for resizing the dom elements
+
     box(w, h, c = "transparent") {
       if (!all) {
         e.style.width = w;
@@ -583,41 +619,42 @@ export const u = (...uied) => {
       }
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").box("100px","100%","#ff9800")
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").box("100px","100%","#ff9800")
+
+*/
     // for scrollingthe dom elements into view
     scrollTo(s = true) {
       e.scrollIntoView(s);
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").scrollTo()
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").scrollTo()
+
+*/
     // for adding elements to the dom elements
     add(nod) {
       e.append(nod);
     },
     /*
-     *** HOW TO USE ***
-    let span = document.createElement("span");
-    u("#container").add(span)
-    
-    */
+ *** HOW TO USE ***
+let span = document.createElement("span");
+u("#container").add(span)
+
+*/
     // for removing elements to the dom elements
     remove(ind) {
       e.removeChild(e.childNodes[ind]);
     },
     /*
-     *** HOW TO USE ***
-    
-    u("#container").remove(0)
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").remove(0)
+
+*/
+
     // for making the dom elements fulscreen
     fullScreen() {
       return {
@@ -642,23 +679,26 @@ export const u = (...uied) => {
         }
       };
     }
+
     /*
-     *** HOW TO USE ***
-    
-    u("#container").fullscreen().toggle()
-    u("#container").fullscreen().exist()
-    u("#container").fullscreen().set()
-    
-    */
+ *** HOW TO USE ***
+
+u("#container").fullscreen().toggle()
+u("#container").fullscreen().exist()
+u("#container").fullscreen().set()
+
+*/
   };
 };
+
 /** for checking for empty objects */
-export const isEmptyObject = function (obj) {
+export const isEmptyObject = function (obj: any): obj is Record<keyof any, never> {
   for (const name in obj) {
     return false;
   }
   return true;
 };
+
 /*
  *** HOW TO USE ***
 let objA = { a: "kd" };
@@ -669,7 +709,8 @@ console.log(isEmptyObject(objB));
 // true
 
 */
-export function isArray(q) {
+
+export function isArray(q: unknown): q is unknown[] {
   for (let e in q) {
     e = e * 1;
     if (e + 1 === 1) {
@@ -680,6 +721,7 @@ export function isArray(q) {
   }
   return false;
 }
+
 /*
  *** HOW TO USE ***
  
@@ -693,7 +735,11 @@ const obj = {food: "bean", num: 44}
 isArray(obj);
 // false
 */
-export const each = function (obj, callback) {
+
+export const each = function <Obj extends Record<keyof any, any> | string>(
+  obj: Obj,
+  callback: (...args: any[]) => any
+): Obj {
   let length,
     i = 0;
   if (typeof obj === "object") {
@@ -713,11 +759,13 @@ export const each = function (obj, callback) {
   }
   return obj;
 };
+
 /*
  *** HOW TO USE ***
 each(obj, function);
 */
-export function intersect(target, opt, callback) {
+
+export function intersect(target: string, opt: IntersectionObserverInit, callback: IntersectionObserverCallback): void {
   const { root, rootMargin, threshold } = opt,
     options = {
       root: root,
@@ -730,6 +778,7 @@ export function intersect(target, opt, callback) {
     observer.observe(child);
   }
 }
+
 /*
 *** HOW TO USE ***
 
@@ -744,12 +793,14 @@ root: null,
 
 
 */
+
 /** `error("there was an error!");` */
-export const error = msg => {
+export const error = (msg: string): never => {
   throw new Error(msg);
 };
+
 /** the get function is the u function but without any sweet methods it is used if you want to enjoy the easiness of the u function but don't want to use it awesome methods */
-export const get = (...uied) => {
+export const get = (...uied: any[]): any => {
   const [el, ifAll_OrNum] = uied;
   let e;
   if (uied.length === 1) {
@@ -769,8 +820,9 @@ export const get = (...uied) => {
  *** HOW TO USE ***
 let container = get("container");
 */
+
 /** for getting more purer random number */
-export const rad = num => {
+export const rad = (num: number): number => {
   return Math.floor(Math.random() * Math.floor(num));
 };
 /*
@@ -778,8 +830,9 @@ export const rad = num => {
 rad(5);
 // you will get random values from 0 to 5
 */
+
 /** for making css classes */
-export const makeClass = (name, stylings) => {
+export const makeClass = (name: string, stylings: string): void => {
   const clas = document.createElement("style");
   const styling = "" + name + "{" + stylings + "}";
   clas.innerHTML = styling;
@@ -789,8 +842,9 @@ export const makeClass = (name, stylings) => {
  *** HOW TO USE ***
 class(".container","color: red;");
 */
+
 /** it's self explanatory some how */
-export const create = (type = "div", id = "") => {
+export const create = (type = "div", id = ""): HTMLElement => {
   const element = document.createElement(type);
   element.setAttribute("id", id);
   document.body.appendChild(element);
@@ -800,8 +854,9 @@ export const create = (type = "div", id = "") => {
  *** HOW TO USE ***
 let div = create("div","newdiv");
 */
+
 /** an easy to use download function that returns the link element that should be clicked */
-export const download = function (type, source, name) {
+export const download = function (type: string, source: { buffer: Uint8Array }, name: string): HTMLAnchorElement {
   const file = new Blob([source.buffer], { type: type });
   const fileURL = URL.createObjectURL(file);
   const linkElement = document.createElement("a");
@@ -811,7 +866,8 @@ export const download = function (type, source, name) {
   linkElement.setAttribute("download", name);
   return linkElement;
 };
-export const debounce = (func, timeout = 600) => {
+
+export const debounce = (func: () => void, timeout = 600): void => {
   let timer = null;
   if (timer !== null) {
     clearTimeout(timer);
@@ -820,19 +876,22 @@ export const debounce = (func, timeout = 600) => {
     func();
   }, timeout);
 };
+
 /*
  *** HOW TO USE ***
 debounce(function , 1000);
 */
-let callStack = [];
+
+let callStack: string[] = [];
 /** the grandmother algorith for managing ids of anything, don't use it if you don't understand it's power it looks simple. */
-export const keep = function (id, time) {
+export const keep = function (id: string | Record<string, number>, time: number): true | undefined {
   const callObj = typeof id === "object" ? id : null;
   let runtime = typeof time === "number" ? time : 1;
   if (typeof id === "string" && typeof runtime === "number") {
     if (callStack.indexOf(id) > -1) {
       return;
     }
+
     for (; runtime > 0; runtime--) {
       callStack.push(id);
     }
@@ -852,7 +911,8 @@ export const keep = function (id, time) {
     }
   }
 };
-export const check = function (id) {
+
+export const check = function (id: string): boolean {
   const ind = callStack.indexOf(id);
   if (ind > -1) {
     callStack.filter(key => !(id === key));
@@ -862,7 +922,8 @@ export const check = function (id) {
     return false;
   }
 };
-export const log = message => {
+
+export const log = (message: any): string[] | undefined => {
   if (message) {
     console.log(message);
   } else {
@@ -872,24 +933,27 @@ export const log = message => {
     }
   }
 };
+
 /** it's self explanatory some how */
-export const store = (name, value) => {
+export const store = (name: string, value: any): void => {
   localStorage.setItem(name, JSON.stringify(value));
 };
-export const retrieve = name => {
+export const retrieve = (name: string): string | null => {
   return localStorage.getItem(name);
 };
-export const remove = name => {
+
+export const remove = (name: string): void => {
   localStorage.removeItem(name);
 };
-export const getKey = index => {
+export const getKey = (index: number): string | null => {
   return window.localStorage.key(index);
 };
-export const clear = () => {
+export const clear = (): void => {
   localStorage.clear();
 };
+
 /** for handling even more complicated key events, it's built with the grandmother algorimth or code */
-export const onKeys = (keys, callback, object = document, lock = true) => {
+export const onKeys = (keys: string[], callback: (this: Event) => void, object = document, lock = true): void => {
   if (!keys || !callStack) {
     throw new Error("no keys or callbacks given");
   }
@@ -917,6 +981,7 @@ export const onKeys = (keys, callback, object = document, lock = true) => {
           break;
         }
       }
+
       if (num === keymap.length) {
         e.preventDefault();
         callback.call(e);
@@ -941,8 +1006,15 @@ export const onKeys = (keys, callback, object = document, lock = true) => {
 onKeys(["arrowRight","control"],callback,container);
 
 */
+
 /** under construction!!!!!!! */
-export const continuesKeys = (keys, callback, delay = 0, object = document, lock = true) => {
+export const continuesKeys = (
+  keys: string[],
+  callback: (this: Event) => void,
+  delay = 0,
+  object = document,
+  lock = true
+): void => {
   if (!keys || !callStack) {
     throw new Error("no keys or callbacks given");
   }
@@ -953,7 +1025,8 @@ export const continuesKeys = (keys, callback, delay = 0, object = document, lock
       checkKeys(e);
     }
   });
-  function checkKeys(e) {
+
+  function checkKeys(e: Event) {
     let num = 0;
     for (let i = 0; i < keymap.length; i++) {
       if (check(keymap[i])) {
@@ -964,6 +1037,7 @@ export const continuesKeys = (keys, callback, delay = 0, object = document, lock
         break;
       }
     }
+
     if (num === keymap.length) {
       if (lock) {
         e.preventDefault();
@@ -977,6 +1051,7 @@ export const continuesKeys = (keys, callback, delay = 0, object = document, lock
     }
   }
 };
+
 /*
  *** HOW TO USE ***
 
@@ -989,10 +1064,12 @@ export const continuesKeys = (keys, callback, delay = 0, object = document, lock
 continuesKeys(["arrowRight","control"],callback,500,true,container);
 
 */
-export function swipe(item) {
-  const caller = {};
+
+export function swipe(item: Record<string, () => any>): void {
+  const caller: Record<string, () => any> = {};
   let startX = 0,
     startY = 0;
+
   if (typeof item === "object") {
     for (const [k, v] of Object.entries(item)) {
       caller[k] = v;
@@ -1000,16 +1077,19 @@ export function swipe(item) {
   } else {
     throw new Error("no call given for the swipe handler");
   }
-  function handleTouchStart(e) {
+
+  function handleTouchStart(e: TouchEvent) {
     startX = e.changedTouches[0].screenX;
     startY = e.changedTouches[0].screenY;
   }
-  function handleTouchEnd(e) {
+
+  function handleTouchEnd(e: TouchEvent) {
     const diffX = e.changedTouches[0].screenX - startX;
     const diffY = e.changedTouches[0].screenY - startY;
     const ratioX = Math.abs(diffX / diffY);
     const ratioY = Math.abs(diffY / diffX);
     const absDiff = Math.abs(ratioX > ratioY ? diffX : diffY);
+
     if (absDiff < 10) {
       if (caller.touch) {
         callback.touch(caller.touch);
@@ -1026,6 +1106,7 @@ export function swipe(item) {
           callback.left(caller.left);
         }
       }
+
       // up and down
     } else {
       if (diffY >= 0) {
@@ -1039,26 +1120,32 @@ export function swipe(item) {
       }
     }
   }
+
   document.body.addEventListener("touchstart", handleTouchStart);
   document.body.addEventListener("touchend", handleTouchEnd);
+
   const callback = {
-    touch(callback) {
+    touch(callback: () => any) {
       return callback();
     },
-    right(callback) {
+    right(callback: () => any) {
       return callback();
     },
-    left(callback) {
+
+    left(callback: () => any) {
       return callback();
     },
-    down(callback) {
+
+    down(callback: () => any) {
       return callback();
     },
-    up(callback) {
+
+    up(callback: () => any) {
       return callback();
     }
   };
 }
+
 /*
  *** HOW TO USE ***
 
@@ -1101,28 +1188,31 @@ export function swipe(item) {
 
 
  */
+
 /*
-The next is system of the
-uiedbook library it's canvas
-related operations like motion
+The next is system of the 
+uiedbook library it's canvas 
+related operations like motion 
 detection key map and all that
-useful stuff in one single
+useful stuff in one single 
 bundle it's a game rendering engine library
 called the RE engine
 with minimal functionality
 for 2D rendering */
+
 /*
-@ TODOs
+@ TODOs 
 
  1. a widget systmen for adding widgets to the gameplay
  2. a movable background image
  3. ......
 */
+
 /** this is used for creating pixel stable game views across all screen width with no pixelation problem try and see the magic */
-export const buildCanvas = function (id, w = window.innerWidth, h = window.innerHeight) {
+export const buildCanvas = function (id: string, w = window.innerWidth, h = window.innerHeight): HTMLCanvasElement {
   const canv = document.createElement("canvas"),
-    context = canv.getContext("2d"),
-    backingStores = [
+    context = canv.getContext("2d")!,
+    backingStores: (string | number)[] = [
       "webkitBackingStorePixelRatio",
       "mozBackingStorePixelRatio",
       "msBackingStorePixelRatio",
@@ -1132,7 +1222,7 @@ export const buildCanvas = function (id, w = window.innerWidth, h = window.inner
     deviceRatio = window.devicePixelRatio,
     backingRatio = backingStores.reduce(function (prev, curr) {
       // eslint-disable-next-line no-prototype-builtins
-      return context.hasOwnProperty(curr) ? context[curr] : 1;
+      return context.hasOwnProperty(curr) ? (context[curr as keyof CanvasRenderingContext2D] as unknown as string) : 1;
     }),
     ratio = deviceRatio / Number(backingRatio);
   canv.id = typeof id === "undefined" ? "canvas" : id;
@@ -1144,11 +1234,12 @@ export const buildCanvas = function (id, w = window.innerWidth, h = window.inner
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
   return canv;
 };
-export const appendCanvas = (id, h, w, parent) => {
-  /*same as above but with a
-  parent to append directly */
+
+export const appendCanvas = (id: string, h: number, w: number, parent: HTMLElement): HTMLCanvasElement => {
+  /*same as above but with a 
+parent to append directly */
   const cv = buildCanvas(id, h, w);
-  let par;
+  let par: HTMLElement | undefined;
   if (typeof parent !== "string" && typeof parent !== "undefined") {
     par = parent;
   } else {
@@ -1160,16 +1251,18 @@ export const appendCanvas = (id, h, w, parent) => {
       }
     }
   }
-  par.style.boxSizing = "border-box";
-  par.append(cv);
+  par!.style.boxSizing = "border-box";
+  par!.append(cv);
   return cv;
 };
+
 /** this is the RE game time line algorimth */
 export const re = (function () {
   /*Re is an interface
-   where game views (view) are
-   sequenced on.*/
+ where game views (view) are
+ sequenced on.*/
   const games = [];
+
   // the build function is for creating the game div
   // and allowing the dev to build upon it
   function build(viewID) {
@@ -1184,6 +1277,7 @@ export const re = (function () {
     });
     return frame;
   }
+
   // the mount function notifies the flow function
   // that the game should be started
   // and the callback can be used to run a function
@@ -1208,12 +1302,14 @@ export const re = (function () {
     if (games.length < 1 || games.length > 1) {
       throw new Error("RE: re.mount() should be called and given a built game world");
     }
+
     u(document.body).style({
       margin: "0px",
       padding: "0px",
       boxSizing: "border-box",
       border: "none"
     });
+
     u("#RE_gameframe").style({
       width: "100vw",
       height: "100vh",
@@ -1243,6 +1339,7 @@ export const re = (function () {
     renderer.toggleRendering();
     // fram.append(vsg())
   };
+
   const widget = function (name) {
     this.wig = document.createElement("div");
     this.wig.className = name;
@@ -1250,6 +1347,7 @@ export const re = (function () {
     document.body.append(this.wig);
     return this.wig;
   };
+
   const imagesArray = [],
     audioArray = [];
   function loadImage(img, id) {
@@ -1298,6 +1396,7 @@ export const re = (function () {
       }
     }
   }
+
   function getAud(id) {
     let p;
     for (let i = 0; i < audioArray.length; i++) {
@@ -1312,6 +1411,7 @@ export const re = (function () {
       throw new Error('RE: audio id "' + id + '" not found');
     }
   }
+
   function getImg(id) {
     let p;
     for (let i = 0; i < imagesArray.length; i++) {
@@ -1327,6 +1427,7 @@ export const re = (function () {
       throw new Error('RE: image of id "' + id + '" not found');
     }
   }
+
   return {
     build: build,
     makeWidget: widget,
@@ -1340,12 +1441,14 @@ export const re = (function () {
   };
 })();
 // END OF THE main RE ENGINE////////////////////////
+
 /*
 other TODOs stuff will be built here
 */
-export const entity = function (name, painter, behaviors) {
+export const entity = function (name: string, painter, behaviors) {
   /*an entity is any object or thing
-   that can be added to the game world*/
+ that can be added to the game world*/
+
   //this.id = name || "none" //name of the entity for identification can be used out side here******
   this.name = name || "none";
   this.painter = painter || {}; // callback for paint the entity     can be used out side here******
@@ -1365,6 +1468,7 @@ export const entity = function (name, painter, behaviors) {
   this.border = true; //   to make the entity observer sides or not   can be used out side here******
   this.isHit = false;
 };
+
 entity.prototype = {
   // this algorimth is for calling the paint function
   // to make it functional when seen at runtime
@@ -1405,6 +1509,7 @@ entity.prototype = {
     }
   }
 };
+
 export const imgPainter = function (img, delay = 1) {
   this.image = img;
   this.delay = delay;
@@ -1422,6 +1527,7 @@ imgPainter.prototype = {
     }
   }
 };
+
 // this is a powerful sprite algorith for
 // rendering the exact sprite from a
 // spritesheet in successful orders
@@ -1446,6 +1552,7 @@ export const spriteSheetPainter = function (img, horizontal = 1, vertical = 1, d
     this.verticalPictures = vertical;
     this.delay = delay;
   };
+
   this.animateFrameOf = function (frameY = 0) {
     this.frameHeightCount = frameY;
     if (this.frameWidthCount <= this.horizontalPictures - 2) {
@@ -1455,6 +1562,7 @@ export const spriteSheetPainter = function (img, horizontal = 1, vertical = 1, d
     }
   };
 };
+
 spriteSheetPainter.prototype = {
   update() {
     this.range++;
@@ -1494,10 +1602,12 @@ spriteSheetPainter.prototype = {
     );
   }
 };
+
 export const speaker = function (text, language = "", volume = 1, rate = 1, pitch = 1) {
   // common languages (not supported by all browsers)
   // en - english,  it - italian, fr - french,  de - german, es - spanish
   // ja - japanese, ru - russian, zh - chinese, hi - hindi,  ko - korean
+
   // build utterance and speak
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = language;
@@ -1506,7 +1616,9 @@ export const speaker = function (text, language = "", volume = 1, rate = 1, pitc
   utterance.pitch = pitch;
   speechSynthesis.speak(utterance);
 };
+
 export const speakerStop = () => speechSynthesis && speechSynthesis.cancel();
+
 /** play mp3 or wav audio from a local file or url  */
 export const audio = function (audio, loop = 0, volumeScale = 1) {
   this.audio = audio;
@@ -1529,6 +1641,7 @@ audio.prototype = {
     }
   }
 };
+
 export const bgPainter = function (img, speed = 10, up, left) {
   this.image = img;
   this.range = 0;
@@ -1548,6 +1661,7 @@ bgPainter.prototype = {
       }
       this.left = this.left - this.speed;
     }
+
     if (this.GoesUp) {
       if (this.top >= this.height) {
         this.top = 0;
@@ -1565,6 +1679,7 @@ bgPainter.prototype = {
     }
   }
 };
+
 export const physics = (function () {
   function detectCollision(ent, name, reduce = 0) {
     for (let j = 0; j < name.length; j++) {
@@ -1584,10 +1699,12 @@ export const physics = (function () {
       }
     }
   }
+
   return {
     detectCollision: detectCollision
   };
 })();
+
 /** game rendering algorithm */
 export const renderer = (function () {
   let canvas,
@@ -1603,11 +1720,13 @@ export const renderer = (function () {
   const bg = [],
     // entity storage array
     entitysArray = [];
+
   function bgPaint(img, speed, up, left) {
     const bgImg = new bgPainter(img, speed, up, left);
     bg.push(bgImg);
     return bgImg;
   }
+
   function animatebg(canvas) {
     if (bg === []) return false;
     bg.forEach(b => {
@@ -1615,6 +1734,7 @@ export const renderer = (function () {
       b.update();
     });
   }
+
   function _assemble(...players) {
     if (!players) throw new Error("RE: No players assembled");
     players.forEach(player => {
@@ -1629,6 +1749,7 @@ export const renderer = (function () {
     c.style.borderRadius = border;
     return c;
   }
+
   function toggleRendering() {
     if (pause) {
       window.requestAnimationFrame(animate);
@@ -1638,6 +1759,7 @@ export const renderer = (function () {
       return (pause = true);
     }
   }
+
   function animate(dt) {
     id = window.requestAnimationFrame(animate);
     deltaTime = dt - lastdt;
@@ -1652,6 +1774,7 @@ export const renderer = (function () {
             entitysArray.splice(i, 1);
             --i;
           }
+
           if (ent.border) {
             ent.observeBorder(canvas.width, canvas.height);
           }
@@ -1666,6 +1789,7 @@ export const renderer = (function () {
     }
     nextdt = 0;
   }
+
   function _render(canv, fpso = 0) {
     if (!canv) {
       throw new Error("RE: game needs to be rendered EXP: renderer.render(canvas)");
@@ -1675,6 +1799,7 @@ export const renderer = (function () {
     fps = fpso;
     animate(0);
   }
+
   return {
     render: _render,
     assemble: _assemble,
@@ -1683,6 +1808,7 @@ export const renderer = (function () {
     copyCanvasTo: copyCanvasTo
   };
 })();
+
 export const uiedbook = {
   css,
   media,
@@ -1728,6 +1854,7 @@ export const uiedbook = {
   route
 };
 // 37 apis contexts
+
 if (typeof window !== "undefined") {
-  window.uiedbook = uiedbook;
+  (window as any).uiedbook = uiedbook;
 }
