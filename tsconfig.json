@@ -5,5 +5,5 @@
     "target": "ESNext",
     "declaration": true
   },
-  "include": ["uiedbook.ts"]
+  "include": ["*.ts"]
 }

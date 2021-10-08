@@ -14,6 +14,7 @@ YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WIT
 */
 
 /** This is for creating css styles using javascipt */
+
 export const css = (name: string, sel: string | Record<string, string>, properties?: Record<string, string>): void => {
   if (typeof sel === "object") {
     properties = sel;
@@ -24,7 +25,8 @@ export const css = (name: string, sel: string | Record<string, string>, properti
   let style = "",
     totalStyle = "";
   if (properties) {
-    for (const [k, v] of Object.entries(properties)) {
+    for (const k in properties) {
+      const v = properties[k];
       style += "" + k + ": " + v + ";";
     }
   }
@@ -58,7 +60,8 @@ export const media = (value: string, ...properties: [string, Record<string, stri
   let totalAnimation,
     Animation = "  ";
   const animationStep = (num: number) => {
-    for (const [k, v] of Object.entries(properties[num][1])) {
+    for (const k in properties[num][1]) {
+      const v = properties[num][1][k]
       style += "" + k + ": " + v + ";";
     }
     aniSty += "" + properties[num][0] + "{" + style + "}";
@@ -116,7 +119,8 @@ export const animate = (name: string, ...properties: [string, Record<string, str
     totalAnimation = null;
 
   const animationStep = (num: number) => {
-    for (const [k, v] of Object.entries(properties[num][1])) {
+    for (const k in properties[num][1]) {
+      const v = properties[num][1][k];
       style += "" + k + ": " + v + ";";
     }
     aniSty += "" + properties[num][0] + "{" + style + "}";
@@ -157,15 +161,16 @@ animate("popanimation",
 
 
 */
-
+type lay = [a: string, b?: Record<string, string>, c?: HTMLElement | Node]
 /** in construction */
 export const build = (
-  ...layouts: (string | Record<string, unknown> | DocumentFragment | HTMLElement)[]
+  ...layouts: lay[]
 ): DocumentFragment | HTMLElement => {
-  let i = 1;
-  function createElement(type = "", op: Record<string, string> = {}, chil: string | Node | (string | Node)[]) {
+  
+  function createElement(type = "", op: Record<string, string> = {}, chil?: (HTMLElement | Node)[] | HTMLElement | Node) {
     const element = document.createElement(type);
-    for (const [k, v] of Object.entries(op)) {
+    for (const k in op) {
+      const v = op[k];
       element.setAttribute(k, v);
     }
     if (chil) {
@@ -184,7 +189,8 @@ export const build = (
     return element;
   }
 
-  if (typeof layouts[0] === "object") {
+  let i: number = 0;
+  if (layouts.length > 1) {
     i = layouts.length;
     const frag = new DocumentFragment();
     while (i > 0) {
@@ -197,7 +203,7 @@ export const build = (
   } else {
     if (typeof layouts[0] === "string") {
       // templating testing should be done here
-      const element = createElement(layouts[0], layouts[1], layouts[2]);
+      const element = createElement(layouts[0][0], layouts[0][1], layouts[0][2]);
       return element;
     }
   }
@@ -206,12 +212,12 @@ export const build = (
 
 export const buildTo = (child: Node, parent: string | HTMLElement): void => {
   if (typeof parent === "string") {
-    Array.from(document.querySelectorAll(parent)).forEach(par => par.appendChild(child));
+    document.querySelectorAll(parent).forEach(par => par.appendChild(child));
   } else {
     parent.append(child);
   }
 };
-// /*
+/*
 const p = build(
   "div",
   {
@@ -227,7 +233,7 @@ const p = build(
 
 buildTo(p, "body");
 
-// */
+*/
 
 const routes: Record<string, { templateId: string; controller: () => any }> = {};
 export const route = function (path = "/", templateId: string, controller: () => any): HTMLAnchorElement {
@@ -289,8 +295,8 @@ export const xhr = function (type: string, url: string | URL): (this: XMLHttpReq
 export const u = (...uied: any[]) => {
   const eU = uied.length,
     [el, ifAll_OrNum] = uied;
-  let all = false,
-    e;
+  let all = false;
+  let e: any;
   if (eU === 1 && typeof el === "string") {
     e = document.querySelector(el);
   } else {
@@ -315,12 +321,13 @@ export const u = (...uied: any[]) => {
 
   return {
     // for styling
-    style(obj) {
-      for (const [k, v] of Object.entries(obj)) {
+    style(obj: Record<string, string>) {
+      for (const k in obj) {
+        const v = obj[k];
         if (!all) {
           e.style[k] = v;
         } else {
-          e.forEach(element => {
+          e.forEach((element: { style: { [x: string]: unknown; }; }) => {
             element.style[k] = v;
           });
         }
@@ -337,10 +344,11 @@ u("#container").style({
 
 */
 
-    config(obj) {
+    config(obj: object) {
       // for manipulating objects
       if (obj) {
-        for (const [k, v] of Object.entries(obj)) {
+        for (const k in obj) {
+          const v = obj[k];
           e[k] = v;
         }
       } else {
@@ -357,7 +365,7 @@ u(object).config({
 
 */
 
-    appendTo(type, attribute, number = 1) {
+    appendTo(type: string, attribute: object, number: number = 1) {
       // for adding new elements more powerfully
       if (typeof attribute === "undefined" || typeof type === "undefined") {
         throw new Error("type or attribute not given | not enough parameters to work with");
@@ -366,9 +374,10 @@ u(object).config({
       const frag = new DocumentFragment();
       if (!all) {
         for (let i = 0; i < number; i++) {
-          const element = document.createElement(type);
-          for (const [k, v] of Object.entries(attribute)) {
-            element[k] = v;
+          const element: HTMLElement = document.createElement(type);
+          for (const k in attribute) {
+            const v = attribute[k];
+            element.setAttribute(k, v);
           }
           frag.append(element);
         }
@@ -376,8 +385,9 @@ u(object).config({
       } else {
         for (let i = 0; i < number; i++) {
           const element = document.createElement(type);
-          for (const [k, v] of Object.entries(attribute)) {
-            element[k] = v;
+          for (const k in attribute) {
+            const v = attribute[k];
+            element.setAttribute(k, v);
           }
           frag.append(element);
         }
@@ -388,28 +398,8 @@ u(object).config({
       }
 
       return;
-
-      //  const createdElement = document.createElement(type);
-      //  let addedAtrr = "";
-      //  for (const [k, v] of Object.entries(attribute)) {
-      //  createdElement[k] = v;
-      // addedAtrr += ' '+k+'="'+v+'"'
-      //  }
-      // if(!all){
-      // e.append(createdElement)
-      // for(let i = 0; i < number - 1; i++){
-      // createdElement.insertAdjacentHTML("afterend","<"+type+" "+addedAtrr+"></"+type+">")
-      // }
-      //   }else{
-      //   e.forEach(element =>{
-      //   element.append(createdElement)
-      //   for(let i = 0; i < number; i++){
-      //   createdElement.insertAdjacentHTML("afterend","<"+type+" "+addedAtrr+"></"+type+">")
-      //   }})
-      //   }
-      //   return createdElement;
     },
-    /*
+/*
  *** HOW TO USE ***
 
 u("#container").appendTo("div"{
@@ -420,8 +410,8 @@ u("#container").appendTo("div"{
 */
 
     // advance event listener
-    on(type, callback) {
-      function evft(e) {
+    on(type: String, callback: (e: object)=> void ) {
+      function evft(e: Event) {
         //   e.stopPropagation()
         e.preventDefault();
         return callback(e);
@@ -445,10 +435,11 @@ u("#container").on("click", ()=>{
 */
 
     // for adding attributes to the dom elements
-    attr(attribute_object) {
+    attr(attribute_object: object) {
       if (typeof attribute_object !== "object") return;
       if (!all) {
-        for (const [prop, attr] of Object.entries(attribute_object)) {
+        for (const prop in attribute_object) {
+          const attr = attribute_object[prop];
           if (prop === null) {
             return e.getAttribute(prop);
           } else {
@@ -456,7 +447,8 @@ u("#container").on("click", ()=>{
           }
         }
       } else {
-        for (const [prop, attr] of Object.entries(attribute_object)) {
+        for (const prop in attribute_object) {
+          const attr = attribute_object[prop];
           if (prop === null) {
             return e.getAttribute(prop);
           } else {
@@ -476,7 +468,7 @@ u("#container").attr({
 */
 
     // for removing attributes from dom elements
-    removeAttr(attr) {
+    removeAttr(attr: string) {
       if (attr === null) {
         return;
       }
@@ -493,7 +485,7 @@ u("#container").removeAttr("className")
 
 */
     // for adding inner html contents to the dom elements
-    html(code) {
+    html(code: string) {
       if (!all) {
         e.innerHTML = code;
       } else {
@@ -507,7 +499,7 @@ u("#container").html("<div> hello am a div </div>")
 
 */
     // for adding text to the dom elements
-    text(text) {
+    text(text: string) {
       if (!all) {
         e.textContent = text;
       } else {
@@ -522,7 +514,7 @@ u("#container").html("hello am text")
 
 */
     // for adding class to the dom elements
-    addClass(clas) {
+    addClass(clas: string) {
       if (!all) {
         e.classList.add(clas);
       } else {
@@ -538,7 +530,7 @@ u("#container").addClass(".class")
 
     // for removing class from the dom elements
 
-    removeClass(clas) {
+    removeClass(clas: string) {
       if (!all) {
         e.classList.remove(clas);
       } else {
@@ -605,7 +597,7 @@ u("#container").show()
 */
     // for resizing the dom elements
 
-    box(w, h, c = "transparent") {
+    box(w: number, h: number, c:string = "transparent") {
       if (!all) {
         e.style.width = w;
         e.style.height = h;
@@ -635,7 +627,7 @@ u("#container").scrollTo()
 
 */
     // for adding elements to the dom elements
-    add(nod) {
+    add(nod: Element| HTMLElement| Node) {
       e.append(nod);
     },
     /*
@@ -645,7 +637,7 @@ u("#container").add(span)
 
 */
     // for removing elements to the dom elements
-    remove(ind) {
+    remove(ind: number) {
       e.removeChild(e.childNodes[ind]);
     },
     /*
@@ -710,62 +702,9 @@ console.log(isEmptyObject(objB));
 
 */
 
-export function isArray(q: unknown): q is unknown[] {
-  for (let e in q) {
-    e = e * 1;
-    if (e + 1 === 1) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-  return false;
-}
 
-/*
- *** HOW TO USE ***
- 
- const array = [1,2,3,4,5]
- 
-isArray(array);
-// true
 
-const obj = {food: "bean", num: 44}
-
-isArray(obj);
-// false
-*/
-
-export const each = function <Obj extends Record<keyof any, any> | string>(
-  obj: Obj,
-  callback: (...args: any[]) => any
-): Obj {
-  let length,
-    i = 0;
-  if (typeof obj === "object") {
-    length = obj.length;
-    for (; i < length; i++) {
-      if (callback.call(obj[i], i, obj[i]) === false) {
-        console.log(obj[i]);
-        break;
-      }
-    }
-  } else {
-    for (const i in obj) {
-      if (callback.call(obj[i]) === false) {
-        break;
-      }
-    }
-  }
-  return obj;
-};
-
-/*
- *** HOW TO USE ***
-each(obj, function);
-*/
-
-export function intersect(target: string, opt: IntersectionObserverInit, callback: IntersectionObserverCallback): void {
+export const intersect = (target: string, opt: IntersectionObserverInit, callback: IntersectionObserverCallback): void =>{
   const { root, rootMargin, threshold } = opt,
     options = {
       root: root,
@@ -898,7 +837,8 @@ export const keep = function (id: string | Record<string, number>, time: number)
   } else {
     if (callObj !== null) {
       // eslint-disable-next-line prefer-const
-      for (let [k, v] of Object.entries(callObj)) {
+      for (let k in callObj) {
+        let v :number = callObj[k]
         if (callStack.indexOf(k) > -1) {
           callStack.splice(Number(id), 1);
           return true;
@@ -952,44 +892,73 @@ export const clear = (): void => {
   localStorage.clear();
 };
 
+
+
+
+// rebuilt key event lister
+const keyObject = function (keysArray: string[], callBack: (e: object) => void) {
+  return {
+    keysArray: keysArray,
+    callBack: callBack
+  }
+  };
+
+type MyArray = {
+  keysArray: string[];
+  callBack: (e: object) => void;
+}
+
+  const keysStack: MyArray[] = [];
+  const keepKeys = function (keys: string[], callback: (e: object) => void) :void {
+      const call = keyObject(keys, callback);
+      keysStack.push(call);
+  };
+  
+  const checkKeys = function (keys: string[], e: object, delay: number) :void {
+    function partOf(a: string[], b: string[]) :boolean{
+      let matches = 0;
+      for (let i = 0; i < a.length; i++) {
+        if (b.indexOf(a[i]) === -1) {
+          matches++;
+        }
+      }
+      return matches === a.length;
+    }
+  
+    for (let i = 0; i < keysStack.length; i++) {
+      if (!partOf(keysStack[i].keysArray, keys)) {
+        debounce( ()=> keysStack[i].callBack(e), delay);
+      }
+    }
+  };
+
+
 /** for handling even more complicated key events, it's built with the grandmother algorimth or code */
-export const onKeys = (keys: string[], callback: (this: Event) => void, object = document, lock = true): void => {
-  if (!keys || !callStack) {
+export const onKeys = (keys: [], callback: (this: Event) => void, object = document, delay = 0, lock = false) => {
+  // for handling even more complicated key events,
+  if (!keys || !callback) {
     throw new Error("no keys or callbacks given");
   }
-  const keymap = [...keys];
+  let temporaryKeys: string[] = [];
+  keepKeys(keys, callback);
   object.addEventListener(
     "keydown",
     e => {
       if (lock) {
         e.preventDefault();
       }
-      keep(e.key, 1);
+      if (temporaryKeys.indexOf(e.key) !== 0) {
+        temporaryKeys.push(e.key);
+      }
     },
     false
   );
+
   object.addEventListener(
     "keyup",
     e => {
-      let num = 0;
-      for (let i = 0; i < keymap.length; i++) {
-        if (check(keymap[i])) {
-          ++num;
-          num = 0;
-          callStack = [];
-        } else {
-          break;
-        }
-      }
-
-      if (num === keymap.length) {
-        e.preventDefault();
-        callback.call(e);
-        num = 0;
-        callStack = [];
-      } else {
-        return false;
-      }
+      checkKeys(temporaryKeys, e, delay);
+      temporaryKeys = [];
     },
     false
   );
@@ -1015,43 +984,27 @@ export const continuesKeys = (
   object = document,
   lock = true
 ): void => {
-  if (!keys || !callStack) {
+  // for handling even more complicated key events,
+  if (!keys || !callback) {
     throw new Error("no keys or callbacks given");
   }
-  const keymap = [...keys];
-  object.addEventListener("keydown", e => {
-    keep(e.key, 1);
-    if (callStack.length === keymap.length) {
-      checkKeys(e);
-    }
-  });
-
-  function checkKeys(e: Event) {
-    let num = 0;
-    for (let i = 0; i < keymap.length; i++) {
-      if (check(keymap[i])) {
-        ++num;
-      } else {
-        num = 0;
-        callStack = [];
-        break;
-      }
-    }
-
-    if (num === keymap.length) {
+  let temporaryKeys: string[] = [];
+  keepKeys(keys, callback);
+  object.addEventListener(
+    "keydown",
+    e => {
       if (lock) {
         e.preventDefault();
       }
-      console.log(delay);
-      debounce(() => callback.call(e), delay);
-      num = 0;
-      callStack = [];
-    } else {
-      return false;
-    }
-  }
+      if (temporaryKeys.indexOf(e.key) !== 0) {
+        temporaryKeys.push(e.key);
+      }
+      checkKeys(temporaryKeys, e, delay);
+      temporaryKeys = [];
+    },
+    false
+  );
 };
-
 /*
  *** HOW TO USE ***
 
@@ -1065,13 +1018,14 @@ continuesKeys(["arrowRight","control"],callback,500,true,container);
 
 */
 
-export function swipe(item: Record<string, () => any>): void {
+export const swipe = (item: Record<string, () => any>): void =>{
   const caller: Record<string, () => any> = {};
   let startX = 0,
     startY = 0;
 
   if (typeof item === "object") {
-    for (const [k, v] of Object.entries(item)) {
+    for (const k in item) {
+      const v = item[k];
       caller[k] = v;
     }
   } else {
@@ -1818,8 +1772,6 @@ export const uiedbook = {
   xhr,
   u,
   isEmptyObject,
-  isArray,
-  each,
   intersect,
   error,
   get,
@@ -1853,7 +1805,7 @@ export const uiedbook = {
   physics,
   route
 };
-// 37 apis contexts
+// 40 apis contexts
 
 if (typeof window !== "undefined") {
   (window as any).uiedbook = uiedbook;
