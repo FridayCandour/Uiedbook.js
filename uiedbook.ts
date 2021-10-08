@@ -13,290 +13,18 @@
 YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WITH THIS MODULE 
 */
 
-/** This is for creating css styles using javascipt */
-
-export const css = (name: string, sel: string | Record<string, string>, properties?: Record<string, string>): void => {
-  if (typeof sel === "object") {
-    properties = sel;
-    sel = "";
-  }
-  const styS = "" + name + sel + "" + "{";
-  const styE = "}";
-  let style = "",
-    totalStyle = "";
-  if (properties) {
-    for (const k in properties) {
-      const v = properties[k];
-      style += "" + k + ": " + v + ";";
-    }
-  }
-  let styleTag = document.querySelector("style");
-  if (styleTag === null) {
-    styleTag = document.createElement("style");
-  }
-  totalStyle += styleTag.innerHTML;
-  totalStyle += styS + style + styE;
-  styleTag.innerHTML = totalStyle;
-  document.head.append(styleTag);
-};
-
-/*
-
-css("#container",
-{
-    height: "100%",
-    height: "100%",
-    background-color: "#ff9800"
-})
-*/
-
-/** This is for creating css @media styles using javascipt */
-export const media = (value: string, ...properties: [string, Record<string, string>][]): void => {
-  const styS = "@media only screen and (" + value + ") " + "{",
-    styE = "}";
-  let style = "  ",
-    aniSty = " ";
-  const proplen = properties.length;
-  let totalAnimation,
-    Animation = "  ";
-  const animationStep = (num: number) => {
-    for (const k in properties[num][1]) {
-      const v = properties[num][1][k]
-      style += "" + k + ": " + v + ";";
-    }
-    aniSty += "" + properties[num][0] + "{" + style + "}";
-    return aniSty;
-  };
-  for (let i = 0; i < proplen; i++) {
-    Animation += animationStep(i);
-  }
-  let aniStyleTag = document.querySelector("style");
-  if (aniStyleTag === null) {
-    aniStyleTag = document.createElement("style");
-  }
-  aniStyleTag.media = "screen";
-  totalAnimation = aniStyleTag.innerHTML;
-  totalAnimation += styS + Animation + styE;
-  aniStyleTag.innerHTML = totalAnimation;
-  document.head.append(aniStyleTag);
-};
-
-/* 
 
 
-the media function is used in the following format
 
 
-media("min-width: 790px",
-["#container",
-{
-    width: "100%",
-    height: "100%",
-    background-color: "#0000"
-}]
-)
 
-["#header",
-{
-    width: "100%",
-    height: "20%",
-    background-color: "#fff"
-}]
-)
-
-
-*/
-
-/** This is for creating css animations using javascipt */
-export const animate = (name: string, ...properties: [string, Record<string, string>][]): void => {
-  const styS = "@keyframes " + name + " " + "{",
-    styE = "}",
-    proplen = properties.length;
-
-  let style = " ",
-    aniSty = " ",
-    Animation = "  ",
-    totalAnimation = null;
-
-  const animationStep = (num: number) => {
-    for (const k in properties[num][1]) {
-      const v = properties[num][1][k];
-      style += "" + k + ": " + v + ";";
-    }
-    aniSty += "" + properties[num][0] + "{" + style + "}";
-    return aniSty;
-  };
-  for (let i = 0; i < proplen; i++) {
-    Animation += animationStep(i);
-  }
-  let aniStyleTag = document.querySelector("style");
-  if (aniStyleTag === null) {
-    aniStyleTag = document.createElement("style");
-  }
-  aniStyleTag.media = "screen";
-  totalAnimation = aniStyleTag.innerHTML;
-  totalAnimation += styS + Animation + styE;
-  aniStyleTag.innerHTML = totalAnimation;
-  document.head.append(aniStyleTag);
-};
-
-/*
-*** HOW TO USE ***
-animate("popanimation",
-["from",
-{
-    transform: "scale3D(2)" ,
-    height: "10%",
-    background-color: "#0000"
-}]
-)
-
-["to",
-{
-    transform: "scale3D(1)" ,
-    height: "100%",
-    background-color: "#ff9800"
-}]
-)
-
-
-*/
-type lay = [a: string, b?: Record<string, string>, c?: HTMLElement | Node]
-/** in construction */
-export const build = (
-  ...layouts: lay[]
-): DocumentFragment | HTMLElement => {
-  
-  function createElement(type = "", op: Record<string, string> = {}, chil?: (HTMLElement | Node)[] | HTMLElement | Node) {
-    const element = document.createElement(type);
-    for (const k in op) {
-      const v = op[k];
-      element.setAttribute(k, v);
-    }
-    if (chil) {
-      if (Array.isArray(chil)) {
-        const frag = new DocumentFragment();
-        // templating testing should be done here
-        chil.forEach(ch => {
-          frag.append(ch);
-        });
-        element.append(frag);
-      } else {
-        element.append(chil);
-      }
-    }
-    // return the element after building the dom objects
-    return element;
-  }
-
-  let i: number = 0;
-  if (layouts.length > 1) {
-    i = layouts.length;
-    const frag = new DocumentFragment();
-    while (i > 0) {
-      // templating testing should be done here
-      const ele = createElement(layouts[i][0], layouts[i][1], layouts[i][2]);
-      frag.append(ele);
-      i--;
-    }
-    return frag;
-  } else {
-    if (typeof layouts[0] === "string") {
-      // templating testing should be done here
-      const element = createElement(layouts[0][0], layouts[0][1], layouts[0][2]);
-      return element;
-    }
-  }
-  return new DocumentFragment();
-};
-
-export const buildTo = (child: Node, parent: string | HTMLElement): void => {
-  if (typeof parent === "string") {
-    document.querySelectorAll(parent).forEach(par => par.appendChild(child));
-  } else {
-    parent.append(child);
-  }
-};
-/*
-const p = build(
-  "div",
-  {
-    title: "title",
-    innerText: "am a title",
-    onclick: function () {
-      console.log("i was clicked");
-    }
-  },
-  build("span", { innerText: "am a span", title: "title" })
-);
-// div.class#id
-
-buildTo(p, "body");
-
-*/
-
-const routes: Record<string, { templateId: string; controller: () => any }> = {};
-export const route = function (path = "/", templateId: string, controller: () => any): HTMLAnchorElement {
-  const link = document.createElement("a");
-  link.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
-  routes[path] = { templateId: templateId, controller: controller };
-  return link;
-};
-/** here is the awesome uiedbook router */
-const router = function (e: Event): void {
-  e.preventDefault();
-  const url = window.location.hash.slice(1) || "/";
-  const route = routes[url];
-  if (route) {
-    route.controller();
-  }
-  // path = path ? path : "";
-  //   if (this.mode === "history") {
-  //     history.pushState(null, null, this.root + this.clearSlashes(path));
-  //   } else {
-  //     window.location.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
-  //   }
-};
-window.addEventListener("hashchange", router);
-window.addEventListener("load", router);
-
-/*
-HOW TO USE
-
-
-route("/", "home", function () {
-  get("div").innerText = " welcome to the home page";
-  console.log("we are at the home page");
-});
-
-const about = route("/about", "about", function () {
-  get("div").innerText = " welcome to the about page";
-  get("a").href = about;
-  console.log("we are at the about page");
-});
-
-
-*/
-
-/** in construction */
-export const xhr = function (type: string, url: string | URL): (this: XMLHttpRequest) => any {
-  // for sending requests
-  const xhrRequest = new XMLHttpRequest();
-  let result = null;
-  xhrRequest.open(type, url, true);
-  result = xhrRequest.onload = function () {
-    return xhrRequest.response;
-  };
-  xhrRequest.send();
-  return result;
-};
-
-/** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more save, fast and efficient. */
-export const u = (...uied: any[]) => {
+type BaseE = | Element | NodeListOf<any>;
+/** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
+export const u = <E extends BaseE>(...uied: any[]) => {
   const eU = uied.length,
     [el, ifAll_OrNum] = uied;
   let all = false;
-  let e: any;
+  let e: E;
   if (eU === 1 && typeof el === "string") {
     e = document.querySelector(el);
   } else {
@@ -343,9 +71,19 @@ u("#container").style({
 })
 
 */
+      /**  for manipulating objects
+       * 
+       * 
+       * *** HOW TO USE ***
 
+      *u(object).config({
+       name: "object",
+       powerof: (pow, n){ return Math.pow(pow, n)}
+       })
+
+      */
     config(obj: object) {
-      // for manipulating objects
+
       if (obj) {
         for (const k in obj) {
           const v = obj[k];
@@ -682,6 +420,377 @@ u("#container").fullscreen().set()
 */
   };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** This is for creating css styles using javascipt 
+ * 
+ * HOW TO USE
+ * 
+ * css("#container",
+{
+  *
+    height: "100%",
+    *
+    height: "100%",
+    *
+    background-color: "#ff9800"
+    *
+})
+*/
+
+export const css = (name: string, sel: string | Record<string, string>, properties?: Record<string, string>): void => {
+  if (typeof sel === "object") {
+    properties = sel;
+    sel = "";
+  }
+  const styS = "" + name + sel + "" + "{";
+  const styE = "}";
+  let style = "",
+    totalStyle = "";
+  if (properties) {
+    for (const k in properties) {
+      const v = properties[k];
+      style += "" + k + ": " + v + ";";
+    }
+  }
+  let styleTag = document.querySelector("style");
+  if (styleTag === null) {
+    styleTag = document.createElement("style");
+  }
+  totalStyle += styleTag.innerHTML;
+  totalStyle += styS + style + styE;
+  styleTag.innerHTML = totalStyle;
+  document.head.append(styleTag);
+};
+
+
+
+
+
+/** This is for creating css @media styles using javascipt 
+ * 
+ * examples.
+ * 
+ * media("min-width: 790px",
+ * *
+["#container",
+{
+  *
+    width: "100%",
+    *
+    height: "100%",
+    *
+    background-color: "#0000" 
+    *
+}]
+)
+
+["#header",
+{
+    width: "100%",
+    *
+    height: "20%",
+    *
+    background-color: "#fff"
+    *
+}]
+*
+)
+ * 
+*/
+export const media = (value: string, ...properties: [string, Record<string, string>][]): void => {
+  const styS = "@media only screen and (" + value + ") " + "{",
+    styE = "}";
+  let style = "  ",
+    aniSty = " ";
+  const proplen = properties.length;
+  let totalAnimation,
+    Animation = "  ";
+  const animationStep = (num: number) => {
+    for (const k in properties[num][1]) {
+      const v = properties[num][1][k]
+      style += "" + k + ": " + v + ";";
+    }
+    aniSty += "" + properties[num][0] + "{" + style + "}";
+    return aniSty;
+  };
+  for (let i = 0; i < proplen; i++) {
+    Animation += animationStep(i);
+  }
+  let aniStyleTag = document.querySelector("style");
+  if (aniStyleTag === null) {
+    aniStyleTag = document.createElement("style");
+  }
+  aniStyleTag.media = "screen";
+  totalAnimation = aniStyleTag.innerHTML;
+  totalAnimation += styS + Animation + styE;
+  aniStyleTag.innerHTML = totalAnimation;
+  document.head.append(aniStyleTag);
+};
+
+
+
+/** This is for creating css animations using javascipt 
+ *
+ * example.
+ * 
+ * 
+ * animate("popanimation",
+ *  * 
+["from",
+{
+   * 
+    transform: "scale3D(2)" ,
+     * 
+    height: "10%",
+     * 
+    background-color: "#0000"
+     * 
+}]
+ * 
+)
+ *  
+ * 
+["to",
+{
+   * 
+    transform: "scale3D(1)" ,
+     * 
+    height: "100%",
+     * 
+    background-color: "#ff9800"
+     * 
+}]
+)
+
+ * 
+ * 
+ * 
+*/
+
+export const animate = (name: string, ...properties: [string, Record<string, string>][]): void => {
+  const styS = "@keyframes " + name + " " + "{",
+    styE = "}",
+    proplen = properties.length;
+
+  let style = " ",
+    aniSty = " ",
+    Animation = "  ",
+    totalAnimation = null;
+
+  const animationStep = (num: number) => {
+    for (const k in properties[num][1]) {
+      const v = properties[num][1][k];
+      style += "" + k + ": " + v + ";";
+    }
+    aniSty += "" + properties[num][0] + "{" + style + "}";
+    return aniSty;
+  };
+  for (let i = 0; i < proplen; i++) {
+    Animation += animationStep(i);
+  }
+  let aniStyleTag = document.querySelector("style");
+  if (aniStyleTag === null) {
+    aniStyleTag = document.createElement("style");
+  }
+  aniStyleTag.media = "screen";
+  totalAnimation = aniStyleTag.innerHTML;
+  totalAnimation += styS + Animation + styE;
+  aniStyleTag.innerHTML = totalAnimation;
+  document.head.append(aniStyleTag);
+};
+
+
+
+
+
+
+
+
+type lay = [a: string, b?: {[k: string]: string}, c?: HTMLElement | Node]
+/**
+ * The build is a context used as a template engine for building layouts
+ * 
+ * example.
+ * 
+ * const p = build(
+ * *
+  "div",
+  {
+    *
+    title: "title",
+    *
+    innerText: "am a title",
+    *
+    onclick: function () {
+      *
+      console.log("i was clicked");
+      *
+    }
+    *
+  },
+  *
+  build("span", { innerText: "am a span", title: "title" })
+  *
+); 
+ */
+export const build = (...layouts: lay[]): DocumentFragment | HTMLElement => {
+  
+  function createElement(type = "", op: {[k: string]: string} = {}, chil?: (HTMLElement | Node)[] | HTMLElement | Node) {
+    const element = document.createElement(type);
+    for (const k in op) {
+      const v: string | number = op[k];
+      element.setAttribute(k, v);
+    }
+    if (chil) {
+      if (Array.isArray(chil)) {
+        const frag = new DocumentFragment();
+        // templating testing should be done here
+        chil.forEach(ch => {
+          frag.append(ch);
+        });
+        element.append(frag);
+      } else {
+        element.append(chil);
+      }
+    }
+    // return the element after building the dom objects
+    return element;
+  }
+
+  let i: number = 0;
+  if (layouts.length > 1) {
+    i = layouts.length;
+    const frag = new DocumentFragment();
+    while (i > 0) {
+      // templating testing should be done here
+      const ele = createElement(layouts[i][0], layouts[i][1], layouts[i][2]);
+      frag.append(ele);
+      i--;
+    }
+    return frag;
+  } else {
+    if (typeof layouts[0] === "string") {
+      // templating testing should be done here
+      const element = createElement(layouts[0][0], layouts[0][1], layouts[0][2]);
+      return element;
+    }
+  }
+  return new DocumentFragment();
+};
+
+
+
+/**
+ * this context used for rendering built layout to a parent or the document body
+ * 
+ * example 
+ * 
+ * const p =   build("span", { innerText: "am a span", title: "title" });
+ * 
+buildTo(p, "body");
+*/
+
+export const buildTo = (child: Node, parent: string | HTMLElement): void => {
+  if (typeof parent === "string") {
+    document.querySelectorAll(parent).forEach(par => par.appendChild(child));
+  } else {
+    parent.append(child);
+  }
+};
+
+
+const routes: Record<string, { templateId: string; controller: () => any }> = {};
+export const route = function (path = "/", templateId: string, controller: () => any): HTMLAnchorElement {
+  const link = document.createElement("a");
+  link.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
+  routes[path] = { templateId: templateId, controller: controller };
+  return link;
+};
+/** A basic router for uiedbook
+ * example.
+ * 
+ * route("/", "home", function () {
+*  
+get("div").innerText = " welcome to the home page";
+* 
+  console.log("we are at the home page");
+* 
+});
+* 
+* 
+const about = route("/about", "about", function () {
+* 
+*   get("div").innerText = " welcome to the about page";
+* 
+*   get("a").href = about;
+* 
+  console.log("we are at the about page");
+  * 
+});
+ * 
+ * 
+ * 
+*/
+const router = function (e: Event): void {
+  e.preventDefault();
+  const url = window.location.hash.slice(1) || "/";
+  const route = routes[url];
+  if (route) {
+    route.controller();
+  }
+  // path = path ? path : "";
+  //   if (this.mode === "history") {
+  //     history.pushState(null, null, this.root + this.clearSlashes(path));
+  //   } else {
+  //     window.location.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
+  //   }
+};
+window.addEventListener("hashchange", router);
+window.addEventListener("load", router);
+
+
+
+
+/** in construction */
+export const xhr = function (type: string, url: string | URL): (this: XMLHttpRequest) => any {
+  // for sending requests
+  const xhrRequest = new XMLHttpRequest();
+  let result = null;
+  xhrRequest.open(type, url, true);
+  result = xhrRequest.onload = function () {
+    return xhrRequest.response;
+  };
+  xhrRequest.send();
+  return result;
+};
+
+
+
+
 
 /** for checking for empty objects */
 export const isEmptyObject = function (obj: any): obj is Record<keyof any, never> {
@@ -1302,56 +1411,48 @@ export const re = (function () {
     return this.wig;
   };
 
-  const imagesArray = [],
-    audioArray = [];
-  function loadImage(img, id) {
+  const imagesArray: HTMLImageElement[] = [],
+    audioArray: HTMLAudioElement[] = [];
+  function loadImage(img: string | string[], id: string) {
     if (typeof img === "object" && !id) {
       for (let i = 0; i < img.length; i++) {
         const p = new Image();
         p.src = img[i][0];
         p.id = img[i][1];
-        // p.onload = ()=>{
         imagesArray.push(p);
-        // }
       }
     } else {
-      if (img && id) {
+      if (typeof img === "string" && id) {
         const i = new Image();
         i.src = img;
         i.id = id;
-        // i.onload = ()=>{
         imagesArray.push(i);
-        // };
       } else {
         throw new Error("cannot load image(s)");
       }
     }
   }
-  function loadAudio(img, id) {
-    if (typeof img === "object" && !id) {
-      for (let i = 0; i < img.length; i++) {
+  function loadAudio(aud: string | string[], id: string) {
+    if (typeof aud === "object" && !id) {
+      for (let i = 0; i < aud.length; i++) {
         const p = new Audio();
-        p.src = img[i][0];
-        p.id = img[i][1];
-        // p.onload = ()=>{
+        p.src = aud[i][0];
+        p.id = aud[i][1];
         audioArray.push(p);
-        // }
       }
     } else {
-      if (img && id) {
+      if (typeof aud === "string" && id) {
         const i = new Image();
-        i.src = img;
+        i.src = aud;
         i.id = id;
-        // i.onload = ()=>{
         imagesArray.push(i);
-        // };
       } else {
         throw new Error("cannot load image(s)");
       }
     }
   }
 
-  function getAud(id) {
+  function getAud(id: string) {
     let p;
     for (let i = 0; i < audioArray.length; i++) {
       if (audioArray[i].id === id) {
@@ -1366,11 +1467,10 @@ export const re = (function () {
     }
   }
 
-  function getImg(id) {
+  function getImg(id: string) {
     let p;
     for (let i = 0; i < imagesArray.length; i++) {
       if (imagesArray[i].id === id) {
-        // console.log(imagesArray[i]);
         p = imagesArray[i];
         break;
       }
@@ -1399,7 +1499,7 @@ export const re = (function () {
 /*
 other TODOs stuff will be built here
 */
-export const entity = function (name: string, painter, behaviors) {
+export const entity = function (name: string, painter: Function, behaviors: Function) {
   /*an entity is any object or thing
  that can be added to the game world*/
 
@@ -1426,21 +1526,21 @@ export const entity = function (name: string, painter, behaviors) {
 entity.prototype = {
   // this algorimth is for calling the paint function
   // to make it functional when seen at runtime
-  update(context, lastDeltalTime) {
+  update(context: CanvasRenderingContext2D, lastDeltalTime:number) {
     if (typeof this.painter.update !== "undefined" && this.visible) {
       this.painter.update(this, context, lastDeltalTime);
     } else {
       // throw new Error(`RE: entity with name of ${this.name} has no update function`);
     }
   },
-  paint(context, lastDeltalTime) {
+  paint(context: CanvasRenderingContext2D, lastDeltalTime: number) {
     if (typeof this.painter.paint !== "undefined" && this.visible) {
       this.painter.paint(this, context, lastDeltalTime);
     } else {
       throw new Error(`RE: entity with name of ${this.name} has no paint function`);
     }
   },
-  observeBorder(w, h) {
+  observeBorder(w:number, h:number) {
     if (this.top <= 0) {
       this.top *= 0;
     } else {
@@ -1456,7 +1556,7 @@ entity.prototype = {
       }
     }
   },
-  run(context, lastDeltalTime) {
+  run(context: CanvasRenderingContext2D, lastDeltalTime: number) {
     // here the entity don't have to be visble
     if (typeof this.behaviors !== "undefined") {
       this.behaviors(this, context, lastDeltalTime);
@@ -1464,14 +1564,14 @@ entity.prototype = {
   }
 };
 
-export const imgPainter = function (img, delay = 1) {
+export const imgPainter = function (img:HTMLImageElement, delay = 1) {
   this.image = img;
   this.delay = delay;
   this.range = 0;
 };
 imgPainter.prototype = {
   // paint only no update
-  paint(entity, context) {
+  paint(entity, context:CanvasRenderingContext2D) {
     this.range++;
     if (this.range % this.delay === 0) {
       context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
@@ -1485,7 +1585,7 @@ imgPainter.prototype = {
 // this is a powerful sprite algorith for
 // rendering the exact sprite from a
 // spritesheet in successful orders
-export const spriteSheetPainter = function (img, horizontal = 1, vertical = 1, delay = 1) {
+export const spriteSheetPainter = function (img:HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
   this.image = img;
   this.framesWidth = Math.round(this.image.width / horizontal);
   this.framesHeight = Math.round(this.image.height / vertical);
@@ -1498,7 +1598,7 @@ export const spriteSheetPainter = function (img, horizontal = 1, vertical = 1, d
   this.isLastImage = false;
   this.animateAllFrames = true;
   this.animate = true;
-  this.changeSheet = function (img, horizontal = 0, vertical = 0, delay = 1) {
+  this.changeSheet = function (img:HTMLImageElement, horizontal = 0, vertical = 0, delay = 1) {
     this.image = img;
     this.framesWidth = Math.round(this.image.width / horizontal);
     this.framesHeight = Math.round(this.image.height / vertical);
@@ -1542,7 +1642,7 @@ spriteSheetPainter.prototype = {
       this.range = 1;
     }
   },
-  paint(entity, context) {
+  paint(entity, context:CanvasRenderingContext2D) {
     context.drawImage(
       this.image,
       this.framesWidth * this.frameWidthCount,
@@ -1557,7 +1657,7 @@ spriteSheetPainter.prototype = {
   }
 };
 
-export const speaker = function (text, language = "", volume = 1, rate = 1, pitch = 1) {
+export const speaker = function (text:string, language:string = "", volume:number = 1, rate: number = 1, pitch:number = 1) {
   // common languages (not supported by all browsers)
   // en - english,  it - italian, fr - french,  de - german, es - spanish
   // ja - japanese, ru - russian, zh - chinese, hi - hindi,  ko - korean
@@ -1574,7 +1674,7 @@ export const speaker = function (text, language = "", volume = 1, rate = 1, pitc
 export const speakerStop = () => speechSynthesis && speechSynthesis.cancel();
 
 /** play mp3 or wav audio from a local file or url  */
-export const audio = function (audio, loop = 0, volumeScale = 1) {
+export const audio = function (audio:HTMLAudioElement, loop = 0, volumeScale = 1) {
   this.audio = audio;
   this.audio.loop = loop;
   this.audio.volume = volumeScale * 0.3;
@@ -1596,7 +1696,7 @@ audio.prototype = {
   }
 };
 
-export const bgPainter = function (img, speed = 10, up, left) {
+export const bgPainter = function (img: HTMLImageElement, speed = 10, up:boolean, left:boolean) {
   this.image = img;
   this.range = 0;
   this.speed = speed;
@@ -1623,7 +1723,7 @@ bgPainter.prototype = {
       this.top += this.speed;
     }
   },
-  paint(canvas) {
+  paint(canvas: HTMLCanvasElement) {
     const context = canvas.getContext("2d");
     context.drawImage(this.image, this.left, this.top, canvas.width, this.height);
     if (this.GoesLeft) {
@@ -1661,9 +1761,9 @@ export const physics = (function () {
 
 /** game rendering algorithm */
 export const renderer = (function () {
-  let canvas,
-    id, // for pausing or playing the game
-    context,
+  let canvas: HTMLCanvasElement,
+    id: any, // for pausing or playing the game
+    context: CanvasRenderingContext2D,
     // variables for the timing
     fps,
     // background varible
@@ -1675,7 +1775,7 @@ export const renderer = (function () {
     // entity storage array
     entitysArray = [];
 
-  function bgPaint(img, speed, up, left) {
+  function bgPaint(img: HTMLImageElement, speed: number, up, left) {
     const bgImg = new bgPainter(img, speed, up, left);
     bg.push(bgImg);
     return bgImg;

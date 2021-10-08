@@ -14,263 +14,8 @@
 YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WITH THIS MODULE
 */
 exports.__esModule = true;
-exports.uiedbook = exports.renderer = exports.physics = exports.bgPainter = exports.audio = exports.speakerStop = exports.speaker = exports.spriteSheetPainter = exports.imgPainter = exports.entity = exports.re = exports.appendCanvas = exports.buildCanvas = exports.swipe = exports.continuesKeys = exports.onKeys = exports.clear = exports.getKey = exports.remove = exports.retrieve = exports.store = exports.log = exports.check = exports.keep = exports.debounce = exports.download = exports.create = exports.makeClass = exports.rad = exports.get = exports.error = exports.intersect = exports.isEmptyObject = exports.u = exports.xhr = exports.route = exports.buildTo = exports.build = exports.animate = exports.media = exports.css = void 0;
-/** This is for creating css styles using javascipt */
-var css = function (name, sel, properties) {
-    if (typeof sel === "object") {
-        properties = sel;
-        sel = "";
-    }
-    var styS = "" + name + sel + "" + "{";
-    var styE = "}";
-    var style = "", totalStyle = "";
-    if (properties) {
-        for (var k in properties) {
-            var v = properties[k];
-            style += "" + k + ": " + v + ";";
-        }
-    }
-    var styleTag = document.querySelector("style");
-    if (styleTag === null) {
-        styleTag = document.createElement("style");
-    }
-    totalStyle += styleTag.innerHTML;
-    totalStyle += styS + style + styE;
-    styleTag.innerHTML = totalStyle;
-    document.head.append(styleTag);
-};
-exports.css = css;
-/*
-
-css("#container",
-{
-    height: "100%",
-    height: "100%",
-    background-color: "#ff9800"
-})
-*/
-/** This is for creating css @media styles using javascipt */
-var media = function (value) {
-    var properties = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        properties[_i - 1] = arguments[_i];
-    }
-    var styS = "@media only screen and (" + value + ") " + "{", styE = "}";
-    var style = "  ", aniSty = " ";
-    var proplen = properties.length;
-    var totalAnimation, Animation = "  ";
-    var animationStep = function (num) {
-        for (var k in properties[num][1]) {
-            var v = properties[num][1][k];
-            style += "" + k + ": " + v + ";";
-        }
-        aniSty += "" + properties[num][0] + "{" + style + "}";
-        return aniSty;
-    };
-    for (var i = 0; i < proplen; i++) {
-        Animation += animationStep(i);
-    }
-    var aniStyleTag = document.querySelector("style");
-    if (aniStyleTag === null) {
-        aniStyleTag = document.createElement("style");
-    }
-    aniStyleTag.media = "screen";
-    totalAnimation = aniStyleTag.innerHTML;
-    totalAnimation += styS + Animation + styE;
-    aniStyleTag.innerHTML = totalAnimation;
-    document.head.append(aniStyleTag);
-};
-exports.media = media;
-/*
-
-
-the media function is used in the following format
-
-
-media("min-width: 790px",
-["#container",
-{
-    width: "100%",
-    height: "100%",
-    background-color: "#0000"
-}]
-)
-
-["#header",
-{
-    width: "100%",
-    height: "20%",
-    background-color: "#fff"
-}]
-)
-
-
-*/
-/** This is for creating css animations using javascipt */
-var animate = function (name) {
-    var properties = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        properties[_i - 1] = arguments[_i];
-    }
-    var styS = "@keyframes " + name + " " + "{", styE = "}", proplen = properties.length;
-    var style = " ", aniSty = " ", Animation = "  ", totalAnimation = null;
-    var animationStep = function (num) {
-        for (var k in properties[num][1]) {
-            var v = properties[num][1][k];
-            style += "" + k + ": " + v + ";";
-        }
-        aniSty += "" + properties[num][0] + "{" + style + "}";
-        return aniSty;
-    };
-    for (var i = 0; i < proplen; i++) {
-        Animation += animationStep(i);
-    }
-    var aniStyleTag = document.querySelector("style");
-    if (aniStyleTag === null) {
-        aniStyleTag = document.createElement("style");
-    }
-    aniStyleTag.media = "screen";
-    totalAnimation = aniStyleTag.innerHTML;
-    totalAnimation += styS + Animation + styE;
-    aniStyleTag.innerHTML = totalAnimation;
-    document.head.append(aniStyleTag);
-};
-exports.animate = animate;
-/** in construction */
-var build = function () {
-    var layouts = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        layouts[_i] = arguments[_i];
-    }
-    function createElement(type, op, chil) {
-        if (type === void 0) { type = ""; }
-        if (op === void 0) { op = {}; }
-        var element = document.createElement(type);
-        for (var k in op) {
-            var v = op[k];
-            element.setAttribute(k, v);
-        }
-        if (chil) {
-            if (Array.isArray(chil)) {
-                var frag_1 = new DocumentFragment();
-                // templating testing should be done here
-                chil.forEach(function (ch) {
-                    frag_1.append(ch);
-                });
-                element.append(frag_1);
-            }
-            else {
-                element.append(chil);
-            }
-        }
-        // return the element after building the dom objects
-        return element;
-    }
-    var i = 0;
-    if (layouts.length > 1) {
-        i = layouts.length;
-        var frag = new DocumentFragment();
-        while (i > 0) {
-            // templating testing should be done here
-            var ele = createElement(layouts[i][0], layouts[i][1], layouts[i][2]);
-            frag.append(ele);
-            i--;
-        }
-        return frag;
-    }
-    else {
-        if (typeof layouts[0] === "string") {
-            // templating testing should be done here
-            var element = createElement(layouts[0][0], layouts[0][1], layouts[0][2]);
-            return element;
-        }
-    }
-    return new DocumentFragment();
-};
-exports.build = build;
-var buildTo = function (child, parent) {
-    if (typeof parent === "string") {
-        document.querySelectorAll(parent).forEach(function (par) { return par.appendChild(child); });
-    }
-    else {
-        parent.append(child);
-    }
-};
-exports.buildTo = buildTo;
-/*
-const p = build(
-  "div",
-  {
-    title: "title",
-    innerText: "am a title",
-    onclick: function () {
-      console.log("i was clicked");
-    }
-  },
-  build("span", { innerText: "am a span", title: "title" })
-);
-// div.class#id
-
-buildTo(p, "body");
-
-*/
-var routes = {};
-var route = function (path, templateId, controller) {
-    if (path === void 0) { path = "/"; }
-    var link = document.createElement("a");
-    link.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
-    routes[path] = { templateId: templateId, controller: controller };
-    return link;
-};
-exports.route = route;
-/** here is the awesome uiedbook router */
-var router = function (e) {
-    e.preventDefault();
-    var url = window.location.hash.slice(1) || "/";
-    var route = routes[url];
-    if (route) {
-        route.controller();
-    }
-    // path = path ? path : "";
-    //   if (this.mode === "history") {
-    //     history.pushState(null, null, this.root + this.clearSlashes(path));
-    //   } else {
-    //     window.location.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
-    //   }
-};
-window.addEventListener("hashchange", router);
-window.addEventListener("load", router);
-/*
-HOW TO USE
-
-
-route("/", "home", function () {
-  get("div").innerText = " welcome to the home page";
-  console.log("we are at the home page");
-});
-
-const about = route("/about", "about", function () {
-  get("div").innerText = " welcome to the about page";
-  get("a").href = about;
-  console.log("we are at the about page");
-});
-
-
-*/
-/** in construction */
-var xhr = function (type, url) {
-    // for sending requests
-    var xhrRequest = new XMLHttpRequest();
-    var result = null;
-    xhrRequest.open(type, url, true);
-    result = xhrRequest.onload = function () {
-        return xhrRequest.response;
-    };
-    xhrRequest.send();
-    return result;
-};
-exports.xhr = xhr;
-/** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more save, fast and efficient. */
+exports.uiedbook = exports.renderer = exports.physics = exports.bgPainter = exports.audio = exports.speakerStop = exports.speaker = exports.spriteSheetPainter = exports.imgPainter = exports.entity = exports.re = exports.appendCanvas = exports.buildCanvas = exports.swipe = exports.continuesKeys = exports.onKeys = exports.clear = exports.getKey = exports.remove = exports.retrieve = exports.store = exports.log = exports.check = exports.keep = exports.debounce = exports.download = exports.create = exports.makeClass = exports.rad = exports.get = exports.error = exports.intersect = exports.isEmptyObject = exports.xhr = exports.route = exports.buildTo = exports.build = exports.animate = exports.media = exports.css = exports.u = void 0;
+/** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
 var u = function () {
     var uied = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -331,8 +76,18 @@ var u = function () {
     })
     
     */
+        /**  for manipulating objects
+         *
+         *
+         * *** HOW TO USE ***
+  
+        *u(object).config({
+         name: "object",
+         powerof: (pow, n){ return Math.pow(pow, n)}
+         })
+  
+        */
         config: function (obj) {
-            // for manipulating objects
             if (obj) {
                 for (var k in obj) {
                     var v = obj[k];
@@ -680,6 +435,331 @@ var u = function () {
     };
 };
 exports.u = u;
+/** This is for creating css styles using javascipt
+ *
+ * HOW TO USE
+ *
+ * css("#container",
+{
+  *
+    height: "100%",
+    *
+    height: "100%",
+    *
+    background-color: "#ff9800"
+    *
+})
+*/
+var css = function (name, sel, properties) {
+    if (typeof sel === "object") {
+        properties = sel;
+        sel = "";
+    }
+    var styS = "" + name + sel + "" + "{";
+    var styE = "}";
+    var style = "", totalStyle = "";
+    if (properties) {
+        for (var k in properties) {
+            var v = properties[k];
+            style += "" + k + ": " + v + ";";
+        }
+    }
+    var styleTag = document.querySelector("style");
+    if (styleTag === null) {
+        styleTag = document.createElement("style");
+    }
+    totalStyle += styleTag.innerHTML;
+    totalStyle += styS + style + styE;
+    styleTag.innerHTML = totalStyle;
+    document.head.append(styleTag);
+};
+exports.css = css;
+/** This is for creating css @media styles using javascipt
+ *
+ * examples.
+ *
+ * media("min-width: 790px",
+ * *
+["#container",
+{
+  *
+    width: "100%",
+    *
+    height: "100%",
+    *
+    background-color: "#0000"
+    *
+}]
+)
+
+["#header",
+{
+    width: "100%",
+    *
+    height: "20%",
+    *
+    background-color: "#fff"
+    *
+}]
+*
+)
+ *
+*/
+var media = function (value) {
+    var properties = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        properties[_i - 1] = arguments[_i];
+    }
+    var styS = "@media only screen and (" + value + ") " + "{", styE = "}";
+    var style = "  ", aniSty = " ";
+    var proplen = properties.length;
+    var totalAnimation, Animation = "  ";
+    var animationStep = function (num) {
+        for (var k in properties[num][1]) {
+            var v = properties[num][1][k];
+            style += "" + k + ": " + v + ";";
+        }
+        aniSty += "" + properties[num][0] + "{" + style + "}";
+        return aniSty;
+    };
+    for (var i = 0; i < proplen; i++) {
+        Animation += animationStep(i);
+    }
+    var aniStyleTag = document.querySelector("style");
+    if (aniStyleTag === null) {
+        aniStyleTag = document.createElement("style");
+    }
+    aniStyleTag.media = "screen";
+    totalAnimation = aniStyleTag.innerHTML;
+    totalAnimation += styS + Animation + styE;
+    aniStyleTag.innerHTML = totalAnimation;
+    document.head.append(aniStyleTag);
+};
+exports.media = media;
+/** This is for creating css animations using javascipt
+ *
+ * example.
+ *
+ *
+ * animate("popanimation",
+ *  *
+["from",
+{
+   *
+    transform: "scale3D(2)" ,
+     *
+    height: "10%",
+     *
+    background-color: "#0000"
+     *
+}]
+ *
+)
+ *
+ *
+["to",
+{
+   *
+    transform: "scale3D(1)" ,
+     *
+    height: "100%",
+     *
+    background-color: "#ff9800"
+     *
+}]
+)
+
+ *
+ *
+ *
+*/
+var animate = function (name) {
+    var properties = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        properties[_i - 1] = arguments[_i];
+    }
+    var styS = "@keyframes " + name + " " + "{", styE = "}", proplen = properties.length;
+    var style = " ", aniSty = " ", Animation = "  ", totalAnimation = null;
+    var animationStep = function (num) {
+        for (var k in properties[num][1]) {
+            var v = properties[num][1][k];
+            style += "" + k + ": " + v + ";";
+        }
+        aniSty += "" + properties[num][0] + "{" + style + "}";
+        return aniSty;
+    };
+    for (var i = 0; i < proplen; i++) {
+        Animation += animationStep(i);
+    }
+    var aniStyleTag = document.querySelector("style");
+    if (aniStyleTag === null) {
+        aniStyleTag = document.createElement("style");
+    }
+    aniStyleTag.media = "screen";
+    totalAnimation = aniStyleTag.innerHTML;
+    totalAnimation += styS + Animation + styE;
+    aniStyleTag.innerHTML = totalAnimation;
+    document.head.append(aniStyleTag);
+};
+exports.animate = animate;
+/**
+ * The build is a context used as a template engine for building layouts
+ *
+ * example.
+ *
+ * const p = build(
+ * *
+  "div",
+  {
+    *
+    title: "title",
+    *
+    innerText: "am a title",
+    *
+    onclick: function () {
+      *
+      console.log("i was clicked");
+      *
+    }
+    *
+  },
+  *
+  build("span", { innerText: "am a span", title: "title" })
+  *
+);
+ */
+var build = function () {
+    var layouts = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        layouts[_i] = arguments[_i];
+    }
+    function createElement(type, op, chil) {
+        if (type === void 0) { type = ""; }
+        if (op === void 0) { op = {}; }
+        var element = document.createElement(type);
+        for (var k in op) {
+            var v = op[k];
+            element.setAttribute(k, v);
+        }
+        if (chil) {
+            if (Array.isArray(chil)) {
+                var frag_1 = new DocumentFragment();
+                // templating testing should be done here
+                chil.forEach(function (ch) {
+                    frag_1.append(ch);
+                });
+                element.append(frag_1);
+            }
+            else {
+                element.append(chil);
+            }
+        }
+        // return the element after building the dom objects
+        return element;
+    }
+    var i = 0;
+    if (layouts.length > 1) {
+        i = layouts.length;
+        var frag = new DocumentFragment();
+        while (i > 0) {
+            // templating testing should be done here
+            var ele = createElement(layouts[i][0], layouts[i][1], layouts[i][2]);
+            frag.append(ele);
+            i--;
+        }
+        return frag;
+    }
+    else {
+        if (typeof layouts[0] === "string") {
+            // templating testing should be done here
+            var element = createElement(layouts[0][0], layouts[0][1], layouts[0][2]);
+            return element;
+        }
+    }
+    return new DocumentFragment();
+};
+exports.build = build;
+/**
+ * this context used for rendering built layout to a parent or the document body
+ *
+ * example
+ *
+ * const p =   build("span", { innerText: "am a span", title: "title" });
+ *
+buildTo(p, "body");
+*/
+var buildTo = function (child, parent) {
+    if (typeof parent === "string") {
+        document.querySelectorAll(parent).forEach(function (par) { return par.appendChild(child); });
+    }
+    else {
+        parent.append(child);
+    }
+};
+exports.buildTo = buildTo;
+var routes = {};
+var route = function (path, templateId, controller) {
+    if (path === void 0) { path = "/"; }
+    var link = document.createElement("a");
+    link.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
+    routes[path] = { templateId: templateId, controller: controller };
+    return link;
+};
+exports.route = route;
+/** A basic router for uiedbook
+ * example.
+ *
+ * route("/", "home", function () {
+*
+get("div").innerText = " welcome to the home page";
+*
+  console.log("we are at the home page");
+*
+});
+*
+*
+const about = route("/about", "about", function () {
+*
+*   get("div").innerText = " welcome to the about page";
+*
+*   get("a").href = about;
+*
+  console.log("we are at the about page");
+  *
+});
+ *
+ *
+ *
+*/
+var router = function (e) {
+    e.preventDefault();
+    var url = window.location.hash.slice(1) || "/";
+    var route = routes[url];
+    if (route) {
+        route.controller();
+    }
+    // path = path ? path : "";
+    //   if (this.mode === "history") {
+    //     history.pushState(null, null, this.root + this.clearSlashes(path));
+    //   } else {
+    //     window.location.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
+    //   }
+};
+window.addEventListener("hashchange", router);
+window.addEventListener("load", router);
+/** in construction */
+var xhr = function (type, url) {
+    // for sending requests
+    var xhrRequest = new XMLHttpRequest();
+    var result = null;
+    xhrRequest.open(type, url, true);
+    result = xhrRequest.onload = function () {
+        return xhrRequest.response;
+    };
+    xhrRequest.send();
+    return result;
+};
+exports.xhr = xhr;
 /** for checking for empty objects */
 var isEmptyObject = function (obj) {
     for (var name_1 in obj) {
@@ -1276,44 +1356,36 @@ exports.re = (function () {
                 var p = new Image();
                 p.src = img[i][0];
                 p.id = img[i][1];
-                // p.onload = ()=>{
                 imagesArray.push(p);
-                // }
             }
         }
         else {
-            if (img && id) {
+            if (typeof img === "string" && id) {
                 var i = new Image();
                 i.src = img;
                 i.id = id;
-                // i.onload = ()=>{
                 imagesArray.push(i);
-                // };
             }
             else {
                 throw new Error("cannot load image(s)");
             }
         }
     }
-    function loadAudio(img, id) {
-        if (typeof img === "object" && !id) {
-            for (var i = 0; i < img.length; i++) {
+    function loadAudio(aud, id) {
+        if (typeof aud === "object" && !id) {
+            for (var i = 0; i < aud.length; i++) {
                 var p = new Audio();
-                p.src = img[i][0];
-                p.id = img[i][1];
-                // p.onload = ()=>{
+                p.src = aud[i][0];
+                p.id = aud[i][1];
                 audioArray.push(p);
-                // }
             }
         }
         else {
-            if (img && id) {
+            if (typeof aud === "string" && id) {
                 var i = new Image();
-                i.src = img;
+                i.src = aud;
                 i.id = id;
-                // i.onload = ()=>{
                 imagesArray.push(i);
-                // };
             }
             else {
                 throw new Error("cannot load image(s)");
@@ -1339,7 +1411,6 @@ exports.re = (function () {
         var p;
         for (var i = 0; i < imagesArray.length; i++) {
             if (imagesArray[i].id === id) {
-                // console.log(imagesArray[i]);
                 p = imagesArray[i];
                 break;
             }
