@@ -13,51 +13,36 @@
 YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WITH THIS MODULE 
 */
 
+type Uied = {
+  style(obj: Partial<HTMLElement["style"]>): void;
+  config(obj: Partial<HTMLElement>): void;
+  appendTo(type: string, attribute: Record<string, string>, number?: number): void;
+  evft(e: Event): void;
+};
 
+type BaseE = HTMLElement | NodeListOf<HTMLElement>;
 
-
-
-
-type BaseE = | Element | NodeListOf<any>;
 /** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
-export const u = <E extends BaseE>(...uied: any[]) => {
-  const eU = uied.length,
-    [el, ifAll_OrNum] = uied;
-  let all = false;
-  let e: E;
-  if (eU === 1 && typeof el === "string") {
-    e = document.querySelector(el);
-  } else {
-    if (eU === 1 && typeof el !== "string") {
-      e = el;
-    } else {
-      if (eU === 2 && typeof ifAll_OrNum !== "number") {
-        //all el is being grabbed from the dom
-        all = true;
-        e = document.querySelectorAll(el);
-      } else {
-        if (typeof ifAll_OrNum === "number") {
-          e = document.querySelectorAll(el)[ifAll_OrNum];
-        }
-      }
-    }
-  }
-  if (!e) throw new Error('element "' + el + '" not found');
+export const u = (el: string | BaseE, ifAll_OrNum?: boolean | number): Uied => {
+  const e = get(el, ifAll_OrNum);
+  if (!e) throw new Error('element "' + String(el) + '" not found');
+  const all = !(e instanceof HTMLElement);
 
   // the funny parts or extra methods that can be used
   // to manipulate dom  elements are below!
 
   return {
     // for styling
-    style(obj: Record<string, string>) {
+    style(obj) {
       for (const k in obj) {
         const v = obj[k];
+        if (!v) {
+          continue;
+        }
         if (!all) {
           e.style[k] = v;
         } else {
-          e.forEach((element: { style: { [x: string]: unknown; }; }) => {
-            element.style[k] = v;
-          });
+          e.forEach(_e => (_e.style[k] = v));
         }
       }
     },
@@ -71,7 +56,7 @@ u("#container").style({
 })
 
 */
-      /**  for manipulating objects
+    /**  for manipulating objects
        * 
        * 
        * *** HOW TO USE ***
@@ -82,15 +67,11 @@ u("#container").style({
        })
 
       */
-    config(obj: object) {
-
-      if (obj) {
-        for (const k in obj) {
-          const v = obj[k];
-          e[k] = v;
-        }
+    config(obj) {
+      if (obj instanceof HTMLElement) {
+        Object.assign(e, obj);
       } else {
-        throw new Error(`the variable is not an object ${obj}`);
+        throw new Error(`the variable is not an object ${String(obj)}`);
       }
     },
     /*
@@ -103,12 +84,8 @@ u(object).config({
 
 */
 
-    appendTo(type: string, attribute: object, number: number = 1) {
-      // for adding new elements more powerfully
-      if (typeof attribute === "undefined" || typeof type === "undefined") {
-        throw new Error("type or attribute not given | not enough parameters to work with");
-      }
-
+    /** for adding new elements more powerfully */
+    appendTo(type, attribute, number = 1) {
       const frag = new DocumentFragment();
       if (!all) {
         for (let i = 0; i < number; i++) {
@@ -137,7 +114,8 @@ u(object).config({
 
       return;
     },
-/*
+
+    /*
  *** HOW TO USE ***
 
 u("#container").appendTo("div"{
@@ -148,7 +126,7 @@ u("#container").appendTo("div"{
 */
 
     // advance event listener
-    on(type: String, callback: (e: object)=> void ) {
+    on(type: string, callback: (e: object) => void) {
       function evft(e: Event) {
         //   e.stopPropagation()
         e.preventDefault();
@@ -335,7 +313,7 @@ u("#container").show()
 */
     // for resizing the dom elements
 
-    box(w: number, h: number, c:string = "transparent") {
+    box(w: number, h: number, c = "transparent") {
       if (!all) {
         e.style.width = w;
         e.style.height = h;
@@ -365,7 +343,7 @@ u("#container").scrollTo()
 
 */
     // for adding elements to the dom elements
-    add(nod: Element| HTMLElement| Node) {
+    add(nod: Element | HTMLElement | Node) {
       e.append(nod);
     },
     /*
@@ -408,6 +386,21 @@ u("#container").remove(0)
           document.exitFullscreen();
         }
       };
+    },
+
+    /*
+ *** HOW TO USE ***
+
+u("#container").fullscreen().toggle()
+u("#container").fullscreen().exist()
+u("#container").fullscreen().set()
+
+*/
+
+    evft(e) {
+      //   e.stopPropagation()
+      e.preventDefault();
+      return callback(e);
     }
 
     /*
@@ -420,30 +413,6 @@ u("#container").fullscreen().set()
 */
   };
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /** This is for creating css styles using javascipt 
  * 
@@ -486,10 +455,6 @@ export const css = (name: string, sel: string | Record<string, string>, properti
   document.head.append(styleTag);
 };
 
-
-
-
-
 /** This is for creating css @media styles using javascipt 
  * 
  * examples.
@@ -507,7 +472,6 @@ export const css = (name: string, sel: string | Record<string, string>, properti
     *
 }]
 )
-
 ["#header",
 {
     width: "100%",
@@ -531,7 +495,7 @@ export const media = (value: string, ...properties: [string, Record<string, stri
     Animation = "  ";
   const animationStep = (num: number) => {
     for (const k in properties[num][1]) {
-      const v = properties[num][1][k]
+      const v = properties[num][1][k];
       style += "" + k + ": " + v + ";";
     }
     aniSty += "" + properties[num][0] + "{" + style + "}";
@@ -550,8 +514,6 @@ export const media = (value: string, ...properties: [string, Record<string, stri
   aniStyleTag.innerHTML = totalAnimation;
   document.head.append(aniStyleTag);
 };
-
-
 
 /** This is for creating css animations using javascipt 
  *
@@ -585,7 +547,6 @@ export const media = (value: string, ...properties: [string, Record<string, stri
      * 
 }]
 )
-
  * 
  * 
  * 
@@ -623,14 +584,7 @@ export const animate = (name: string, ...properties: [string, Record<string, str
   document.head.append(aniStyleTag);
 };
 
-
-
-
-
-
-
-
-type lay = [a: string, b?: {[k: string]: string}, c?: HTMLElement | Node]
+type lay = [a: string, b?: { [k: string]: string }, c?: HTMLElement | Node];
 /**
  * The build is a context used as a template engine for building layouts
  * 
@@ -658,8 +612,11 @@ type lay = [a: string, b?: {[k: string]: string}, c?: HTMLElement | Node]
 ); 
  */
 export const build = (...layouts: lay[]): DocumentFragment | HTMLElement => {
-  
-  function createElement(type = "", op: {[k: string]: string} = {}, chil?: (HTMLElement | Node)[] | HTMLElement | Node) {
+  function createElement(
+    type = "",
+    op: { [k: string]: string } = {},
+    chil?: (HTMLElement | Node)[] | HTMLElement | Node
+  ) {
     const element = document.createElement(type);
     for (const k in op) {
       const v: string | number = op[k];
@@ -681,7 +638,7 @@ export const build = (...layouts: lay[]): DocumentFragment | HTMLElement => {
     return element;
   }
 
-  let i: number = 0;
+  let i = 0;
   if (layouts.length > 1) {
     i = layouts.length;
     const frag = new DocumentFragment();
@@ -702,7 +659,7 @@ export const build = (...layouts: lay[]): DocumentFragment | HTMLElement => {
   return new DocumentFragment();
 };
 
-
+type lay = [a: string, b?: { [k: string]: string }, c?: HTMLElement | Node];
 
 /**
  * this context used for rendering built layout to a parent or the document body
@@ -721,7 +678,6 @@ export const buildTo = (child: Node, parent: string | HTMLElement): void => {
     parent.append(child);
   }
 };
-
 
 const routes: Record<string, { templateId: string; controller: () => any }> = {};
 export const route = function (path = "/", templateId: string, controller: () => any): HTMLAnchorElement {
@@ -772,9 +728,6 @@ const router = function (e: Event): void {
 window.addEventListener("hashchange", router);
 window.addEventListener("load", router);
 
-
-
-
 /** in construction */
 export const xhr = function (type: string, url: string | URL): (this: XMLHttpRequest) => any {
   // for sending requests
@@ -787,10 +740,6 @@ export const xhr = function (type: string, url: string | URL): (this: XMLHttpReq
   xhrRequest.send();
   return result;
 };
-
-
-
-
 
 /** for checking for empty objects */
 export const isEmptyObject = function (obj: any): obj is Record<keyof any, never> {
@@ -811,9 +760,11 @@ console.log(isEmptyObject(objB));
 
 */
 
-
-
-export const intersect = (target: string, opt: IntersectionObserverInit, callback: IntersectionObserverCallback): void =>{
+export const intersect = (
+  target: string,
+  opt: IntersectionObserverInit,
+  callback: IntersectionObserverCallback
+): void => {
   const { root, rootMargin, threshold } = opt,
     options = {
       root: root,
@@ -825,7 +776,7 @@ export const intersect = (target: string, opt: IntersectionObserverInit, callbac
   if (child) {
     observer.observe(child);
   }
-}
+};
 
 /*
 *** HOW TO USE ***
@@ -848,26 +799,20 @@ export const error = (msg: string): never => {
 };
 
 /** the get function is the u function but without any sweet methods it is used if you want to enjoy the easiness of the u function but don't want to use it awesome methods */
-export const get = (...uied: any[]): any => {
-  const [el, ifAll_OrNum] = uied;
-  let e;
-  if (uied.length === 1) {
-    e = document.querySelector(el);
-  } else {
-    if (uied.length === 2 && typeof ifAll_OrNum !== "number") {
-      e = document.querySelectorAll(el);
-    } else {
-      if (typeof ifAll_OrNum === "number") {
-        e = document.querySelectorAll(el)[ifAll_OrNum];
-      }
-    }
-  }
-  return e;
+export const get = <All extends boolean | number | undefined = undefined>(
+  el: string | BaseE,
+  ifAll_OrNum?: All
+): null | (All extends undefined ? HTMLElement : NodeListOf<HTMLElement>) => {
+  return (
+    typeof el === "string"
+      ? typeof ifAll_OrNum !== "undefined"
+        ? typeof ifAll_OrNum === "number"
+          ? document.querySelectorAll<HTMLElement>(el)[ifAll_OrNum]
+          : document.querySelectorAll<HTMLElement>(el)
+        : document.querySelector<HTMLElement>(el)
+      : el
+  ) as null | (All extends undefined ? HTMLElement : NodeListOf<HTMLElement>);
 };
-/*
- *** HOW TO USE ***
-let container = get("container");
-*/
 
 /** for getting more purer random number */
 export const rad = (num: number): number => {
@@ -930,7 +875,7 @@ export const debounce = (func: () => void, timeout = 600): void => {
 debounce(function , 1000);
 */
 
-let callStack: string[] = [];
+const callStack: string[] = [];
 /** the grandmother algorith for managing ids of anything, don't use it if you don't understand it's power it looks simple. */
 export const keep = function (id: string | Record<string, number>, time: number): true | undefined {
   const callObj = typeof id === "object" ? id : null;
@@ -947,7 +892,7 @@ export const keep = function (id: string | Record<string, number>, time: number)
     if (callObj !== null) {
       // eslint-disable-next-line prefer-const
       for (let k in callObj) {
-        let v :number = callObj[k]
+        let v: number = callObj[k];
         if (callStack.indexOf(k) > -1) {
           callStack.splice(Number(id), 1);
           return true;
@@ -1001,46 +946,42 @@ export const clear = (): void => {
   localStorage.clear();
 };
 
-
-
-
 // rebuilt key event lister
 const keyObject = function (keysArray: string[], callBack: (e: object) => void) {
   return {
     keysArray: keysArray,
     callBack: callBack
-  }
   };
+};
 
 type MyArray = {
   keysArray: string[];
   callBack: (e: object) => void;
-}
+};
 
-  const keysStack: MyArray[] = [];
-  const keepKeys = function (keys: string[], callback: (e: object) => void) :void {
-      const call = keyObject(keys, callback);
-      keysStack.push(call);
-  };
-  
-  const checkKeys = function (keys: string[], e: object, delay: number) :void {
-    function partOf(a: string[], b: string[]) :boolean{
-      let matches = 0;
-      for (let i = 0; i < a.length; i++) {
-        if (b.indexOf(a[i]) === -1) {
-          matches++;
-        }
-      }
-      return matches === a.length;
-    }
-  
-    for (let i = 0; i < keysStack.length; i++) {
-      if (!partOf(keysStack[i].keysArray, keys)) {
-        debounce( ()=> keysStack[i].callBack(e), delay);
+const keysStack: MyArray[] = [];
+const keepKeys = function (keys: string[], callback: (e: object) => void): void {
+  const call = keyObject(keys, callback);
+  keysStack.push(call);
+};
+
+const checkKeys = function (keys: string[], e: object, delay: number): void {
+  function partOf(a: string[], b: string[]): boolean {
+    let matches = 0;
+    for (let i = 0; i < a.length; i++) {
+      if (b.indexOf(a[i]) === -1) {
+        matches++;
       }
     }
-  };
+    return matches === a.length;
+  }
 
+  for (let i = 0; i < keysStack.length; i++) {
+    if (!partOf(keysStack[i].keysArray, keys)) {
+      debounce(() => keysStack[i].callBack(e), delay);
+    }
+  }
+};
 
 /** for handling even more complicated key events, it's built with the grandmother algorimth or code */
 export const onKeys = (keys: [], callback: (this: Event) => void, object = document, delay = 0, lock = false) => {
@@ -1127,7 +1068,7 @@ continuesKeys(["arrowRight","control"],callback,500,true,container);
 
 */
 
-export const swipe = (item: Record<string, () => any>): void =>{
+export const swipe = (item: Record<string, () => any>): void => {
   const caller: Record<string, () => any> = {};
   let startX = 0,
     startY = 0;
@@ -1207,7 +1148,7 @@ export const swipe = (item: Record<string, () => any>): void =>{
       return callback();
     }
   };
-}
+};
 
 /*
  *** HOW TO USE ***
@@ -1324,11 +1265,11 @@ export const re = (function () {
   /*Re is an interface
  where game views (view) are
  sequenced on.*/
-  const games = [];
+  const games: any[] = [];
 
   // the build function is for creating the game div
   // and allowing the dev to build upon it
-  function build(viewID) {
+  function build(viewID: string) {
     const frame = document.createElement("div");
     if (viewID) {
       frame.setAttribute("id", viewID);
@@ -1345,7 +1286,7 @@ export const re = (function () {
   // that the game should be started
   // and the callback can be used to run a function
   // perculiar to this effect.
-  function mount(template, callback) {
+  function mount(template: any, callback: () => void) {
     u("body").appendTo("div", { id: "RE_gameframe" });
     if (games.length === 1) {
       return;
@@ -1356,7 +1297,7 @@ export const re = (function () {
     return callback();
   }
   // the flow function ochastrate the game play
-  function flow(fram) {
+  function flow(fram: HTMLElement) {
     fram.append(games[0]);
   }
   // the start function starts the game
@@ -1392,18 +1333,18 @@ export const re = (function () {
       padding: "0px",
       boxSizing: "border-box"
     });
-    const gameframe = get("#RE_gameframe");
+    const gameframe = get("#RE_gameframe")!;
     flow(gameframe);
   };
   // this stops the game
   const cancel = () => {
-    const fram = get("#RE_gameframe");
+    const fram = get("#RE_gameframe")!;
     fram.innerHTML = "";
     renderer.toggleRendering();
     // fram.append(vsg())
   };
 
-  const widget = function (name) {
+  const widget = function (this: any, name: string) {
     this.wig = document.createElement("div");
     this.wig.className = name;
     this.wig.id = name;
@@ -1494,6 +1435,7 @@ export const re = (function () {
     cancel: cancel
   };
 })();
+
 // END OF THE main RE ENGINE////////////////////////
 
 /*
@@ -1526,7 +1468,7 @@ export const entity = function (name: string, painter: Function, behaviors: Func
 entity.prototype = {
   // this algorimth is for calling the paint function
   // to make it functional when seen at runtime
-  update(context: CanvasRenderingContext2D, lastDeltalTime:number) {
+  update(context: CanvasRenderingContext2D, lastDeltalTime: number) {
     if (typeof this.painter.update !== "undefined" && this.visible) {
       this.painter.update(this, context, lastDeltalTime);
     } else {
@@ -1540,7 +1482,7 @@ entity.prototype = {
       throw new Error(`RE: entity with name of ${this.name} has no paint function`);
     }
   },
-  observeBorder(w:number, h:number) {
+  observeBorder(w: number, h: number) {
     if (this.top <= 0) {
       this.top *= 0;
     } else {
@@ -1564,14 +1506,14 @@ entity.prototype = {
   }
 };
 
-export const imgPainter = function (img:HTMLImageElement, delay = 1) {
+export const imgPainter = function (img: HTMLImageElement, delay = 1) {
   this.image = img;
   this.delay = delay;
   this.range = 0;
 };
 imgPainter.prototype = {
   // paint only no update
-  paint(entity, context:CanvasRenderingContext2D) {
+  paint(entity, context: CanvasRenderingContext2D) {
     this.range++;
     if (this.range % this.delay === 0) {
       context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
@@ -1585,7 +1527,7 @@ imgPainter.prototype = {
 // this is a powerful sprite algorith for
 // rendering the exact sprite from a
 // spritesheet in successful orders
-export const spriteSheetPainter = function (img:HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
+export const spriteSheetPainter = function (img: HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
   this.image = img;
   this.framesWidth = Math.round(this.image.width / horizontal);
   this.framesHeight = Math.round(this.image.height / vertical);
@@ -1598,7 +1540,7 @@ export const spriteSheetPainter = function (img:HTMLImageElement, horizontal = 1
   this.isLastImage = false;
   this.animateAllFrames = true;
   this.animate = true;
-  this.changeSheet = function (img:HTMLImageElement, horizontal = 0, vertical = 0, delay = 1) {
+  this.changeSheet = function (img: HTMLImageElement, horizontal = 0, vertical = 0, delay = 1) {
     this.image = img;
     this.framesWidth = Math.round(this.image.width / horizontal);
     this.framesHeight = Math.round(this.image.height / vertical);
@@ -1642,7 +1584,7 @@ spriteSheetPainter.prototype = {
       this.range = 1;
     }
   },
-  paint(entity, context:CanvasRenderingContext2D) {
+  paint(entity, context: CanvasRenderingContext2D) {
     context.drawImage(
       this.image,
       this.framesWidth * this.frameWidthCount,
@@ -1657,7 +1599,7 @@ spriteSheetPainter.prototype = {
   }
 };
 
-export const speaker = function (text:string, language:string = "", volume:number = 1, rate: number = 1, pitch:number = 1) {
+export const speaker = function (text: string, language = "", volume = 1, rate = 1, pitch = 1) {
   // common languages (not supported by all browsers)
   // en - english,  it - italian, fr - french,  de - german, es - spanish
   // ja - japanese, ru - russian, zh - chinese, hi - hindi,  ko - korean
@@ -1674,29 +1616,29 @@ export const speaker = function (text:string, language:string = "", volume:numbe
 export const speakerStop = () => speechSynthesis && speechSynthesis.cancel();
 
 /** play mp3 or wav audio from a local file or url  */
-export const audio = function (audio:HTMLAudioElement, loop = 0, volumeScale = 1) {
+export const audio = function (this: { audio: HTMLAudioElement }, audio: HTMLAudioElement, loop = 0, volumeScale = 1) {
   this.audio = audio;
-  this.audio.loop = loop;
+  this.audio.loop = loop !== 0;
   this.audio.volume = volumeScale * 0.3;
   return this.audio;
 };
 audio.prototype = {
-  play() {
-    this.audio.play();
+  play(this: { audio: HTMLAudioElement }) {
+    return this.audio.play();
   },
-  pause() {
+  pause(this: { audio: HTMLAudioElement }) {
     this.audio.pause();
   },
-  toggle() {
-    if (this.audio.pause) {
-      this.audio.play();
+  toggle(this: { audio: HTMLAudioElement }) {
+    if (this.audio.paused) {
+      return this.audio.play();
     } else {
       this.audio.pause();
     }
   }
 };
 
-export const bgPainter = function (img: HTMLImageElement, speed = 10, up:boolean, left:boolean) {
+export const bgPainter = function (this: any, img: HTMLImageElement, speed = 10, up: boolean, left: boolean) {
   this.image = img;
   this.range = 0;
   this.speed = speed;
@@ -1724,7 +1666,7 @@ bgPainter.prototype = {
     }
   },
   paint(canvas: HTMLCanvasElement) {
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext("2d")!;
     context.drawImage(this.image, this.left, this.top, canvas.width, this.height);
     if (this.GoesLeft) {
       context.drawImage(this.image, this.left + this.width, this.top, canvas.width, canvas.height);
@@ -1735,7 +1677,7 @@ bgPainter.prototype = {
 };
 
 export const physics = (function () {
-  function detectCollision(ent, name, reduce = 0) {
+  function detectCollision(ent: any, name: any, reduce = 0) {
     for (let j = 0; j < name.length; j++) {
       if (
         ent.left + reduce > name[j].left + name[j].width ||

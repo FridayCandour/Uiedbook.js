@@ -1,62 +1,161 @@
-/** This is for creating css styles using javascipt */
+declare type Uied = {
+  style(obj: Partial<HTMLElement["style"]>): void;
+  config(obj: Partial<HTMLElement>): void;
+  appendTo(type: string, attribute: Record<string, string>, number?: number): void;
+  evft(e: Event): void;
+};
+declare type BaseE = HTMLElement | NodeListOf<HTMLElement>;
+/** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
+export declare const u: (el: string | BaseE, ifAll_OrNum?: number | boolean | undefined) => Uied;
+/** This is for creating css styles using javascipt
+ *
+ * HOW TO USE
+ *
+ * css("#container",
+{
+  *
+    height: "100%",
+    *
+    height: "100%",
+    *
+    background-color: "#ff9800"
+    *
+})
+*/
 export declare const css: (
   name: string,
   sel: string | Record<string, string>,
   properties?: Record<string, string> | undefined
 ) => void;
-/** This is for creating css @media styles using javascipt */
+/** This is for creating css @media styles using javascipt
+ *
+ * examples.
+ *
+ * media("min-width: 790px",
+ * *
+["#container",
+{
+  *
+    width: "100%",
+    *
+    height: "100%",
+    *
+    background-color: "#0000"
+    *
+}]
+)
+["#header",
+{
+    width: "100%",
+    *
+    height: "20%",
+    *
+    background-color: "#fff"
+    *
+}]
+*
+)
+ *
+*/
 export declare const media: (value: string, ...properties: [string, Record<string, string>][]) => void;
-/** This is for creating css animations using javascipt */
+/** This is for creating css animations using javascipt
+ *
+ * example.
+ *
+ *
+ * animate("popanimation",
+ *  *
+["from",
+{
+   *
+    transform: "scale3D(2)" ,
+     *
+    height: "10%",
+     *
+    background-color: "#0000"
+     *
+}]
+ *
+)
+ *
+ *
+["to",
+{
+   *
+    transform: "scale3D(1)" ,
+     *
+    height: "100%",
+     *
+    background-color: "#ff9800"
+     *
+}]
+)
+ *
+ *
+ *
+*/
 export declare const animate: (name: string, ...properties: [string, Record<string, string>][]) => void;
-/** in construction */
-export declare const build: (
-  ...layouts: (string | Record<string, unknown> | DocumentFragment | HTMLElement)[]
-) => DocumentFragment | HTMLElement;
+declare type lay = [
+  a: string,
+  b?: {
+    [k: string]: string;
+  },
+  c?: HTMLElement | Node
+];
+/**
+ * The build is a context used as a template engine for building layouts
+ *
+ * example.
+ *
+ * const p = build(
+ * *
+  "div",
+  {
+    *
+    title: "title",
+    *
+    innerText: "am a title",
+    *
+    onclick: function () {
+      *
+      console.log("i was clicked");
+      *
+    }
+    *
+  },
+  *
+  build("span", { innerText: "am a span", title: "title" })
+  *
+);
+ */
+export declare const build: (...layouts: lay[]) => DocumentFragment | HTMLElement;
+/**
+ * this context used for rendering built layout to a parent or the document body
+ *
+ * example
+ *
+ * const p =   build("span", { innerText: "am a span", title: "title" });
+ *
+buildTo(p, "body");
+*/
 export declare const buildTo: (child: Node, parent: string | HTMLElement) => void;
 export declare const route: (path: string | undefined, templateId: string, controller: () => any) => HTMLAnchorElement;
 /** in construction */
 export declare const xhr: (type: string, url: string | URL) => (this: XMLHttpRequest) => any;
-/** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more save, fast and efficient. */
-export declare const u: (...uied: any[]) => {
-  style(obj: any): void;
-  config(obj: any): void;
-  appendTo(type: any, attribute: any, number?: number): void;
-  on(type: any, callback: any): any;
-  attr(attribute_object: any): any;
-  removeAttr(attr: any): void;
-  html(code: any): void;
-  text(text: any): void;
-  addClass(clas: any): void;
-  removeClass(clas: any): void;
-  hide(): void;
-  toggleClass(): void;
-  show(): void;
-  box(w: any, h: any, c?: string): void;
-  scrollTo(s?: boolean): void;
-  add(nod: any): void;
-  remove(ind: any): void;
-  fullScreen(): {
-    toggle: () => void;
-    set(): void;
-    exist(): void;
-  };
-};
 /** for checking for empty objects */
 export declare const isEmptyObject: (obj: any) => obj is Record<string | number | symbol, never>;
-export declare function isArray(q: unknown): q is unknown[];
-export declare const each: <Obj extends string | Record<string | number | symbol, any>>(
-  obj: Obj,
-  callback: (...args: any[]) => any
-) => Obj;
-export declare function intersect(
+export declare const intersect: (
   target: string,
   opt: IntersectionObserverInit,
   callback: IntersectionObserverCallback
-): void;
+) => void;
 /** `error("there was an error!");` */
 export declare const error: (msg: string) => never;
 /** the get function is the u function but without any sweet methods it is used if you want to enjoy the easiness of the u function but don't want to use it awesome methods */
-export declare const get: (...uied: any[]) => any;
+export declare const get: <All extends number | boolean | undefined = undefined>(
+  el: string | BaseE,
+  ifAll_OrNum?: All | undefined
+) => (All extends undefined ? HTMLElement : NodeListOf<HTMLElement>) | null;
 /** for getting more purer random number */
 export declare const rad: (num: number) => number;
 /** for making css classes */
@@ -84,9 +183,10 @@ export declare const getKey: (index: number) => string | null;
 export declare const clear: () => void;
 /** for handling even more complicated key events, it's built with the grandmother algorimth or code */
 export declare const onKeys: (
-  keys: string[],
+  keys: [],
   callback: (this: Event) => void,
   object?: Document,
+  delay?: number,
   lock?: boolean
 ) => void;
 /** under construction!!!!!!! */
@@ -97,30 +197,48 @@ export declare const continuesKeys: (
   object?: Document,
   lock?: boolean
 ) => void;
-export declare function swipe(item: Record<string, () => any>): void;
+export declare const swipe: (item: Record<string, () => any>) => void;
 /** this is used for creating pixel stable game views across all screen width with no pixelation problem try and see the magic */
 export declare const buildCanvas: (id: string, w?: number, h?: number) => HTMLCanvasElement;
 export declare const appendCanvas: (id: string, h: number, w: number, parent: HTMLElement) => HTMLCanvasElement;
 /** this is the RE game time line algorimth */
 export declare const re: {
-  build: (viewID: any) => HTMLDivElement;
-  makeWidget: (name: any) => any;
-  mount: (template: any, callback: any) => any;
+  build: (viewID: string) => HTMLDivElement;
+  makeWidget: (this: any, name: string) => any;
+  mount: (template: any, callback: () => void) => void;
   start: () => void;
-  loadImage: (img: any, id: any) => void;
-  loadAudio: (img: any, id: any) => void;
-  getImg: (id: any) => any;
-  getAud: (id: any) => any;
+  loadImage: (img: string | string[], id: string) => void;
+  loadAudio: (aud: string | string[], id: string) => void;
+  getImg: (id: string) => HTMLImageElement;
+  getAud: (id: string) => HTMLAudioElement;
   cancel: () => void;
 };
-export declare const entity: (name: string, painter: any, behaviors: any) => void;
-export declare const imgPainter: (img: any, delay?: number) => void;
-export declare const spriteSheetPainter: (img: any, horizontal?: number, vertical?: number, delay?: number) => void;
-export declare const speaker: (text: any, language?: string, volume?: number, rate?: number, pitch?: number) => void;
+export declare const entity: (name: string, painter: Function, behaviors: Function) => void;
+export declare const imgPainter: (img: HTMLImageElement, delay?: number) => void;
+export declare const spriteSheetPainter: (
+  img: HTMLImageElement,
+  horizontal?: number,
+  vertical?: number,
+  delay?: number
+) => void;
+export declare const speaker: (text: string, language?: string, volume?: number, rate?: number, pitch?: number) => void;
 export declare const speakerStop: () => void;
 /** play mp3 or wav audio from a local file or url  */
-export declare const audio: (audio: any, loop?: number, volumeScale?: number) => any;
-export declare const bgPainter: (img: any, speed: number | undefined, up: any, left: any) => void;
+export declare const audio: (
+  this: {
+    audio: HTMLAudioElement;
+  },
+  audio: HTMLAudioElement,
+  loop?: number,
+  volumeScale?: number
+) => HTMLAudioElement;
+export declare const bgPainter: (
+  this: any,
+  img: HTMLImageElement,
+  speed: number | undefined,
+  up: boolean,
+  left: boolean
+) => void;
 export declare const physics: {
   detectCollision: (ent: any, name: any, reduce?: number) => void;
 };
@@ -129,51 +247,24 @@ export declare const renderer: {
   render: (canv: any, fpso?: number) => void;
   assemble: (...players: any[]) => any[];
   toggleRendering: () => boolean;
-  backgroundImage: (img: any, speed: any, up: any, left: any) => any;
+  backgroundImage: (img: HTMLImageElement, speed: number, up: any, left: any) => any;
   copyCanvasTo: (c: any, opacity: any, border: any) => any;
 };
 export declare const uiedbook: {
   css: (name: string, sel: string | Record<string, string>, properties?: Record<string, string> | undefined) => void;
   media: (value: string, ...properties: [string, Record<string, string>][]) => void;
   animate: (name: string, ...properties: [string, Record<string, string>][]) => void;
-  build: (
-    ...layouts: (string | Record<string, unknown> | DocumentFragment | HTMLElement)[]
-  ) => DocumentFragment | HTMLElement;
+  build: (...layouts: lay[]) => DocumentFragment | HTMLElement;
   buildTo: (child: Node, parent: string | HTMLElement) => void;
   xhr: (type: string, url: string | URL) => (this: XMLHttpRequest) => any;
-  u: (...uied: any[]) => {
-    style(obj: any): void;
-    config(obj: any): void;
-    appendTo(type: any, attribute: any, number?: number): void;
-    on(type: any, callback: any): any;
-    attr(attribute_object: any): any;
-    removeAttr(attr: any): void;
-    html(code: any): void;
-    text(text: any): void;
-    addClass(clas: any): void;
-    removeClass(clas: any): void;
-    hide(): void;
-    toggleClass(): void;
-    show(): void;
-    box(w: any, h: any, c?: string): void;
-    scrollTo(s?: boolean): void;
-    add(nod: any): void;
-    remove(ind: any): void;
-    fullScreen(): {
-      toggle: () => void;
-      set(): void;
-      exist(): void;
-    };
-  };
+  u: (el: string | BaseE, ifAll_OrNum?: number | boolean | undefined) => Uied;
   isEmptyObject: (obj: any) => obj is Record<string | number | symbol, never>;
-  isArray: typeof isArray;
-  each: <Obj extends string | Record<string | number | symbol, any>>(
-    obj: Obj,
-    callback: (...args: any[]) => any
-  ) => Obj;
-  intersect: typeof intersect;
+  intersect: (target: string, opt: IntersectionObserverInit, callback: IntersectionObserverCallback) => void;
   error: (msg: string) => never;
-  get: (...uied: any[]) => any;
+  get: <All extends number | boolean | undefined = undefined>(
+    el: string | BaseE,
+    ifAll_OrNum?: All | undefined
+  ) => (All extends undefined ? HTMLElement : NodeListOf<HTMLElement>) | null;
   rad: (num: number) => number;
   makeClass: (name: string, stylings: string) => void;
   create: (type?: string, id?: string) => HTMLElement;
@@ -193,7 +284,7 @@ export declare const uiedbook: {
   remove: (name: string) => void;
   getKey: (index: number) => string | null;
   clear: () => void;
-  onKeys: (keys: string[], callback: (this: Event) => void, object?: Document, lock?: boolean) => void;
+  onKeys: (keys: [], callback: (this: Event) => void, object?: Document, delay?: number, lock?: boolean) => void;
   continuesKeys: (
     keys: string[],
     callback: (this: Event) => void,
@@ -201,36 +292,44 @@ export declare const uiedbook: {
     object?: Document,
     lock?: boolean
   ) => void;
-  swipe: typeof swipe;
+  swipe: (item: Record<string, () => any>) => void;
   buildCanvas: (id: string, w?: number, h?: number) => HTMLCanvasElement;
   appendCanvas: (id: string, h: number, w: number, parent: HTMLElement) => HTMLCanvasElement;
   re: {
-    build: (viewID: any) => HTMLDivElement;
-    makeWidget: (name: any) => any;
-    mount: (template: any, callback: any) => any;
+    build: (viewID: string) => HTMLDivElement;
+    makeWidget: (this: any, name: string) => any;
+    mount: (template: any, callback: () => void) => void;
     start: () => void;
-    loadImage: (img: any, id: any) => void;
-    loadAudio: (img: any, id: any) => void;
-    getImg: (id: any) => any;
-    getAud: (id: any) => any;
+    loadImage: (img: string | string[], id: string) => void;
+    loadAudio: (aud: string | string[], id: string) => void;
+    getImg: (id: string) => HTMLImageElement;
+    getAud: (id: string) => HTMLAudioElement;
     cancel: () => void;
   };
-  entity: (name: string, painter: any, behaviors: any) => void;
-  imgPainter: (img: any, delay?: number) => void;
-  spriteSheetPainter: (img: any, horizontal?: number, vertical?: number, delay?: number) => void;
-  audio: (audio: any, loop?: number, volumeScale?: number) => any;
-  bgPainter: (img: any, speed: number | undefined, up: any, left: any) => void;
+  entity: (name: string, painter: Function, behaviors: Function) => void;
+  imgPainter: (img: HTMLImageElement, delay?: number) => void;
+  spriteSheetPainter: (img: HTMLImageElement, horizontal?: number, vertical?: number, delay?: number) => void;
+  audio: (
+    this: {
+      audio: HTMLAudioElement;
+    },
+    audio: HTMLAudioElement,
+    loop?: number,
+    volumeScale?: number
+  ) => HTMLAudioElement;
+  bgPainter: (this: any, img: HTMLImageElement, speed: number | undefined, up: boolean, left: boolean) => void;
   renderer: {
     render: (canv: any, fpso?: number) => void;
     assemble: (...players: any[]) => any[];
     toggleRendering: () => boolean;
-    backgroundImage: (img: any, speed: any, up: any, left: any) => any;
+    backgroundImage: (img: HTMLImageElement, speed: number, up: any, left: any) => any;
     copyCanvasTo: (c: any, opacity: any, border: any) => any;
   };
-  speaker: (text: any, language?: string, volume?: number, rate?: number, pitch?: number) => void;
+  speaker: (text: string, language?: string, volume?: number, rate?: number, pitch?: number) => void;
   speakerStop: () => void;
   physics: {
     detectCollision: (ent: any, name: any, reduce?: number) => void;
   };
   route: (path: string | undefined, templateId: string, controller: () => any) => HTMLAnchorElement;
 };
+export {};
