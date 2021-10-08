@@ -2,7 +2,21 @@ declare type Uied = {
   style(obj: Partial<HTMLElement["style"]>): void;
   config(obj: Partial<HTMLElement>): void;
   appendTo(type: string, attribute: Record<string, string>, number?: number): void;
-  evft(e: Event): void;
+  on(type: string, callback: (e: Event) => void): void;
+  attr(attribute_object: Partial<HTMLElement>): string | null | (string | null)[] | undefined;
+  removeAttr(attr: string): void;
+  html(code: string): void;
+  text(text: string): void;
+  addClass(clas: string): void;
+  removeClass(clas: string): void;
+  hide(): void;
+  toggleClass(): void;
+  show(): void;
+  box(w: number, h: number, c?: string): void;
+  scrollTo(s?: boolean): void;
+  add(nod: Element | HTMLElement | Node): void;
+  remove(ind: number): void;
+  fullScreen(): void;
 };
 declare type BaseE = HTMLElement | NodeListOf<HTMLElement>;
 /** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
@@ -244,7 +258,7 @@ export declare const physics: {
 };
 /** game rendering algorithm */
 export declare const renderer: {
-  render: (canv: any, fpso?: number) => void;
+  render: (canv: HTMLCanvasElement, fpso?: number) => void;
   assemble: (...players: any[]) => any[];
   toggleRendering: () => boolean;
   backgroundImage: (img: HTMLImageElement, speed: number, up: any, left: any) => any;
@@ -319,7 +333,7 @@ export declare const uiedbook: {
   ) => HTMLAudioElement;
   bgPainter: (this: any, img: HTMLImageElement, speed: number | undefined, up: boolean, left: boolean) => void;
   renderer: {
-    render: (canv: any, fpso?: number) => void;
+    render: (canv: HTMLCanvasElement, fpso?: number) => void;
     assemble: (...players: any[]) => any[];
     toggleRendering: () => boolean;
     backgroundImage: (img: HTMLImageElement, speed: number, up: any, left: any) => any;

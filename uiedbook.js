@@ -140,16 +140,16 @@ export const u = (el, ifAll_OrNum) => {
           if (prop === null) {
             return e.getAttribute(prop);
           } else {
-            e.setAttribute(prop, attr);
+            e.setAttribute(prop, String(attr));
           }
         }
       } else {
         for (const prop in attribute_object) {
           const attr = attribute_object[prop];
           if (prop === null) {
-            return e.getAttribute(prop);
+            return Array.from(e).map(el => el.getAttribute(prop));
           } else {
-            e.forEach(el => el.setAttribute(prop, attr));
+            e.forEach(el => el.setAttribute(prop, String(attr)));
           }
         }
       }
@@ -165,9 +165,6 @@ export const u = (el, ifAll_OrNum) => {
     */
     // for removing attributes from dom elements
     removeAttr(attr) {
-      if (attr === null) {
-        return;
-      }
       if (!all) {
         e.removeAttribute(attr);
       } else {
@@ -290,13 +287,13 @@ export const u = (el, ifAll_OrNum) => {
     // for resizing the dom elements
     box(w, h, c = "transparent") {
       if (!all) {
-        e.style.width = w;
-        e.style.height = h;
+        e.style.width = String(w);
+        e.style.height = String(h);
         e.style.backgroundColor = c;
       } else {
         e.forEach(el => {
-          el.style.width = w;
-          el.style.height = h;
+          el.style.width = String(w);
+          el.style.height = String(h);
           el.style.backgroundColor = c;
         });
       }
@@ -309,7 +306,11 @@ export const u = (el, ifAll_OrNum) => {
     */
     // for scrollingthe dom elements into view
     scrollTo(s = true) {
-      e.scrollIntoView(s);
+      if (!all) {
+        e.scrollIntoView(s);
+      } else {
+        e.forEach(el => el.scrollIntoView(s));
+      }
     },
     /*
      *** HOW TO USE ***
@@ -319,7 +320,11 @@ export const u = (el, ifAll_OrNum) => {
     */
     // for adding elements to the dom elements
     add(nod) {
-      e.append(nod);
+      if (!all) {
+        e.append(nod);
+      } else {
+        e.forEach(el => el.append(nod));
+      }
     },
     /*
      *** HOW TO USE ***
@@ -329,7 +334,11 @@ export const u = (el, ifAll_OrNum) => {
     */
     // for removing elements to the dom elements
     remove(ind) {
-      e.removeChild(e.childNodes[ind]);
+      if (!all) {
+        e.removeChild(e.childNodes[ind]);
+      } else {
+        e.forEach(el => el.removeChild(el.childNodes[ind]));
+      }
     },
     /*
      *** HOW TO USE ***
@@ -341,15 +350,18 @@ export const u = (el, ifAll_OrNum) => {
     fullScreen() {
       return {
         toggle: () => {
-          if (!document.fullscreenElement) {
+          if (!document.fullscreenElement && !all) {
             e.requestFullscreen().catch(err => {
               alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
             });
           } else {
-            document.exitFullscreen();
+            void document.exitFullscreen();
           }
         },
         set() {
+          if (all) {
+            return;
+          }
           e.requestFullscreen().catch(err => {
             alert(`Error! failure attempting to enable
  full-screen mode: ${err.message}
@@ -357,10 +369,10 @@ export const u = (el, ifAll_OrNum) => {
           });
         },
         exist() {
-          document.exitFullscreen();
+          void document.exitFullscreen();
         }
       };
-    },
+    }
     /*
      *** HOW TO USE ***
     
@@ -369,11 +381,6 @@ export const u = (el, ifAll_OrNum) => {
     u("#container").fullscreen().set()
     
     */
-    evft(e) {
-      //   e.stopPropagation()
-      e.preventDefault();
-      return callback(e);
-    }
     /*
      *** HOW TO USE ***
     

@@ -17,7 +17,21 @@ type Uied = {
   style(obj: Partial<HTMLElement["style"]>): void;
   config(obj: Partial<HTMLElement>): void;
   appendTo(type: string, attribute: Record<string, string>, number?: number): void;
-  evft(e: Event): void;
+  on(type: string, callback: (e: Event) => void): void;
+  attr(attribute_object: Partial<HTMLElement>): string | null | (string | null)[] | undefined;
+  removeAttr(attr: string): void;
+  html(code: string): void;
+  text(text: string): void;
+  addClass(clas: string): void;
+  removeClass(clas: string): void;
+  hide(): void;
+  toggleClass(): void;
+  show(): void;
+  box(w: number, h: number, c?: string): void;
+  scrollTo(s?: boolean): void;
+  add(nod: Element | HTMLElement | Node): void;
+  remove(ind: number): void;
+  fullScreen(): void;
 };
 
 type BaseE = HTMLElement | NodeListOf<HTMLElement>;
@@ -126,7 +140,7 @@ u("#container").appendTo("div"{
 */
 
     // advance event listener
-    on(type: string, callback: (e: object) => void) {
+    on(type, callback) {
       function evft(e: Event) {
         //   e.stopPropagation()
         e.preventDefault();
@@ -151,24 +165,24 @@ u("#container").on("click", ()=>{
 */
 
     // for adding attributes to the dom elements
-    attr(attribute_object: object) {
+    attr(attribute_object) {
       if (typeof attribute_object !== "object") return;
       if (!all) {
         for (const prop in attribute_object) {
-          const attr = attribute_object[prop];
+          const attr = attribute_object[prop as keyof typeof attribute_object];
           if (prop === null) {
             return e.getAttribute(prop);
           } else {
-            e.setAttribute(prop, attr);
+            e.setAttribute(prop, String(attr));
           }
         }
       } else {
         for (const prop in attribute_object) {
-          const attr = attribute_object[prop];
+          const attr = attribute_object[prop as keyof typeof attribute_object];
           if (prop === null) {
-            return e.getAttribute(prop);
+            return Array.from(e).map(el => el.getAttribute(prop));
           } else {
-            e.forEach(el => el.setAttribute(prop, attr));
+            e.forEach(el => el.setAttribute(prop, String(attr)));
           }
         }
       }
@@ -184,10 +198,7 @@ u("#container").attr({
 */
 
     // for removing attributes from dom elements
-    removeAttr(attr: string) {
-      if (attr === null) {
-        return;
-      }
+    removeAttr(attr) {
       if (!all) {
         e.removeAttribute(attr);
       } else {
@@ -201,7 +212,7 @@ u("#container").removeAttr("className")
 
 */
     // for adding inner html contents to the dom elements
-    html(code: string) {
+    html(code) {
       if (!all) {
         e.innerHTML = code;
       } else {
@@ -215,7 +226,7 @@ u("#container").html("<div> hello am a div </div>")
 
 */
     // for adding text to the dom elements
-    text(text: string) {
+    text(text) {
       if (!all) {
         e.textContent = text;
       } else {
@@ -230,7 +241,7 @@ u("#container").html("hello am text")
 
 */
     // for adding class to the dom elements
-    addClass(clas: string) {
+    addClass(clas) {
       if (!all) {
         e.classList.add(clas);
       } else {
@@ -246,7 +257,7 @@ u("#container").addClass(".class")
 
     // for removing class from the dom elements
 
-    removeClass(clas: string) {
+    removeClass(clas) {
       if (!all) {
         e.classList.remove(clas);
       } else {
@@ -315,13 +326,13 @@ u("#container").show()
 
     box(w: number, h: number, c = "transparent") {
       if (!all) {
-        e.style.width = w;
-        e.style.height = h;
+        e.style.width = String(w);
+        e.style.height = String(h);
         e.style.backgroundColor = c;
       } else {
         e.forEach(el => {
-          el.style.width = w;
-          el.style.height = h;
+          el.style.width = String(w);
+          el.style.height = String(h);
           el.style.backgroundColor = c;
         });
       }
@@ -334,7 +345,11 @@ u("#container").box("100px","100%","#ff9800")
 */
     // for scrollingthe dom elements into view
     scrollTo(s = true) {
-      e.scrollIntoView(s);
+      if (!all) {
+        e.scrollIntoView(s);
+      } else {
+        e.forEach(el => el.scrollIntoView(s));
+      }
     },
     /*
  *** HOW TO USE ***
@@ -344,7 +359,11 @@ u("#container").scrollTo()
 */
     // for adding elements to the dom elements
     add(nod: Element | HTMLElement | Node) {
-      e.append(nod);
+      if (!all) {
+        e.append(nod);
+      } else {
+        e.forEach(el => el.append(nod));
+      }
     },
     /*
  *** HOW TO USE ***
@@ -354,7 +373,11 @@ u("#container").add(span)
 */
     // for removing elements to the dom elements
     remove(ind: number) {
-      e.removeChild(e.childNodes[ind]);
+      if (!all) {
+        e.removeChild(e.childNodes[ind]);
+      } else {
+        e.forEach(el => el.removeChild(el.childNodes[ind]));
+      }
     },
     /*
  *** HOW TO USE ***
@@ -367,26 +390,29 @@ u("#container").remove(0)
     fullScreen() {
       return {
         toggle: () => {
-          if (!document.fullscreenElement) {
-            e.requestFullscreen().catch(err => {
+          if (!document.fullscreenElement && !all) {
+            e.requestFullscreen().catch((err: Error) => {
               alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
             });
           } else {
-            document.exitFullscreen();
+            void document.exitFullscreen();
           }
         },
         set() {
-          e.requestFullscreen().catch(err => {
+          if (all) {
+            return;
+          }
+          e.requestFullscreen().catch((err: Error) => {
             alert(`Error! failure attempting to enable
  full-screen mode: ${err.message}
  (${err.name})`);
           });
         },
         exist() {
-          document.exitFullscreen();
+          void document.exitFullscreen();
         }
       };
-    },
+    }
 
     /*
  *** HOW TO USE ***
@@ -396,12 +422,6 @@ u("#container").fullscreen().exist()
 u("#container").fullscreen().set()
 
 */
-
-    evft(e) {
-      //   e.stopPropagation()
-      e.preventDefault();
-      return callback(e);
-    }
 
     /*
  *** HOW TO USE ***
@@ -1129,22 +1149,22 @@ export const swipe = (item: Record<string, () => any>): void => {
   document.body.addEventListener("touchend", handleTouchEnd);
 
   const callback = {
-    touch(callback: () => any) {
+    touch(callback: () => void) {
       return callback();
     },
-    right(callback: () => any) {
-      return callback();
-    },
-
-    left(callback: () => any) {
+    right(callback: () => void) {
       return callback();
     },
 
-    down(callback: () => any) {
+    left(callback: () => void) {
       return callback();
     },
 
-    up(callback: () => any) {
+    down(callback: () => void) {
+      return callback();
+    },
+
+    up(callback: () => void) {
       return callback();
     }
   };
@@ -1756,7 +1776,7 @@ export const renderer = (function () {
     }
   }
 
-  function animate(dt) {
+  function animate(dt: number) {
     id = window.requestAnimationFrame(animate);
     deltaTime = dt - lastdt;
     lastdt = dt;
@@ -1786,12 +1806,12 @@ export const renderer = (function () {
     nextdt = 0;
   }
 
-  function _render(canv, fpso = 0) {
+  function _render(canv: HTMLCanvasElement, fpso = 0) {
     if (!canv) {
       throw new Error("RE: game needs to be rendered EXP: renderer.render(canvas)");
     }
     canvas = canv;
-    context = canvas.getContext("2d");
+    context = canvas.getContext("2d")!;
     fps = fpso;
     animate(0);
   }
