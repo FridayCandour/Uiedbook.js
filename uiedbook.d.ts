@@ -156,6 +156,8 @@ export declare const get: <All extends number | boolean | undefined = undefined>
   el: string | BaseE,
   ifAll_OrNum?: All | undefined
 ) => (All extends undefined ? HTMLElement : NodeListOf<HTMLElement>) | null;
+/** for getting more purer random number */
+export declare const rad: (num: number) => number;
 /** for making css classes */
 export declare const makeClass: (name: string, stylings: string) => void;
 /** it's self explanatory some how */
@@ -239,5 +241,95 @@ export declare const bgPainter: (
 ) => void;
 export declare const physics: {
   detectCollision: (ent: any, name: any, reduce?: number) => void;
+};
+/** game rendering algorithm */
+export declare const renderer: {
+  render: (canv: any, fpso?: number) => void;
+  assemble: (...players: any[]) => any[];
+  toggleRendering: () => boolean;
+  backgroundImage: (img: HTMLImageElement, speed: number, up: any, left: any) => any;
+  copyCanvasTo: (c: any, opacity: any, border: any) => any;
+};
+export declare const uiedbook: {
+  css: (name: string, sel: string | Record<string, string>, properties?: Record<string, string> | undefined) => void;
+  media: (value: string, ...properties: [string, Record<string, string>][]) => void;
+  animate: (name: string, ...properties: [string, Record<string, string>][]) => void;
+  build: (...layouts: lay[]) => DocumentFragment | HTMLElement;
+  buildTo: (child: Node, parent: string | HTMLElement) => void;
+  xhr: (type: string, url: string | URL) => (this: XMLHttpRequest) => any;
+  u: (el: string | BaseE, ifAll_OrNum?: number | boolean | undefined) => Uied;
+  isEmptyObject: (obj: any) => obj is Record<string | number | symbol, never>;
+  intersect: (target: string, opt: IntersectionObserverInit, callback: IntersectionObserverCallback) => void;
+  error: (msg: string) => never;
+  get: <All extends number | boolean | undefined = undefined>(
+    el: string | BaseE,
+    ifAll_OrNum?: All | undefined
+  ) => (All extends undefined ? HTMLElement : NodeListOf<HTMLElement>) | null;
+  rad: (num: number) => number;
+  makeClass: (name: string, stylings: string) => void;
+  create: (type?: string, id?: string) => HTMLElement;
+  download: (
+    type: string,
+    source: {
+      buffer: Uint8Array;
+    },
+    name: string
+  ) => HTMLAnchorElement;
+  debounce: (func: () => void, timeout?: number) => void;
+  keep: (id: string | Record<string, number>, time: number) => true | undefined;
+  check: (id: string) => boolean;
+  log: (message: any) => string[] | undefined;
+  store: (name: string, value: any) => void;
+  retrieve: (name: string) => string | null;
+  remove: (name: string) => void;
+  getKey: (index: number) => string | null;
+  clear: () => void;
+  onKeys: (keys: [], callback: (this: Event) => void, object?: Document, delay?: number, lock?: boolean) => void;
+  continuesKeys: (
+    keys: string[],
+    callback: (this: Event) => void,
+    delay?: number,
+    object?: Document,
+    lock?: boolean
+  ) => void;
+  swipe: (item: Record<string, () => any>) => void;
+  buildCanvas: (id: string, w?: number, h?: number) => HTMLCanvasElement;
+  appendCanvas: (id: string, h: number, w: number, parent: HTMLElement) => HTMLCanvasElement;
+  re: {
+    build: (viewID: string) => HTMLDivElement;
+    makeWidget: (this: any, name: string) => any;
+    mount: (template: any, callback: () => void) => void;
+    start: () => void;
+    loadImage: (img: string | string[], id: string) => void;
+    loadAudio: (aud: string | string[], id: string) => void;
+    getImg: (id: string) => HTMLImageElement;
+    getAud: (id: string) => HTMLAudioElement;
+    cancel: () => void;
+  };
+  entity: (name: string, painter: Function, behaviors: Function) => void;
+  imgPainter: (img: HTMLImageElement, delay?: number) => void;
+  spriteSheetPainter: (img: HTMLImageElement, horizontal?: number, vertical?: number, delay?: number) => void;
+  audio: (
+    this: {
+      audio: HTMLAudioElement;
+    },
+    audio: HTMLAudioElement,
+    loop?: number,
+    volumeScale?: number
+  ) => HTMLAudioElement;
+  bgPainter: (this: any, img: HTMLImageElement, speed: number | undefined, up: boolean, left: boolean) => void;
+  renderer: {
+    render: (canv: any, fpso?: number) => void;
+    assemble: (...players: any[]) => any[];
+    toggleRendering: () => boolean;
+    backgroundImage: (img: HTMLImageElement, speed: number, up: any, left: any) => any;
+    copyCanvasTo: (c: any, opacity: any, border: any) => any;
+  };
+  speaker: (text: string, language?: string, volume?: number, rate?: number, pitch?: number) => void;
+  speakerStop: () => void;
+  physics: {
+    detectCollision: (ent: any, name: any, reduce?: number) => void;
+  };
+  route: (path: string | undefined, templateId: string, controller: () => any) => HTMLAnchorElement;
 };
 export {};

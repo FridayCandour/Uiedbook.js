@@ -749,6 +749,10 @@ export const get = (el, ifAll_OrNum) => {
       : document.querySelector(el)
     : el;
 };
+/** for getting more purer random number */
+export const rad = num => {
+  return Math.floor(Math.random() * Math.floor(num));
+};
 /*
  *** HOW TO USE ***
 rad(5);
@@ -1560,3 +1564,144 @@ export const physics = (function () {
     detectCollision: detectCollision
   };
 })();
+/** game rendering algorithm */
+export const renderer = (function () {
+  let canvas,
+    id, // for pausing or playing the game
+    context,
+    // variables for the timing
+    fps,
+    // background varible
+    lastdt = 0,
+    nextdt = 0,
+    pause = false,
+    deltaTime;
+  const bg = [],
+    // entity storage array
+    entitysArray = [];
+  function bgPaint(img, speed, up, left) {
+    const bgImg = new bgPainter(img, speed, up, left);
+    bg.push(bgImg);
+    return bgImg;
+  }
+  function animatebg(canvas) {
+    if (bg === []) return false;
+    bg.forEach(b => {
+      b.paint(canvas);
+      b.update();
+    });
+  }
+  function _assemble(...players) {
+    if (!players) throw new Error("RE: No players assembled");
+    players.forEach(player => {
+      entitysArray.push(player);
+    });
+    return entitysArray;
+  }
+  function copyCanvasTo(c, opacity, border) {
+    const cx = c.getContext("2d");
+    cx.drawImage(canvas, 0, 0, c.width, c.height);
+    c.style.opacity = opacity;
+    c.style.borderRadius = border;
+    return c;
+  }
+  function toggleRendering() {
+    if (pause) {
+      window.requestAnimationFrame(animate);
+      return (pause = false);
+    } else {
+      window.cancelAnimationFrame(id);
+      return (pause = true);
+    }
+  }
+  function animate(dt) {
+    id = window.requestAnimationFrame(animate);
+    deltaTime = dt - lastdt;
+    lastdt = dt;
+    nextdt += Math.round(deltaTime);
+    if (nextdt > fps) {
+      try {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        animatebg(canvas);
+        entitysArray.forEach((ent, i) => {
+          if (ent.delete) {
+            entitysArray.splice(i, 1);
+            --i;
+          }
+          if (ent.border) {
+            ent.observeBorder(canvas.width, canvas.height);
+          }
+          //   console.log(entitysArray);
+          ent.update(context, dt);
+          ent.run(context, dt);
+          ent.paint(context, dt);
+        });
+      } catch (error) {
+        throw new Error(`RE: the canvas cannot be animated due to some errors > ${error}`);
+      }
+    }
+    nextdt = 0;
+  }
+  function _render(canv, fpso = 0) {
+    if (!canv) {
+      throw new Error("RE: game needs to be rendered EXP: renderer.render(canvas)");
+    }
+    canvas = canv;
+    context = canvas.getContext("2d");
+    fps = fpso;
+    animate(0);
+  }
+  return {
+    render: _render,
+    assemble: _assemble,
+    toggleRendering: toggleRendering,
+    backgroundImage: bgPaint,
+    copyCanvasTo: copyCanvasTo
+  };
+})();
+export const uiedbook = {
+  css,
+  media,
+  animate,
+  build,
+  buildTo,
+  xhr,
+  u,
+  isEmptyObject,
+  intersect,
+  error,
+  get,
+  rad,
+  makeClass,
+  create,
+  download,
+  debounce,
+  keep,
+  check,
+  log,
+  store,
+  retrieve,
+  remove,
+  getKey,
+  clear,
+  onKeys,
+  continuesKeys,
+  swipe,
+  buildCanvas,
+  appendCanvas,
+  re,
+  entity,
+  imgPainter,
+  spriteSheetPainter,
+  audio,
+  bgPainter,
+  renderer,
+  speaker,
+  speakerStop,
+  physics,
+  route
+};
+// 40 apis contexts
+if (typeof window !== "undefined") {
+  window.uiedbook = uiedbook;
+}
