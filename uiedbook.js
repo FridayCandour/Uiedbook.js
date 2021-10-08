@@ -99,6 +99,276 @@ export const u = (el, ifAll_OrNum) => {
       }
       return;
     },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").appendTo("div"{
+        className: "newdiv",
+        id: "newdiv"
+    }, 5)
+    
+    */
+    // advance event listener
+    on(type, callback) {
+      function evft(e) {
+        //   e.stopPropagation()
+        e.preventDefault();
+        return callback(e);
+      }
+      if (!all) {
+        return e.addEventListener(type, evft, false);
+      } else {
+        return e.forEach(element => {
+          element.addEventListener(type, evft, false);
+        });
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").on("click", ()=>{
+        console.log("clicked!")
+    })
+    
+    */
+    // for adding attributes to the dom elements
+    attr(attribute_object) {
+      if (typeof attribute_object !== "object") return;
+      if (!all) {
+        for (const prop in attribute_object) {
+          const attr = attribute_object[prop];
+          if (prop === null) {
+            return e.getAttribute(prop);
+          } else {
+            e.setAttribute(prop, attr);
+          }
+        }
+      } else {
+        for (const prop in attribute_object) {
+          const attr = attribute_object[prop];
+          if (prop === null) {
+            return e.getAttribute(prop);
+          } else {
+            e.forEach(el => el.setAttribute(prop, attr));
+          }
+        }
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").attr({
+        className: "container",
+        id: "container"
+    })
+    
+    */
+    // for removing attributes from dom elements
+    removeAttr(attr) {
+      if (attr === null) {
+        return;
+      }
+      if (!all) {
+        e.removeAttribute(attr);
+      } else {
+        e.forEach(el => el.removeAttribute(attr));
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").removeAttr("className")
+    
+    */
+    // for adding inner html contents to the dom elements
+    html(code) {
+      if (!all) {
+        e.innerHTML = code;
+      } else {
+        e.forEach(el => (el.innerHTML = code));
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").html("<div> hello am a div </div>")
+    
+    */
+    // for adding text to the dom elements
+    text(text) {
+      if (!all) {
+        e.textContent = text;
+      } else {
+        e.forEach(el => (el.textContent = text));
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").html("hello am text")
+    
+    
+    */
+    // for adding class to the dom elements
+    addClass(clas) {
+      if (!all) {
+        e.classList.add(clas);
+      } else {
+        e.forEach(el => el.classList.add(clas));
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").addClass(".class")
+    
+    */
+    // for removing class from the dom elements
+    removeClass(clas) {
+      if (!all) {
+        e.classList.remove(clas);
+      } else {
+        e.forEach(el => el.classList.remove(clas));
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").removeClass(".class")
+    
+    */
+    // for hiding the dom elements
+    hide() {
+      if (!all) {
+        e.style.display = "none";
+      } else {
+        e.forEach(el => (el.style.display = "none"));
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").hide()
+    
+    */
+    // for toggling the display of elements
+    toggleClass() {
+      if (!all) {
+        if (e.style.display === "none") {
+          e.style.display = "block";
+        } else {
+          e.style.display = "none";
+        }
+      } else {
+        if (e[0].style.display === "none") {
+          e.forEach(el => (el.style.display = "block"));
+        } else {
+          e.forEach(el => (el.style.display = "none"));
+        }
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").toggleClass(".class")
+    
+    */
+    // for displaying the dom elements
+    show() {
+      if (!all) {
+        e.style.display = "block";
+      } else {
+        e.forEach(el => (el.style.display = "block"));
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").show()
+    
+    */
+    // for resizing the dom elements
+    box(w, h, c = "transparent") {
+      if (!all) {
+        e.style.width = w;
+        e.style.height = h;
+        e.style.backgroundColor = c;
+      } else {
+        e.forEach(el => {
+          el.style.width = w;
+          el.style.height = h;
+          el.style.backgroundColor = c;
+        });
+      }
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").box("100px","100%","#ff9800")
+    
+    */
+    // for scrollingthe dom elements into view
+    scrollTo(s = true) {
+      e.scrollIntoView(s);
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").scrollTo()
+    
+    */
+    // for adding elements to the dom elements
+    add(nod) {
+      e.append(nod);
+    },
+    /*
+     *** HOW TO USE ***
+    let span = document.createElement("span");
+    u("#container").add(span)
+    
+    */
+    // for removing elements to the dom elements
+    remove(ind) {
+      e.removeChild(e.childNodes[ind]);
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").remove(0)
+    
+    */
+    // for making the dom elements fulscreen
+    fullScreen() {
+      return {
+        toggle: () => {
+          if (!document.fullscreenElement) {
+            e.requestFullscreen().catch(err => {
+              alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+          } else {
+            document.exitFullscreen();
+          }
+        },
+        set() {
+          e.requestFullscreen().catch(err => {
+            alert(`Error! failure attempting to enable
+ full-screen mode: ${err.message}
+ (${err.name})`);
+          });
+        },
+        exist() {
+          document.exitFullscreen();
+        }
+      };
+    },
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").fullscreen().toggle()
+    u("#container").fullscreen().exist()
+    u("#container").fullscreen().set()
+    
+    */
     evft(e) {
       //   e.stopPropagation()
       e.preventDefault();
@@ -114,6 +384,237 @@ export const u = (el, ifAll_OrNum) => {
     */
   };
 };
+/** This is for creating css styles using javascipt
+ *
+ * HOW TO USE
+ *
+ * css("#container",
+{
+  *
+    height: "100%",
+    *
+    height: "100%",
+    *
+    background-color: "#ff9800"
+    *
+})
+*/
+export const css = (name, sel, properties) => {
+  if (typeof sel === "object") {
+    properties = sel;
+    sel = "";
+  }
+  const styS = "" + name + sel + "" + "{";
+  const styE = "}";
+  let style = "",
+    totalStyle = "";
+  if (properties) {
+    for (const k in properties) {
+      const v = properties[k];
+      style += "" + k + ": " + v + ";";
+    }
+  }
+  let styleTag = document.querySelector("style");
+  if (styleTag === null) {
+    styleTag = document.createElement("style");
+  }
+  totalStyle += styleTag.innerHTML;
+  totalStyle += styS + style + styE;
+  styleTag.innerHTML = totalStyle;
+  document.head.append(styleTag);
+};
+/** This is for creating css @media styles using javascipt
+ *
+ * examples.
+ *
+ * media("min-width: 790px",
+ * *
+["#container",
+{
+  *
+    width: "100%",
+    *
+    height: "100%",
+    *
+    background-color: "#0000"
+    *
+}]
+)
+["#header",
+{
+    width: "100%",
+    *
+    height: "20%",
+    *
+    background-color: "#fff"
+    *
+}]
+*
+)
+ *
+*/
+export const media = (value, ...properties) => {
+  const styS = "@media only screen and (" + value + ") " + "{",
+    styE = "}";
+  let style = "  ",
+    aniSty = " ";
+  const proplen = properties.length;
+  let totalAnimation,
+    Animation = "  ";
+  const animationStep = num => {
+    for (const k in properties[num][1]) {
+      const v = properties[num][1][k];
+      style += "" + k + ": " + v + ";";
+    }
+    aniSty += "" + properties[num][0] + "{" + style + "}";
+    return aniSty;
+  };
+  for (let i = 0; i < proplen; i++) {
+    Animation += animationStep(i);
+  }
+  let aniStyleTag = document.querySelector("style");
+  if (aniStyleTag === null) {
+    aniStyleTag = document.createElement("style");
+  }
+  aniStyleTag.media = "screen";
+  totalAnimation = aniStyleTag.innerHTML;
+  totalAnimation += styS + Animation + styE;
+  aniStyleTag.innerHTML = totalAnimation;
+  document.head.append(aniStyleTag);
+};
+/** This is for creating css animations using javascipt
+ *
+ * example.
+ *
+ *
+ * animate("popanimation",
+ *  *
+["from",
+{
+   *
+    transform: "scale3D(2)" ,
+     *
+    height: "10%",
+     *
+    background-color: "#0000"
+     *
+}]
+ *
+)
+ *
+ *
+["to",
+{
+   *
+    transform: "scale3D(1)" ,
+     *
+    height: "100%",
+     *
+    background-color: "#ff9800"
+     *
+}]
+)
+ *
+ *
+ *
+*/
+export const animate = (name, ...properties) => {
+  const styS = "@keyframes " + name + " " + "{",
+    styE = "}",
+    proplen = properties.length;
+  let style = " ",
+    aniSty = " ",
+    Animation = "  ",
+    totalAnimation = null;
+  const animationStep = num => {
+    for (const k in properties[num][1]) {
+      const v = properties[num][1][k];
+      style += "" + k + ": " + v + ";";
+    }
+    aniSty += "" + properties[num][0] + "{" + style + "}";
+    return aniSty;
+  };
+  for (let i = 0; i < proplen; i++) {
+    Animation += animationStep(i);
+  }
+  let aniStyleTag = document.querySelector("style");
+  if (aniStyleTag === null) {
+    aniStyleTag = document.createElement("style");
+  }
+  aniStyleTag.media = "screen";
+  totalAnimation = aniStyleTag.innerHTML;
+  totalAnimation += styS + Animation + styE;
+  aniStyleTag.innerHTML = totalAnimation;
+  document.head.append(aniStyleTag);
+};
+/**
+ * The build is a context used as a template engine for building layouts
+ *
+ * example.
+ *
+ * const p = build(
+ * *
+  "div",
+  {
+    *
+    title: "title",
+    *
+    innerText: "am a title",
+    *
+    onclick: function () {
+      *
+      console.log("i was clicked");
+      *
+    }
+    *
+  },
+  *
+  build("span", { innerText: "am a span", title: "title" })
+  *
+);
+ */
+export const build = (...layouts) => {
+  function createElement(type = "", op = {}, chil) {
+    const element = document.createElement(type);
+    for (const k in op) {
+      const v = op[k];
+      element.setAttribute(k, v);
+    }
+    if (chil) {
+      if (Array.isArray(chil)) {
+        const frag = new DocumentFragment();
+        // templating testing should be done here
+        chil.forEach(ch => {
+          frag.append(ch);
+        });
+        element.append(frag);
+      } else {
+        element.append(chil);
+      }
+    }
+    // return the element after building the dom objects
+    return element;
+  }
+  let i = 0;
+  if (layouts.length > 1) {
+    i = layouts.length;
+    const frag = new DocumentFragment();
+    while (i > 0) {
+      // templating testing should be done here
+      const ele = createElement(layouts[i][0], layouts[i][1], layouts[i][2]);
+      frag.append(ele);
+      i--;
+    }
+    return frag;
+  } else {
+    if (typeof layouts[0] === "string") {
+      // templating testing should be done here
+      const element = createElement(layouts[0][0], layouts[0][1], layouts[0][2]);
+      return element;
+    }
+  }
+  return new DocumentFragment();
+};
 /**
  * this context used for rendering built layout to a parent or the document body
  *
@@ -123,7 +624,13 @@ export const u = (el, ifAll_OrNum) => {
  *
 buildTo(p, "body");
 */
-export const buildTo = (child, parent) => {};
+export const buildTo = (child, parent) => {
+  if (typeof parent === "string") {
+    document.querySelectorAll(parent).forEach(par => par.appendChild(child));
+  } else {
+    parent.append(child);
+  }
+};
 const routes = {};
 export const route = function (path = "/", templateId, controller) {
   const link = document.createElement("a");
@@ -804,6 +1311,161 @@ export const re = (function () {
     cancel: cancel
   };
 })();
+// END OF THE main RE ENGINE////////////////////////
+/*
+other TODOs stuff will be built here
+*/
+export const entity = function (name, painter, behaviors) {
+  /*an entity is any object or thing
+   that can be added to the game world*/
+  //this.id = name || "none" //name of the entity for identification can be used out side here******
+  this.name = name || "none";
+  this.painter = painter || {}; // callback for paint the entity     can be used out side here******
+  this.width = 0; // width of entiity                              can be used out side here******
+  this.height = 0; // height of entity                             can be used out side here******
+  // this.spritWidth = 0;
+  // this.spritHeight = 0;
+  this.top = 0; // distance from the top of the canvas              can be used out side here******
+  this.left = 0; // distance from the left of the canvas            can be used out side here******
+  // this.velocityX = 0; // velocity on the x axis
+  // this.velocityY = 0; // velocity on the y axis
+  this.visible = true; // to check if the entity is displayed        can be used out side here******
+  this.behaviors = behaviors; // this is a callback to add additional properties to the entity at runtime
+  // this.frame = 0;
+  // this.timer = 0;
+  this.delete = false; //  to delete an entity                        can be used out side here******
+  this.border = true; //   to make the entity observer sides or not   can be used out side here******
+  this.isHit = false;
+};
+entity.prototype = {
+  // this algorimth is for calling the paint function
+  // to make it functional when seen at runtime
+  update(context, lastDeltalTime) {
+    if (typeof this.painter.update !== "undefined" && this.visible) {
+      this.painter.update(this, context, lastDeltalTime);
+    } else {
+      // throw new Error(`RE: entity with name of ${this.name} has no update function`);
+    }
+  },
+  paint(context, lastDeltalTime) {
+    if (typeof this.painter.paint !== "undefined" && this.visible) {
+      this.painter.paint(this, context, lastDeltalTime);
+    } else {
+      throw new Error(`RE: entity with name of ${this.name} has no paint function`);
+    }
+  },
+  observeBorder(w, h) {
+    if (this.top <= 0) {
+      this.top *= 0;
+    } else {
+      if (h && this.top + this.height >= h) {
+        this.top = h - this.height;
+      }
+    }
+    if (this.left <= 0) {
+      this.left *= 0;
+    } else {
+      if (w && this.left + this.width >= w) {
+        this.left = w - this.width;
+      }
+    }
+  },
+  run(context, lastDeltalTime) {
+    // here the entity don't have to be visble
+    if (typeof this.behaviors !== "undefined") {
+      this.behaviors(this, context, lastDeltalTime);
+    }
+  }
+};
+export const imgPainter = function (img, delay = 1) {
+  this.image = img;
+  this.delay = delay;
+  this.range = 0;
+};
+imgPainter.prototype = {
+  // paint only no update
+  paint(entity, context) {
+    this.range++;
+    if (this.range % this.delay === 0) {
+      context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
+    }
+    if (this.range > 100) {
+      this.range = 1;
+    }
+  }
+};
+// this is a powerful sprite algorith for
+// rendering the exact sprite from a
+// spritesheet in successful orders
+export const spriteSheetPainter = function (img, horizontal = 1, vertical = 1, delay = 1) {
+  this.image = img;
+  this.framesWidth = Math.round(this.image.width / horizontal);
+  this.framesHeight = Math.round(this.image.height / vertical);
+  this.horizontalPictures = horizontal;
+  this.verticalPictures = vertical;
+  this.frameHeightCount = 0;
+  this.frameWidthCount = 0;
+  this.range = 0;
+  this.delay = delay;
+  this.isLastImage = false;
+  this.animateAllFrames = true;
+  this.animate = true;
+  this.changeSheet = function (img, horizontal = 0, vertical = 0, delay = 1) {
+    this.image = img;
+    this.framesWidth = Math.round(this.image.width / horizontal);
+    this.framesHeight = Math.round(this.image.height / vertical);
+    this.horizontalPictures = horizontal;
+    this.verticalPictures = vertical;
+    this.delay = delay;
+  };
+  this.animateFrameOf = function (frameY = 0) {
+    this.frameHeightCount = frameY;
+    if (this.frameWidthCount <= this.horizontalPictures - 2) {
+      this.frameWidthCount++;
+    } else {
+      this.frameWidthCount = 0;
+    }
+  };
+};
+spriteSheetPainter.prototype = {
+  update() {
+    this.range++;
+    if (this.range % this.delay === 0 && this.animate) {
+      if (this.animateAllFrames) {
+        if (this.frameHeightCount < this.verticalPictures - 1) {
+          if (this.frameWidthCount <= this.horizontalPictures - 2) {
+            this.frameWidthCount++;
+          } else {
+            this.isLastImage = true;
+            this.frameWidthCount = 0;
+            this.frameHeightCount++;
+          }
+        } else {
+          this.frameHeightCount = 0;
+        }
+        if (this.frameHeightCount === this.verticalPictures) {
+          this.frameHeightCount++;
+        }
+      }
+    }
+    if (this.range > 100) {
+      this.range = 1;
+    }
+  },
+  paint(entity, context) {
+    context.drawImage(
+      this.image,
+      this.framesWidth * this.frameWidthCount,
+      this.framesHeight * this.frameHeightCount,
+      this.framesWidth,
+      this.framesHeight,
+      entity.left,
+      entity.top,
+      entity.width,
+      entity.height
+    );
+  }
+};
 export const speaker = function (text, language = "", volume = 1, rate = 1, pitch = 1) {
   // common languages (not supported by all browsers)
   // en - english,  it - italian, fr - french,  de - german, es - spanish

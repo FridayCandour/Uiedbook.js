@@ -7,6 +7,128 @@ declare type Uied = {
 declare type BaseE = HTMLElement | NodeListOf<HTMLElement>;
 /** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
 export declare const u: (el: string | BaseE, ifAll_OrNum?: number | boolean | undefined) => Uied;
+/** This is for creating css styles using javascipt
+ *
+ * HOW TO USE
+ *
+ * css("#container",
+{
+  *
+    height: "100%",
+    *
+    height: "100%",
+    *
+    background-color: "#ff9800"
+    *
+})
+*/
+export declare const css: (
+  name: string,
+  sel: string | Record<string, string>,
+  properties?: Record<string, string> | undefined
+) => void;
+/** This is for creating css @media styles using javascipt
+ *
+ * examples.
+ *
+ * media("min-width: 790px",
+ * *
+["#container",
+{
+  *
+    width: "100%",
+    *
+    height: "100%",
+    *
+    background-color: "#0000"
+    *
+}]
+)
+["#header",
+{
+    width: "100%",
+    *
+    height: "20%",
+    *
+    background-color: "#fff"
+    *
+}]
+*
+)
+ *
+*/
+export declare const media: (value: string, ...properties: [string, Record<string, string>][]) => void;
+/** This is for creating css animations using javascipt
+ *
+ * example.
+ *
+ *
+ * animate("popanimation",
+ *  *
+["from",
+{
+   *
+    transform: "scale3D(2)" ,
+     *
+    height: "10%",
+     *
+    background-color: "#0000"
+     *
+}]
+ *
+)
+ *
+ *
+["to",
+{
+   *
+    transform: "scale3D(1)" ,
+     *
+    height: "100%",
+     *
+    background-color: "#ff9800"
+     *
+}]
+)
+ *
+ *
+ *
+*/
+export declare const animate: (name: string, ...properties: [string, Record<string, string>][]) => void;
+declare type lay = [
+  a: string,
+  b?: {
+    [k: string]: string;
+  },
+  c?: HTMLElement | Node
+];
+/**
+ * The build is a context used as a template engine for building layouts
+ *
+ * example.
+ *
+ * const p = build(
+ * *
+  "div",
+  {
+    *
+    title: "title",
+    *
+    innerText: "am a title",
+    *
+    onclick: function () {
+      *
+      console.log("i was clicked");
+      *
+    }
+    *
+  },
+  *
+  build("span", { innerText: "am a span", title: "title" })
+  *
+);
+ */
+export declare const build: (...layouts: lay[]) => DocumentFragment | HTMLElement;
 /**
  * this context used for rendering built layout to a parent or the document body
  *
@@ -89,6 +211,14 @@ export declare const re: {
   getAud: (id: string) => HTMLAudioElement;
   cancel: () => void;
 };
+export declare const entity: (name: string, painter: Function, behaviors: Function) => void;
+export declare const imgPainter: (img: HTMLImageElement, delay?: number) => void;
+export declare const spriteSheetPainter: (
+  img: HTMLImageElement,
+  horizontal?: number,
+  vertical?: number,
+  delay?: number
+) => void;
 export declare const speaker: (text: string, language?: string, volume?: number, rate?: number, pitch?: number) => void;
 export declare const speakerStop: () => void;
 /** play mp3 or wav audio from a local file or url  */
