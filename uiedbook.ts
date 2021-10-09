@@ -363,8 +363,16 @@ u("#container").remove(0)
 
 */
 
-    // for making the dom elements fulscreen
-    fullScreen() {
+
+    /*
+ *** HOW TO USE ***
+
+u("#container").fullscreen().toggle()
+u("#container").fullscreen().exist()
+u("#container").fullscreen().set()
+
+*/
+   fullScreen() {
       return {
         toggle: () => {
           if (!document.fullscreenElement) {
@@ -388,29 +396,8 @@ u("#container").remove(0)
       };
     },
 
-    /*
- *** HOW TO USE ***
 
-u("#container").fullscreen().toggle()
-u("#container").fullscreen().exist()
-u("#container").fullscreen().set()
 
-*/
-
-    evft(e) {
-      //   e.stopPropagation()
-      e.preventDefault();
-      return callback(e);
-    }
-
-    /*
- *** HOW TO USE ***
-
-u("#container").fullscreen().toggle()
-u("#container").fullscreen().exist()
-u("#container").fullscreen().set()
-
-*/
   };
 };
 
@@ -1707,23 +1694,23 @@ export const renderer = (function () {
     id: any, // for pausing or playing the game
     context: CanvasRenderingContext2D,
     // variables for the timing
-    fps,
+    fps:number,
     // background varible
     lastdt = 0,
     nextdt = 0,
     pause = false,
     deltaTime;
-  const bg = [],
+  const bg:Object[] = [],
     // entity storage array
-    entitysArray = [];
+    entitysArray: object[] = [];
 
-  function bgPaint(img: HTMLImageElement, speed: number, up, left) {
+  function bgPaint(img: HTMLImageElement, speed: number, up:boolean, left:boolean) {
     const bgImg = new bgPainter(img, speed, up, left);
     bg.push(bgImg);
     return bgImg;
   }
 
-  function animatebg(canvas) {
+  function animatebg(canvas:HTMLCanvasElement) {
     if (bg === []) return false;
     bg.forEach(b => {
       b.paint(canvas);
@@ -1731,18 +1718,19 @@ export const renderer = (function () {
     });
   }
 
-  function _assemble(...players) {
+  function _assemble(...players: object[]) {
     if (!players) throw new Error("RE: No players assembled");
     players.forEach(player => {
       entitysArray.push(player);
     });
     return entitysArray;
   }
-  function copyCanvasTo(c, opacity, border) {
-    const cx = c.getContext("2d");
+  function copyCanvasTo(c:HTMLCanvasElement) {
+    if (!c) {
+      throw new Error("RE: the main game canvas cannot be copied to a null element");
+    }
+    const cx = c.getContext("2d")!;
     cx.drawImage(canvas, 0, 0, c.width, c.height);
-    c.style.opacity = opacity;
-    c.style.borderRadius = border;
     return c;
   }
 
@@ -1786,12 +1774,12 @@ export const renderer = (function () {
     nextdt = 0;
   }
 
-  function _render(canv, fpso = 0) {
+  function _render(canv: HTMLCanvasElement, fpso:number = 0) {
     if (!canv) {
       throw new Error("RE: game needs to be rendered EXP: renderer.render(canvas)");
     }
     canvas = canv;
-    context = canvas.getContext("2d");
+    context = canvas.getContext("2d")!;
     fps = fpso;
     animate(0);
   }
