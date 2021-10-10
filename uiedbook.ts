@@ -68,7 +68,7 @@ u("#container").style({
 
       */
     config(obj) {
-      if (obj instanceof HTMLElement) {
+      if (obj instanceof Object) {
         Object.assign(e, obj);
       } else {
         throw new Error(`the variable is not an object ${String(obj)}`);
@@ -128,8 +128,6 @@ u("#container").appendTo("div"{
     // advance event listener
     on(type: string, callback: (e: object) => void) {
       function evft(e: Event) {
-        //   e.stopPropagation()
-        e.preventDefault();
         return callback(e);
       }
       if (!all) {
@@ -1514,7 +1512,7 @@ imgPainter.prototype = {
 // this is a powerful sprite algorith for
 // rendering the exact sprite from a
 // spritesheet in successful orders
-export const spriteSheetPainter = function (img: HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
+export const spriteSheetPainter = function (this: Object, img: HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
   this.image = img;
   this.framesWidth = Math.round(this.image.width / horizontal);
   this.framesHeight = Math.round(this.image.height / vertical);

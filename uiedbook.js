@@ -64,7 +64,7 @@ var u = function (el, ifAll_OrNum) {
     
           */
         config: function (obj) {
-            if (obj instanceof HTMLElement) {
+            if (obj instanceof Object) {
                 Object.assign(e, obj);
             }
             else {
@@ -122,8 +122,6 @@ var u = function (el, ifAll_OrNum) {
         // advance event listener
         on: function (type, callback) {
             function evft(e) {
-                //   e.stopPropagation()
-                e.preventDefault();
                 return callback(e);
             }
             if (!all) {
