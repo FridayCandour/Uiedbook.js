@@ -15,9 +15,27 @@ YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WIT
 
 type Uied = {
   style(obj: Partial<HTMLElement["style"]>): void;
-  config(obj: Partial<HTMLElement>): void;
+  config(obj: Partial<ObjectConstructor>): void;
   appendTo(type: string, attribute: Record<string, string>, number?: number): void;
-  evft(e: Event): void;
+  on(type: string, callback: (e: object) => void): void;
+  attr(attribute_object: object): void;
+  removeAttr(attr: string): void;
+  html(code: string): void;
+  text(text: string): void;
+  addClass(clas: string): void;
+removeClass(clas: string): void;
+hide(): void;
+toggleClass(): void;
+show(): void;
+box(w: number, h: number, c?: string): void;
+scrollTo(s?: boolean): void;
+add(nod: Element | HTMLElement | Node): void;
+remove(ind: number): void;
+fullScreen(): {
+    toggle: () => void;
+    set(): void;
+    exist(): void;
+};
 };
 
 type BaseE = HTMLElement | NodeListOf<HTMLElement>;
@@ -164,7 +182,7 @@ u("#container").on("click", ()=>{
         for (const prop in attribute_object) {
           const attr = attribute_object[prop];
           if (prop === null) {
-            return e.getAttribute(prop);
+            return;
           } else {
             e.forEach(el => el.setAttribute(prop, attr));
           }
@@ -313,13 +331,13 @@ u("#container").show()
 
     box(w: number, h: number, c = "transparent") {
       if (!all) {
-        e.style.width = w;
-        e.style.height = h;
+        e.style.width = w + '';
+        e.style.height = h + '';
         e.style.backgroundColor = c;
       } else {
         e.forEach(el => {
-          el.style.width = w;
-          el.style.height = h;
+          el.style.width = w + '';
+          el.style.height = h + '';
           el.style.backgroundColor = c;
         });
       }
@@ -332,7 +350,11 @@ u("#container").box("100px","100%","#ff9800")
 */
     // for scrollingthe dom elements into view
     scrollTo(s = true) {
-      e.scrollIntoView(s);
+      if (!all) {
+        e.scrollIntoView(s);        
+      } else {
+        throw new Error("can't to multiple elements");
+      }
     },
     /*
  *** HOW TO USE ***
@@ -342,7 +364,11 @@ u("#container").scrollTo()
 */
     // for adding elements to the dom elements
     add(nod: Element | HTMLElement | Node) {
-      e.append(nod);
+      if (!all) {
+        e.append(nod);        
+      } else {
+        e.forEach((el)=> el.append(nod));
+      }
     },
     /*
  *** HOW TO USE ***
@@ -352,7 +378,11 @@ u("#container").add(span)
 */
     // for removing elements to the dom elements
     remove(ind: number) {
-      e.removeChild(e.childNodes[ind]);
+      if (!all) {
+        e.removeChild(e.childNodes[ind]); 
+      } else {
+        e.forEach((el)=> el.removeChild(el.childNodes[ind]))
+      }
     },
     /*
  *** HOW TO USE ***
@@ -373,20 +403,24 @@ u("#container").fullscreen().set()
    fullScreen() {
       return {
         toggle: () => {
-          if (!document.fullscreenElement) {
-            e.requestFullscreen().catch(err => {
-              alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
-            });
-          } else {
-            document.exitFullscreen();
+          if (!all) {
+            if (!document.fullscreenElement) {
+              e.requestFullscreen().catch(err => {
+                alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
+              });
+            } else {
+              document.exitFullscreen();
+            }
           }
         },
         set() {
-          e.requestFullscreen().catch(err => {
-            alert(`Error! failure attempting to enable
- full-screen mode: ${err.message}
- (${err.name})`);
-          });
+          if (!all) {
+            e.requestFullscreen().catch(err => {
+              alert(`Error! failure attempting to enable
+   full-screen mode: ${err.message}
+   (${err.name})`);
+            });
+          }
         },
         exist() {
           document.exitFullscreen();
@@ -596,7 +630,7 @@ type lay = [a: string, b?: { [k: string]: string }, c?: HTMLElement | Node];
   *
 ); 
  */
-export const build = (...layouts: lay[]): DocumentFragment | HTMLElement => {
+export const build = (...layouts: lay[]): DocumentFragment | HTMLElement | Element => {
   function createElement(
     type = "",
     op: { [k: string]: string } = {},
@@ -644,7 +678,6 @@ export const build = (...layouts: lay[]): DocumentFragment | HTMLElement => {
   return new DocumentFragment();
 };
 
-type lay = [a: string, b?: { [k: string]: string }, c?: HTMLElement | Node];
 
 /**
  * this context used for rendering built layout to a parent or the document body
@@ -1024,6 +1057,9 @@ export const continuesKeys = (
     throw new Error("no keys or callbacks given");
   }
   let temporaryKeys: string[] = [];
+  object.addEventListener("keyup", ()=>{
+    temporaryKeys = []
+  })
   keepKeys(keys, callback);
   object.addEventListener(
     "keydown",
@@ -1035,7 +1071,6 @@ export const continuesKeys = (
         temporaryKeys.push(e.key);
       }
       checkKeys(temporaryKeys, e, delay);
-      temporaryKeys = [];
     },
     false
   );
@@ -1426,7 +1461,7 @@ export const re = (function () {
 /*
 other TODOs stuff will be built here
 */
-export const entity = function (name: string, painter: Function, behaviors: Function) {
+export const entity = function (this:this, name: string, painter: Function, behaviors: Function) {
   /*an entity is any object or thing
  that can be added to the game world*/
 
@@ -1491,14 +1526,14 @@ entity.prototype = {
   }
 };
 
-export const imgPainter = function (img: HTMLImageElement, delay = 1) {
+export const imgPainter = function (this:this, img: HTMLImageElement, delay = 1) {
   this.image = img;
   this.delay = delay;
   this.range = 0;
 };
 imgPainter.prototype = {
   // paint only no update
-  paint(entity, context: CanvasRenderingContext2D) {
+  paint(entity: { left: number; top: number; width: number; height: number; }, context: CanvasRenderingContext2D) {
     this.range++;
     if (this.range % this.delay === 0) {
       context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
@@ -1512,7 +1547,7 @@ imgPainter.prototype = {
 // this is a powerful sprite algorith for
 // rendering the exact sprite from a
 // spritesheet in successful orders
-export const spriteSheetPainter = function (this: Object, img: HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
+export const spriteSheetPainter = function (this:this, img: HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
   this.image = img;
   this.framesWidth = Math.round(this.image.width / horizontal);
   this.framesHeight = Math.round(this.image.height / vertical);
@@ -1569,7 +1604,7 @@ spriteSheetPainter.prototype = {
       this.range = 1;
     }
   },
-  paint(entity, context: CanvasRenderingContext2D) {
+  paint(entity: { left: number; top: number; width: number; height: number; }, context: CanvasRenderingContext2D) {
     context.drawImage(
       this.image,
       this.framesWidth * this.frameWidthCount,
@@ -1623,7 +1658,7 @@ audio.prototype = {
   }
 };
 
-export const bgPainter = function (this: any, img: HTMLImageElement, speed = 10, up: boolean, left: boolean) {
+export const bgPainter = function (this:this, img: HTMLImageElement, speed = 10, up: boolean, left: boolean): void {
   this.image = img;
   this.range = 0;
   this.speed = speed;
@@ -1698,7 +1733,7 @@ export const renderer = (function () {
     nextdt = 0,
     pause = false,
     deltaTime;
-  const bg:Object[] = [],
+  const bg: any[] = [],
     // entity storage array
     entitysArray: object[] = [];
 
@@ -1716,7 +1751,7 @@ export const renderer = (function () {
     });
   }
 
-  function _assemble(...players: object[]) {
+  function _assemble(...players: ObjectConstructor[]) {
     if (!players) throw new Error("RE: No players assembled");
     players.forEach(player => {
       entitysArray.push(player);
@@ -1742,7 +1777,7 @@ export const renderer = (function () {
     }
   }
 
-  function animate(dt) {
+  function animate(dt: number) {
     id = window.requestAnimationFrame(animate);
     deltaTime = dt - lastdt;
     lastdt = dt;

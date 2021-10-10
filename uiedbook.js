@@ -160,7 +160,7 @@ var u = function (el, ifAll_OrNum) {
                 var _loop_2 = function (prop) {
                     var attr = attribute_object[prop];
                     if (prop === null) {
-                        return { value: e.getAttribute(prop) };
+                        return { value: void 0 };
                     }
                     else {
                         e.forEach(function (el) { return el.setAttribute(prop, attr); });
@@ -320,14 +320,14 @@ var u = function (el, ifAll_OrNum) {
         box: function (w, h, c) {
             if (c === void 0) { c = "transparent"; }
             if (!all) {
-                e.style.width = w;
-                e.style.height = h;
+                e.style.width = w + '';
+                e.style.height = h + '';
                 e.style.backgroundColor = c;
             }
             else {
                 e.forEach(function (el) {
-                    el.style.width = w;
-                    el.style.height = h;
+                    el.style.width = w + '';
+                    el.style.height = h + '';
                     el.style.backgroundColor = c;
                 });
             }
@@ -341,7 +341,12 @@ var u = function (el, ifAll_OrNum) {
         // for scrollingthe dom elements into view
         scrollTo: function (s) {
             if (s === void 0) { s = true; }
-            e.scrollIntoView(s);
+            if (!all) {
+                e.scrollIntoView(s);
+            }
+            else {
+                throw new Error("can't to multiple elements");
+            }
         },
         /*
      *** HOW TO USE ***
@@ -351,7 +356,12 @@ var u = function (el, ifAll_OrNum) {
     */
         // for adding elements to the dom elements
         add: function (nod) {
-            e.append(nod);
+            if (!all) {
+                e.append(nod);
+            }
+            else {
+                e.forEach(function (el) { return el.append(nod); });
+            }
         },
         /*
      *** HOW TO USE ***
@@ -361,7 +371,12 @@ var u = function (el, ifAll_OrNum) {
     */
         // for removing elements to the dom elements
         remove: function (ind) {
-            e.removeChild(e.childNodes[ind]);
+            if (!all) {
+                e.removeChild(e.childNodes[ind]);
+            }
+            else {
+                e.forEach(function (el) { return el.removeChild(el.childNodes[ind]); });
+            }
         },
         /*
      *** HOW TO USE ***
@@ -380,19 +395,23 @@ var u = function (el, ifAll_OrNum) {
         fullScreen: function () {
             return {
                 toggle: function () {
-                    if (!document.fullscreenElement) {
-                        e.requestFullscreen()["catch"](function (err) {
-                            alert("Error! failure attempting to enable full-screen mode: " + err.message + " (" + err.name + ")");
-                        });
-                    }
-                    else {
-                        document.exitFullscreen();
+                    if (!all) {
+                        if (!document.fullscreenElement) {
+                            e.requestFullscreen()["catch"](function (err) {
+                                alert("Error! failure attempting to enable full-screen mode: " + err.message + " (" + err.name + ")");
+                            });
+                        }
+                        else {
+                            document.exitFullscreen();
+                        }
                     }
                 },
                 set: function () {
-                    e.requestFullscreen()["catch"](function (err) {
-                        alert("Error! failure attempting to enable\n full-screen mode: " + err.message + "\n (" + err.name + ")");
-                    });
+                    if (!all) {
+                        e.requestFullscreen()["catch"](function (err) {
+                            alert("Error! failure attempting to enable\n   full-screen mode: " + err.message + "\n   (" + err.name + ")");
+                        });
+                    }
                 },
                 exist: function () {
                     document.exitFullscreen();
@@ -1002,6 +1021,9 @@ var continuesKeys = function (keys, callback, delay, object, lock) {
         throw new Error("no keys or callbacks given");
     }
     var temporaryKeys = [];
+    object.addEventListener("keyup", function () {
+        temporaryKeys = [];
+    });
     keepKeys(keys, callback);
     object.addEventListener("keydown", function (e) {
         if (lock) {
@@ -1011,7 +1033,6 @@ var continuesKeys = function (keys, callback, delay, object, lock) {
             temporaryKeys.push(e.key);
         }
         checkKeys(temporaryKeys, e, delay);
-        temporaryKeys = [];
     }, false);
 };
 exports.continuesKeys = continuesKeys;

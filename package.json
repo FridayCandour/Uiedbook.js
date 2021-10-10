@@ -1,4 +1,5 @@
-{
+{"name": "uiedbook",
+  "version": "1.0.54",
   "scripts": {
     "build": "eslint uiedbook.ts & tsc & prettier . -w && uglifyjs uiedbook.js > uiedbook_min.js"
   },
