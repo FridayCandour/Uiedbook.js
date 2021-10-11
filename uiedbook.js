@@ -138,16 +138,16 @@ export const u = (el, ifAll_OrNum) => {
           if (prop === null) {
             return e.getAttribute(prop);
           } else {
-            e.setAttribute(prop, attr);
+            e.setAttribute(prop, String(attr));
           }
         }
       } else {
         for (const prop in attribute_object) {
           const attr = attribute_object[prop];
           if (prop === null) {
-            return;
+            return Array.from(e).map(el => el.getAttribute(prop));
           } else {
-            e.forEach(el => el.setAttribute(prop, attr));
+            e.forEach(el => el.setAttribute(prop, String(attr)));
           }
         }
       }
@@ -163,9 +163,6 @@ export const u = (el, ifAll_OrNum) => {
     */
     // for removing attributes from dom elements
     removeAttr(attr) {
-      if (attr === null) {
-        return;
-      }
       if (!all) {
         e.removeAttribute(attr);
       } else {
@@ -288,13 +285,13 @@ export const u = (el, ifAll_OrNum) => {
     // for resizing the dom elements
     box(w, h, c = "transparent") {
       if (!all) {
-        e.style.width = w + "";
-        e.style.height = h + "";
+        e.style.width = String(w);
+        e.style.height = String(h);
         e.style.backgroundColor = c;
       } else {
         e.forEach(el => {
-          el.style.width = w + "";
-          el.style.height = h + "";
+          el.style.width = String(w);
+          el.style.height = String(h);
           el.style.backgroundColor = c;
         });
       }
@@ -310,7 +307,7 @@ export const u = (el, ifAll_OrNum) => {
       if (!all) {
         e.scrollIntoView(s);
       } else {
-        throw new Error("can't to multiple elements");
+        e.forEach(el => el.scrollIntoView(s));
       }
     },
     /*
@@ -358,30 +355,45 @@ export const u = (el, ifAll_OrNum) => {
     fullScreen() {
       return {
         toggle: () => {
-          if (!all) {
-            if (!document.fullscreenElement) {
-              e.requestFullscreen().catch(err => {
-                alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
-              });
-            } else {
-              document.exitFullscreen();
-            }
+          if (!document.fullscreenElement && !all) {
+            e.requestFullscreen().catch(err => {
+              alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+          } else {
+            void document.exitFullscreen();
           }
         },
         set() {
-          if (!all) {
-            e.requestFullscreen().catch(err => {
-              alert(`Error! failure attempting to enable
-   full-screen mode: ${err.message}
-   (${err.name})`);
-            });
+          if (all) {
+            return;
           }
+          e.requestFullscreen().catch(err => {
+            alert(`Error! failure attempting to enable
+ full-screen mode: ${err.message}
+ (${err.name})`);
+          });
         },
         exist() {
-          document.exitFullscreen();
+          void document.exitFullscreen();
         }
       };
     }
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").fullscreen().toggle()
+    u("#container").fullscreen().exist()
+    u("#container").fullscreen().set()
+    
+    */
+    /*
+     *** HOW TO USE ***
+    
+    u("#container").fullscreen().toggle()
+    u("#container").fullscreen().exist()
+    u("#container").fullscreen().set()
+    
+    */
   };
 };
 /** This is for creating css styles using javascipt
@@ -1323,24 +1335,6 @@ other TODOs stuff will be built here
 */
 /** an entity is any object or thing that can be added to the game world */
 export class Entity {
-  name;
-  painter;
-  behaviors;
-  /** width of entiity */
-  width = 0;
-  /** height of entity */
-  height = 0;
-  /** distance from the top of the canvas */
-  top = 0;
-  /** distance from the left of the canvas */
-  left = 0;
-  /** to check if the entity is displayed */
-  visible = true;
-  /** to delete an entity */
-  delete = false;
-  /** to make the entity observer sides or not */
-  border = true;
-  isHit = false;
   // spritWidth = 0;
   // spritHeight = 0;
   // frame = 0;
@@ -1356,6 +1350,21 @@ export class Entity {
     this.name = name;
     this.painter = painter;
     this.behaviors = behaviors;
+    /** width of entiity */
+    this.width = 0;
+    /** height of entity */
+    this.height = 0;
+    /** distance from the top of the canvas */
+    this.top = 0;
+    /** distance from the left of the canvas */
+    this.left = 0;
+    /** to check if the entity is displayed */
+    this.visible = true;
+    /** to delete an entity */
+    this.delete = false;
+    /** to make the entity observer sides or not */
+    this.border = true;
+    this.isHit = false;
     this.name ||= "none";
   }
   // this algorimth is for calling the paint function
@@ -1398,12 +1407,10 @@ export class Entity {
   }
 }
 export class ImgPainter {
-  image;
-  delay;
-  range = 0;
   constructor(image, delay = 1) {
     this.image = image;
     this.delay = delay;
+    this.range = 0;
   }
   paint(entity, context) {
     this.range++;

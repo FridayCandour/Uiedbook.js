@@ -2,8 +2,8 @@ declare type Uied = {
   style(obj: Partial<HTMLElement["style"]>): void;
   config(obj: Partial<ObjectConstructor>): void;
   appendTo(type: string, attribute: Record<string, string>, number?: number): void;
-  on(type: string, callback: (e: object) => void): void;
-  attr(attribute_object: object): void;
+  on(type: string, callback: (e: Event) => void): void;
+  attr(attribute_object: Partial<HTMLElement>): string | null | (string | null)[] | undefined;
   removeAttr(attr: string): void;
   html(code: string): void;
   text(text: string): void;
