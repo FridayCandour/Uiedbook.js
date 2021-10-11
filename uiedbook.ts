@@ -23,19 +23,19 @@ type Uied = {
   html(code: string): void;
   text(text: string): void;
   addClass(clas: string): void;
-removeClass(clas: string): void;
-hide(): void;
-toggleClass(): void;
-show(): void;
-box(w: number, h: number, c?: string): void;
-scrollTo(s?: boolean): void;
-add(nod: Element | HTMLElement | Node): void;
-remove(ind: number): void;
-fullScreen(): {
+  removeClass(clas: string): void;
+  hide(): void;
+  toggleClass(): void;
+  show(): void;
+  box(w: number, h: number, c?: string): void;
+  scrollTo(s?: boolean): void;
+  add(nod: Element | HTMLElement | Node): void;
+  remove(ind: number): void;
+  fullScreen(): {
     toggle: () => void;
     set(): void;
     exist(): void;
-};
+  };
 };
 
 type BaseE = HTMLElement | NodeListOf<HTMLElement>;
@@ -167,7 +167,7 @@ u("#container").on("click", ()=>{
 */
 
     // for adding attributes to the dom elements
-    attr(attribute_object: object) {
+    attr(attribute_object: Record<string, string>) {
       if (typeof attribute_object !== "object") return;
       if (!all) {
         for (const prop in attribute_object) {
@@ -331,13 +331,13 @@ u("#container").show()
 
     box(w: number, h: number, c = "transparent") {
       if (!all) {
-        e.style.width = w + '';
-        e.style.height = h + '';
+        e.style.width = w + "";
+        e.style.height = h + "";
         e.style.backgroundColor = c;
       } else {
         e.forEach(el => {
-          el.style.width = w + '';
-          el.style.height = h + '';
+          el.style.width = w + "";
+          el.style.height = h + "";
           el.style.backgroundColor = c;
         });
       }
@@ -351,7 +351,7 @@ u("#container").box("100px","100%","#ff9800")
     // for scrollingthe dom elements into view
     scrollTo(s = true) {
       if (!all) {
-        e.scrollIntoView(s);        
+        e.scrollIntoView(s);
       } else {
         throw new Error("can't to multiple elements");
       }
@@ -365,9 +365,9 @@ u("#container").scrollTo()
     // for adding elements to the dom elements
     add(nod: Element | HTMLElement | Node) {
       if (!all) {
-        e.append(nod);        
+        e.append(nod);
       } else {
-        e.forEach((el)=> el.append(nod));
+        e.forEach(el => el.append(nod));
       }
     },
     /*
@@ -379,9 +379,9 @@ u("#container").add(span)
     // for removing elements to the dom elements
     remove(ind: number) {
       if (!all) {
-        e.removeChild(e.childNodes[ind]); 
+        e.removeChild(e.childNodes[ind]);
       } else {
-        e.forEach((el)=> el.removeChild(el.childNodes[ind]))
+        e.forEach(el => el.removeChild(el.childNodes[ind]));
       }
     },
     /*
@@ -391,7 +391,6 @@ u("#container").remove(0)
 
 */
 
-
     /*
  *** HOW TO USE ***
 
@@ -400,7 +399,7 @@ u("#container").fullscreen().exist()
 u("#container").fullscreen().set()
 
 */
-   fullScreen() {
+    fullScreen() {
       return {
         toggle: () => {
           if (!all) {
@@ -426,10 +425,7 @@ u("#container").fullscreen().set()
           document.exitFullscreen();
         }
       };
-    },
-
-
-
+    }
   };
 };
 
@@ -677,7 +673,6 @@ export const build = (...layouts: lay[]): DocumentFragment | HTMLElement | Eleme
   }
   return new DocumentFragment();
 };
-
 
 /**
  * this context used for rendering built layout to a parent or the document body
@@ -1057,9 +1052,9 @@ export const continuesKeys = (
     throw new Error("no keys or callbacks given");
   }
   let temporaryKeys: string[] = [];
-  object.addEventListener("keyup", ()=>{
-    temporaryKeys = []
-  })
+  object.addEventListener("keyup", () => {
+    temporaryKeys = [];
+  });
   keepKeys(keys, callback);
   object.addEventListener(
     "keydown",
@@ -1461,31 +1456,39 @@ export const re = (function () {
 /*
 other TODOs stuff will be built here
 */
-export const entity = function (this:this, name: string, painter: Function, behaviors: Function) {
-  /*an entity is any object or thing
- that can be added to the game world*/
 
-  //this.id = name || "none" //name of the entity for identification can be used out side here******
-  this.name = name || "none";
-  this.painter = painter || {}; // callback for paint the entity     can be used out side here******
-  this.width = 0; // width of entiity                              can be used out side here******
-  this.height = 0; // height of entity                             can be used out side here******
-  // this.spritWidth = 0;
-  // this.spritHeight = 0;
-  this.top = 0; // distance from the top of the canvas              can be used out side here******
-  this.left = 0; // distance from the left of the canvas            can be used out side here******
-  // this.velocityX = 0; // velocity on the x axis
-  // this.velocityY = 0; // velocity on the y axis
-  this.visible = true; // to check if the entity is displayed        can be used out side here******
-  this.behaviors = behaviors; // this is a callback to add additional properties to the entity at runtime
-  // this.frame = 0;
-  // this.timer = 0;
-  this.delete = false; //  to delete an entity                        can be used out side here******
-  this.border = true; //   to make the entity observer sides or not   can be used out side here******
-  this.isHit = false;
-};
+/** an entity is any object or thing that can be added to the game world */
+export class Entity {
+  /** width of entiity */
+  width = 0;
+  /** height of entity */
+  height = 0;
+  /** distance from the top of the canvas */
+  top = 0;
+  /** distance from the left of the canvas */
+  left = 0;
+  /** to check if the entity is displayed */
+  visible = true;
+  /** to delete an entity */
+  delete = false;
+  /** to make the entity observer sides or not */
+  border = true;
+  isHit = false;
 
-entity.prototype = {
+  // spritWidth = 0;
+  // spritHeight = 0;
+  // frame = 0;
+  // timer = 0;
+  constructor(
+    /** this.id = name || "none" //name of the entity for identification can be used out side here */
+    public name: string,
+    /** callback for paint the entity     can be used out side here */
+    public painter: Function,
+    /** this is a callback to add additional properties to the entity at runtime */
+    public behaviors: Function
+  ) {
+    this.name ||= "none";
+  }
   // this algorimth is for calling the paint function
   // to make it functional when seen at runtime
   update(context: CanvasRenderingContext2D, lastDeltalTime: number) {
@@ -1494,15 +1497,15 @@ entity.prototype = {
     } else {
       // throw new Error(`RE: entity with name of ${this.name} has no update function`);
     }
-  },
-  paint(context: CanvasRenderingContext2D, lastDeltalTime: number) {
+  }
+  paint(context: CanvasRenderingContext2D, lastDeltalTime: number): void {
     if (typeof this.painter.paint !== "undefined" && this.visible) {
       this.painter.paint(this, context, lastDeltalTime);
     } else {
       throw new Error(`RE: entity with name of ${this.name} has no paint function`);
     }
-  },
-  observeBorder(w: number, h: number) {
+  }
+  observeBorder(w: number, h: number): void {
     if (this.top <= 0) {
       this.top *= 0;
     } else {
@@ -1517,23 +1520,19 @@ entity.prototype = {
         this.left = w - this.width;
       }
     }
-  },
-  run(context: CanvasRenderingContext2D, lastDeltalTime: number) {
+  }
+  run(context: CanvasRenderingContext2D, lastDeltalTime: number): void {
     // here the entity don't have to be visble
     if (typeof this.behaviors !== "undefined") {
       this.behaviors(this, context, lastDeltalTime);
     }
   }
-};
+}
 
-export const imgPainter = function (this:this, img: HTMLImageElement, delay = 1) {
-  this.image = img;
-  this.delay = delay;
-  this.range = 0;
-};
-imgPainter.prototype = {
-  // paint only no update
-  paint(entity: { left: number; top: number; width: number; height: number; }, context: CanvasRenderingContext2D) {
+export class ImgPainter {
+  range = 0;
+  constructor(public image: HTMLImageElement, public delay = 1) {}
+  paint(entity: Entity, context: CanvasRenderingContext2D): void {
     this.range++;
     if (this.range % this.delay === 0) {
       context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
@@ -1542,12 +1541,18 @@ imgPainter.prototype = {
       this.range = 1;
     }
   }
-};
+}
 
 // this is a powerful sprite algorith for
 // rendering the exact sprite from a
 // spritesheet in successful orders
-export const spriteSheetPainter = function (this:this, img: HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
+export const spriteSheetPainter = function (
+  this: this,
+  img: HTMLImageElement,
+  horizontal = 1,
+  vertical = 1,
+  delay = 1
+) {
   this.image = img;
   this.framesWidth = Math.round(this.image.width / horizontal);
   this.framesHeight = Math.round(this.image.height / vertical);
@@ -1604,7 +1609,7 @@ spriteSheetPainter.prototype = {
       this.range = 1;
     }
   },
-  paint(entity: { left: number; top: number; width: number; height: number; }, context: CanvasRenderingContext2D) {
+  paint(entity: { left: number; top: number; width: number; height: number }, context: CanvasRenderingContext2D) {
     context.drawImage(
       this.image,
       this.framesWidth * this.frameWidthCount,
@@ -1658,7 +1663,7 @@ audio.prototype = {
   }
 };
 
-export const bgPainter = function (this:this, img: HTMLImageElement, speed = 10, up: boolean, left: boolean): void {
+export const bgPainter = function (this: this, img: HTMLImageElement, speed = 10, up: boolean, left: boolean): void {
   this.image = img;
   this.range = 0;
   this.speed = speed;
@@ -1697,7 +1702,7 @@ bgPainter.prototype = {
 };
 
 export const physics = (function () {
-  function detectCollision(ent: any, name: any, reduce = 0) {
+  function detectCollision(ent: Entity, name: Entity[], reduce = 0) {
     for (let j = 0; j < name.length; j++) {
       if (
         ent.left + reduce > name[j].left + name[j].width ||
@@ -1727,7 +1732,7 @@ export const renderer = (function () {
     id: any, // for pausing or playing the game
     context: CanvasRenderingContext2D,
     // variables for the timing
-    fps:number,
+    fps: number,
     // background varible
     lastdt = 0,
     nextdt = 0,
@@ -1735,15 +1740,15 @@ export const renderer = (function () {
     deltaTime;
   const bg: any[] = [],
     // entity storage array
-    entitysArray: object[] = [];
+    entitysArray: Entity[] = [];
 
-  function bgPaint(img: HTMLImageElement, speed: number, up:boolean, left:boolean) {
+  function bgPaint(img: HTMLImageElement, speed: number, up: boolean, left: boolean) {
     const bgImg = new bgPainter(img, speed, up, left);
     bg.push(bgImg);
     return bgImg;
   }
 
-  function animatebg(canvas:HTMLCanvasElement) {
+  function animatebg(canvas: HTMLCanvasElement) {
     if (bg === []) return false;
     bg.forEach(b => {
       b.paint(canvas);
@@ -1751,14 +1756,14 @@ export const renderer = (function () {
     });
   }
 
-  function _assemble(...players: ObjectConstructor[]) {
+  function _assemble(...players: Entity[]) {
     if (!players) throw new Error("RE: No players assembled");
     players.forEach(player => {
       entitysArray.push(player);
     });
     return entitysArray;
   }
-  function copyCanvasTo(c:HTMLCanvasElement) {
+  function copyCanvasTo(c: HTMLCanvasElement) {
     if (!c) {
       throw new Error("RE: the main game canvas cannot be copied to a null element");
     }
@@ -1801,13 +1806,13 @@ export const renderer = (function () {
           ent.paint(context, dt);
         });
       } catch (error) {
-        throw new Error(`RE: the canvas cannot be animated due to some errors > ${error}`);
+        throw new Error(`RE: the canvas cannot be animated due to some errors > ${String(error)}`);
       }
     }
     nextdt = 0;
   }
 
-  function _render(canv: HTMLCanvasElement, fpso:number = 0) {
+  function _render(canv: HTMLCanvasElement, fpso = 0) {
     if (!canv) {
       throw new Error("RE: game needs to be rendered EXP: renderer.render(canvas)");
     }
@@ -1857,8 +1862,8 @@ export const uiedbook = {
   buildCanvas,
   appendCanvas,
   re,
-  entity,
-  imgPainter,
+  Entity,
+  ImgPainter,
   spriteSheetPainter,
   audio,
   bgPainter,
@@ -1871,5 +1876,5 @@ export const uiedbook = {
 // 40 apis contexts
 
 if (typeof window !== "undefined") {
-  (window as any).uiedbook = uiedbook;
+  (window as unknown as { uiedbook: typeof uiedbook }).uiedbook = uiedbook;
 }

@@ -1,8 +1,26 @@
 declare type Uied = {
   style(obj: Partial<HTMLElement["style"]>): void;
-  config(obj: Partial<HTMLElement>): void;
+  config(obj: Partial<ObjectConstructor>): void;
   appendTo(type: string, attribute: Record<string, string>, number?: number): void;
-  evft(e: Event): void;
+  on(type: string, callback: (e: object) => void): void;
+  attr(attribute_object: object): void;
+  removeAttr(attr: string): void;
+  html(code: string): void;
+  text(text: string): void;
+  addClass(clas: string): void;
+  removeClass(clas: string): void;
+  hide(): void;
+  toggleClass(): void;
+  show(): void;
+  box(w: number, h: number, c?: string): void;
+  scrollTo(s?: boolean): void;
+  add(nod: Element | HTMLElement | Node): void;
+  remove(ind: number): void;
+  fullScreen(): {
+    toggle: () => void;
+    set(): void;
+    exist(): void;
+  };
 };
 declare type BaseE = HTMLElement | NodeListOf<HTMLElement>;
 /** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
@@ -128,7 +146,7 @@ declare type lay = [
   *
 );
  */
-export declare const build: (...layouts: lay[]) => DocumentFragment | HTMLElement;
+export declare const build: (...layouts: lay[]) => DocumentFragment | HTMLElement | Element;
 /**
  * this context used for rendering built layout to a parent or the document body
  *
@@ -213,9 +231,51 @@ export declare const re: {
   getAud: (id: string) => HTMLAudioElement;
   cancel: () => void;
 };
-export declare const entity: (name: string, painter: Function, behaviors: Function) => void;
-export declare const imgPainter: (img: HTMLImageElement, delay?: number) => void;
+/** an entity is any object or thing that can be added to the game world */
+export declare class Entity {
+  /** this.id = name || "none" //name of the entity for identification can be used out side here */
+  name: string;
+  /** callback for paint the entity     can be used out side here */
+  painter: Function;
+  /** this is a callback to add additional properties to the entity at runtime */
+  behaviors: Function;
+  /** width of entiity */
+  width: number;
+  /** height of entity */
+  height: number;
+  /** distance from the top of the canvas */
+  top: number;
+  /** distance from the left of the canvas */
+  left: number;
+  /** to check if the entity is displayed */
+  visible: boolean;
+  /** to delete an entity */
+  delete: boolean;
+  /** to make the entity observer sides or not */
+  border: boolean;
+  isHit: boolean;
+  constructor(
+    /** this.id = name || "none" //name of the entity for identification can be used out side here */
+    name: string,
+    /** callback for paint the entity     can be used out side here */
+    painter: Function,
+    /** this is a callback to add additional properties to the entity at runtime */
+    behaviors: Function
+  );
+  update(context: CanvasRenderingContext2D, lastDeltalTime: number): void;
+  paint(context: CanvasRenderingContext2D, lastDeltalTime: number): void;
+  observeBorder(w: number, h: number): void;
+  run(context: CanvasRenderingContext2D, lastDeltalTime: number): void;
+}
+export declare class ImgPainter {
+  image: HTMLImageElement;
+  delay: number;
+  range: number;
+  constructor(image: HTMLImageElement, delay?: number);
+  paint(entity: Entity, context: CanvasRenderingContext2D): void;
+}
 export declare const spriteSheetPainter: (
+  this: any,
   img: HTMLImageElement,
   horizontal?: number,
   vertical?: number,
@@ -240,21 +300,21 @@ export declare const bgPainter: (
   left: boolean
 ) => void;
 export declare const physics: {
-  detectCollision: (ent: any, name: any, reduce?: number) => void;
+  detectCollision: (ent: Entity, name: Entity[], reduce?: number) => void;
 };
 /** game rendering algorithm */
 export declare const renderer: {
-  render: (canv: any, fpso?: number) => void;
-  assemble: (...players: any[]) => any[];
+  render: (canv: HTMLCanvasElement, fpso?: number) => void;
+  assemble: (...players: Entity[]) => Entity[];
   toggleRendering: () => boolean;
-  backgroundImage: (img: HTMLImageElement, speed: number, up: any, left: any) => any;
-  copyCanvasTo: (c: any, opacity: any, border: any) => any;
+  backgroundImage: (img: HTMLImageElement, speed: number, up: boolean, left: boolean) => any;
+  copyCanvasTo: (c: HTMLCanvasElement) => HTMLCanvasElement;
 };
 export declare const uiedbook: {
   css: (name: string, sel: string | Record<string, string>, properties?: Record<string, string> | undefined) => void;
   media: (value: string, ...properties: [string, Record<string, string>][]) => void;
   animate: (name: string, ...properties: [string, Record<string, string>][]) => void;
-  build: (...layouts: lay[]) => DocumentFragment | HTMLElement;
+  build: (...layouts: lay[]) => DocumentFragment | HTMLElement | Element;
   buildTo: (child: Node, parent: string | HTMLElement) => void;
   xhr: (type: string, url: string | URL) => (this: XMLHttpRequest) => any;
   u: (el: string | BaseE, ifAll_OrNum?: number | boolean | undefined) => Uied;
@@ -306,9 +366,15 @@ export declare const uiedbook: {
     getAud: (id: string) => HTMLAudioElement;
     cancel: () => void;
   };
-  entity: (name: string, painter: Function, behaviors: Function) => void;
-  imgPainter: (img: HTMLImageElement, delay?: number) => void;
-  spriteSheetPainter: (img: HTMLImageElement, horizontal?: number, vertical?: number, delay?: number) => void;
+  Entity: typeof Entity;
+  ImgPainter: typeof ImgPainter;
+  spriteSheetPainter: (
+    this: any,
+    img: HTMLImageElement,
+    horizontal?: number,
+    vertical?: number,
+    delay?: number
+  ) => void;
   audio: (
     this: {
       audio: HTMLAudioElement;
@@ -319,16 +385,16 @@ export declare const uiedbook: {
   ) => HTMLAudioElement;
   bgPainter: (this: any, img: HTMLImageElement, speed: number | undefined, up: boolean, left: boolean) => void;
   renderer: {
-    render: (canv: any, fpso?: number) => void;
-    assemble: (...players: any[]) => any[];
+    render: (canv: HTMLCanvasElement, fpso?: number) => void;
+    assemble: (...players: Entity[]) => Entity[];
     toggleRendering: () => boolean;
-    backgroundImage: (img: HTMLImageElement, speed: number, up: any, left: any) => any;
-    copyCanvasTo: (c: any, opacity: any, border: any) => any;
+    backgroundImage: (img: HTMLImageElement, speed: number, up: boolean, left: boolean) => any;
+    copyCanvasTo: (c: HTMLCanvasElement) => HTMLCanvasElement;
   };
   speaker: (text: string, language?: string, volume?: number, rate?: number, pitch?: number) => void;
   speakerStop: () => void;
   physics: {
-    detectCollision: (ent: any, name: any, reduce?: number) => void;
+    detectCollision: (ent: Entity, name: Entity[], reduce?: number) => void;
   };
   route: (path: string | undefined, templateId: string, controller: () => any) => HTMLAnchorElement;
 };
