@@ -706,8 +706,8 @@ export const buildTo = (child: Node, parent: string | HTMLElement): void => {
   }
 };
 
-const routes: Record<string, { templateId: string; controller: () => any }> = {};
-export const route = function (path = "/", templateId: string, controller: () => any): HTMLAnchorElement {
+const routes: Record<string, { templateId: string; controller: () => void }> = {};
+export const route = function (path = "/", templateId: string, controller: () => void): HTMLAnchorElement {
   const link = document.createElement("a");
   link.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
   routes[path] = { templateId: templateId, controller: controller };
@@ -756,25 +756,21 @@ window.addEventListener("hashchange", router);
 window.addEventListener("load", router);
 
 /** in construction */
-export const xhr = function (type: string, url: string | URL): (this: XMLHttpRequest) => any {
+export const xhr = function <T>(type: string, url: string | URL): (this: XMLHttpRequest) => T {
   // for sending requests
   const xhrRequest = new XMLHttpRequest();
   let result = null;
   xhrRequest.open(type, url, true);
   result = xhrRequest.onload = function () {
-    return xhrRequest.response;
+    return xhrRequest.response as T;
   };
   xhrRequest.send();
   return result;
 };
 
 /** for checking for empty objects */
-export const isEmptyObject = function (obj: any): obj is Record<keyof any, never> {
-  for (const name in obj) {
-    return false;
-  }
-  return true;
-};
+export const isEmptyObject = (obj: unknown): obj is Record<string | number | symbol, never> =>
+  Boolean(typeof obj === "object" && obj && Object.keys(obj).length === 0);
 
 /*
  *** HOW TO USE ***
@@ -944,7 +940,7 @@ export const check = function (id: string): boolean {
   }
 };
 
-export const log = (message: any): string[] | undefined => {
+export const log = (message: unknown): string[] | undefined => {
   if (message) {
     console.log(message);
   } else {
@@ -956,7 +952,7 @@ export const log = (message: any): string[] | undefined => {
 };
 
 /** it's self explanatory some how */
-export const store = (name: string, value: any): void => {
+export const store = (name: string, value: unknown): void => {
   localStorage.setItem(name, JSON.stringify(value));
 };
 export const retrieve = (name: string): string | null => {
@@ -974,7 +970,7 @@ export const clear = (): void => {
 };
 
 // rebuilt key event lister
-const keyObject = function (keysArray: string[], callBack: (e: object) => void) {
+const keyObject = function (keysArray: string[], callBack: (e: Event) => void) {
   return {
     keysArray: keysArray,
     callBack: callBack
@@ -983,16 +979,16 @@ const keyObject = function (keysArray: string[], callBack: (e: object) => void) 
 
 type MyArray = {
   keysArray: string[];
-  callBack: (e: object) => void;
+  callBack: (e: Event) => void;
 };
 
 const keysStack: MyArray[] = [];
-const keepKeys = function (keys: string[], callback: (e: object) => void): void {
+const keepKeys = function (keys: string[], callback: (e: Event) => void): void {
   const call = keyObject(keys, callback);
   keysStack.push(call);
 };
 
-const checkKeys = function (keys: string[], e: object, delay: number): void {
+const checkKeys = function (keys: string[], e: Event, delay: number): void {
   function partOf(a: string[], b: string[]): boolean {
     let matches = 0;
     for (let i = 0; i < a.length; i++) {
@@ -1011,7 +1007,7 @@ const checkKeys = function (keys: string[], e: object, delay: number): void {
 };
 
 /** for handling even more complicated key events, it's built with the grandmother algorimth or code */
-export const onKeys = (keys: [], callback: (this: Event) => void, object = document, delay = 0, lock = false) => {
+export const onKeys = (keys: [], callback: (this: Event) => void, object = document, delay = 0, lock = false): void => {
   // for handling even more complicated key events,
   if (!keys || !callback) {
     throw new Error("no keys or callbacks given");
@@ -1097,8 +1093,8 @@ continuesKeys(["arrowRight","control"],callback,500,true,container);
 
 */
 
-export const swipe = (item: Record<string, () => any>): void => {
-  const caller: Record<string, () => any> = {};
+export const swipe = (item: Record<string, () => void>): void => {
+  const caller: Record<string, () => void> = {};
   let startX = 0,
     startY = 0;
 
@@ -1261,8 +1257,8 @@ export const buildCanvas = function (id: string, w = window.innerWidth, h = wind
   canv.id = typeof id === "undefined" ? "canvas" : id;
   canv.width = Math.round(w * ratio);
   canv.height = Math.round(h * ratio);
-  canv.style.width = w + "px";
-  canv.style.height = h + "px";
+  canv.style.width = String(w) + "px";
+  canv.style.height = String(h) + "px";
   canv.style.backgroundColor = "black";
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
   return canv;
@@ -1284,8 +1280,10 @@ parent to append directly */
       }
     }
   }
-  par!.style.boxSizing = "border-box";
-  par!.append(cv);
+  if (par) {
+    par.style.boxSizing = "border-box";
+    par.append(cv);
+  }
   return cv;
 };
 
@@ -1373,7 +1371,7 @@ export const re = (function () {
     // fram.append(vsg())
   };
 
-  const widget = function (this: any, name: string) {
+  const widget = function (this: { wig: HTMLDivElement }, name: string) {
     this.wig = document.createElement("div");
     this.wig.className = name;
     this.wig.id = name;

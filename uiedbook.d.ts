@@ -157,11 +157,11 @@ export declare const build: (...layouts: lay[]) => DocumentFragment | HTMLElemen
 buildTo(p, "body");
 */
 export declare const buildTo: (child: Node, parent: string | HTMLElement) => void;
-export declare const route: (path: string | undefined, templateId: string, controller: () => any) => HTMLAnchorElement;
+export declare const route: (path: string | undefined, templateId: string, controller: () => void) => HTMLAnchorElement;
 /** in construction */
-export declare const xhr: (type: string, url: string | URL) => (this: XMLHttpRequest) => any;
+export declare const xhr: <T>(type: string, url: string | URL) => (this: XMLHttpRequest) => T;
 /** for checking for empty objects */
-export declare const isEmptyObject: (obj: any) => obj is Record<string | number | symbol, never>;
+export declare const isEmptyObject: (obj: unknown) => obj is Record<string | number | symbol, never>;
 export declare const intersect: (
   target: string,
   opt: IntersectionObserverInit,
@@ -192,9 +192,9 @@ export declare const debounce: (func: () => void, timeout?: number) => void;
 /** the grandmother algorith for managing ids of anything, don't use it if you don't understand it's power it looks simple. */
 export declare const keep: (id: string | Record<string, number>, time: number) => true | undefined;
 export declare const check: (id: string) => boolean;
-export declare const log: (message: any) => string[] | undefined;
+export declare const log: (message: unknown) => string[] | undefined;
 /** it's self explanatory some how */
-export declare const store: (name: string, value: any) => void;
+export declare const store: (name: string, value: unknown) => void;
 export declare const retrieve: (name: string) => string | null;
 export declare const remove: (name: string) => void;
 export declare const getKey: (index: number) => string | null;
@@ -215,14 +215,19 @@ export declare const continuesKeys: (
   object?: Document,
   lock?: boolean
 ) => void;
-export declare const swipe: (item: Record<string, () => any>) => void;
+export declare const swipe: (item: Record<string, () => void>) => void;
 /** this is used for creating pixel stable game views across all screen width with no pixelation problem try and see the magic */
 export declare const buildCanvas: (id: string, w?: number, h?: number) => HTMLCanvasElement;
 export declare const appendCanvas: (id: string, h: number, w: number, parent: HTMLElement) => HTMLCanvasElement;
 /** this is the RE game time line algorimth */
 export declare const re: {
   build: (viewID: string) => HTMLDivElement;
-  makeWidget: (this: any, name: string) => any;
+  makeWidget: (
+    this: {
+      wig: HTMLDivElement;
+    },
+    name: string
+  ) => HTMLDivElement;
   mount: (template: any, callback: () => void) => void;
   start: () => void;
   loadImage: (img: string | string[], id: string) => void;
@@ -316,9 +321,9 @@ export declare const uiedbook: {
   animate: (name: string, ...properties: [string, Record<string, string>][]) => void;
   build: (...layouts: lay[]) => DocumentFragment | HTMLElement | Element;
   buildTo: (child: Node, parent: string | HTMLElement) => void;
-  xhr: (type: string, url: string | URL) => (this: XMLHttpRequest) => any;
+  xhr: <T>(type: string, url: string | URL) => (this: XMLHttpRequest) => T;
   u: (el: string | BaseE, ifAll_OrNum?: number | boolean | undefined) => Uied;
-  isEmptyObject: (obj: any) => obj is Record<string | number | symbol, never>;
+  isEmptyObject: (obj: unknown) => obj is Record<string | number | symbol, never>;
   intersect: (target: string, opt: IntersectionObserverInit, callback: IntersectionObserverCallback) => void;
   error: (msg: string) => never;
   get: <All extends number | boolean | undefined = undefined>(
@@ -338,8 +343,8 @@ export declare const uiedbook: {
   debounce: (func: () => void, timeout?: number) => void;
   keep: (id: string | Record<string, number>, time: number) => true | undefined;
   check: (id: string) => boolean;
-  log: (message: any) => string[] | undefined;
-  store: (name: string, value: any) => void;
+  log: (message: unknown) => string[] | undefined;
+  store: (name: string, value: unknown) => void;
   retrieve: (name: string) => string | null;
   remove: (name: string) => void;
   getKey: (index: number) => string | null;
@@ -352,12 +357,17 @@ export declare const uiedbook: {
     object?: Document,
     lock?: boolean
   ) => void;
-  swipe: (item: Record<string, () => any>) => void;
+  swipe: (item: Record<string, () => void>) => void;
   buildCanvas: (id: string, w?: number, h?: number) => HTMLCanvasElement;
   appendCanvas: (id: string, h: number, w: number, parent: HTMLElement) => HTMLCanvasElement;
   re: {
     build: (viewID: string) => HTMLDivElement;
-    makeWidget: (this: any, name: string) => any;
+    makeWidget: (
+      this: {
+        wig: HTMLDivElement;
+      },
+      name: string
+    ) => HTMLDivElement;
     mount: (template: any, callback: () => void) => void;
     start: () => void;
     loadImage: (img: string | string[], id: string) => void;
@@ -396,6 +406,6 @@ export declare const uiedbook: {
   physics: {
     detectCollision: (ent: Entity, name: Entity[], reduce?: number) => void;
   };
-  route: (path: string | undefined, templateId: string, controller: () => any) => HTMLAnchorElement;
+  route: (path: string | undefined, templateId: string, controller: () => void) => HTMLAnchorElement;
 };
 export {};

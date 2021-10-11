@@ -704,12 +704,7 @@ export const xhr = function (type, url) {
   return result;
 };
 /** for checking for empty objects */
-export const isEmptyObject = function (obj) {
-  for (const name in obj) {
-    return false;
-  }
-  return true;
-};
+export const isEmptyObject = obj => Boolean(typeof obj === "object" && obj && Object.keys(obj).length === 0);
 /*
  *** HOW TO USE ***
 let objA = { a: "kd" };
@@ -1137,8 +1132,8 @@ export const buildCanvas = function (id, w = window.innerWidth, h = window.inner
   canv.id = typeof id === "undefined" ? "canvas" : id;
   canv.width = Math.round(w * ratio);
   canv.height = Math.round(h * ratio);
-  canv.style.width = w + "px";
-  canv.style.height = h + "px";
+  canv.style.width = String(w) + "px";
+  canv.style.height = String(h) + "px";
   canv.style.backgroundColor = "black";
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
   return canv;
@@ -1159,8 +1154,10 @@ export const appendCanvas = (id, h, w, parent) => {
       }
     }
   }
-  par.style.boxSizing = "border-box";
-  par.append(cv);
+  if (par) {
+    par.style.boxSizing = "border-box";
+    par.append(cv);
+  }
   return cv;
 };
 /** this is the RE game time line algorimth */
