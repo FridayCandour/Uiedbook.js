@@ -1,8 +1,26 @@
 declare type Uied = {
   style(obj: Partial<HTMLElement["style"]>): void;
-  config(obj: Partial<HTMLElement>): void;
+  config(obj: Partial<ObjectConstructor>): void;
   appendTo(type: string, attribute: Record<string, string>, number?: number): void;
-  evft(e: Event): void;
+  on(type: string, callback: (e: Event) => void): void;
+  attr(attribute_object: Partial<HTMLElement>): string | null | (string | null)[] | undefined;
+  removeAttr(attr: string): void;
+  html(code: string): void;
+  text(text: string): void;
+  addClass(clas: string): void;
+  removeClass(clas: string): void;
+  hide(): void;
+  toggleClass(): void;
+  show(): void;
+  box(w: number, h: number, c?: string): void;
+  scrollTo(s?: boolean): void;
+  add(nod: Element | HTMLElement | Node): void;
+  remove(ind: number): void;
+  fullScreen(): {
+    toggle: () => void;
+    set(): void;
+    exist(): void;
+  };
 };
 declare type BaseE = HTMLElement | NodeListOf<HTMLElement>;
 /** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
@@ -128,7 +146,7 @@ declare type lay = [
   *
 );
  */
-export declare const build: (...layouts: lay[]) => DocumentFragment | HTMLElement;
+export declare const build: (...layouts: lay[]) => DocumentFragment | HTMLElement | Element;
 /**
  * this context used for rendering built layout to a parent or the document body
  *
@@ -139,11 +157,11 @@ export declare const build: (...layouts: lay[]) => DocumentFragment | HTMLElemen
 buildTo(p, "body");
 */
 export declare const buildTo: (child: Node, parent: string | HTMLElement) => void;
-export declare const route: (path: string | undefined, templateId: string, controller: () => any) => HTMLAnchorElement;
+export declare const route: (path: string | undefined, templateId: string, controller: () => void) => HTMLAnchorElement;
 /** in construction */
-export declare const xhr: (type: string, url: string | URL) => (this: XMLHttpRequest) => any;
+export declare const xhr: <T>(type: string, url: string | URL) => (this: XMLHttpRequest) => T;
 /** for checking for empty objects */
-export declare const isEmptyObject: (obj: any) => obj is Record<string | number | symbol, never>;
+export declare const isEmptyObject: (obj: unknown) => obj is Record<string | number | symbol, never>;
 export declare const intersect: (
   target: string,
   opt: IntersectionObserverInit,
@@ -174,9 +192,9 @@ export declare const debounce: (func: () => void, timeout?: number) => void;
 /** the grandmother algorith for managing ids of anything, don't use it if you don't understand it's power it looks simple. */
 export declare const keep: (id: string | Record<string, number>, time: number) => true | undefined;
 export declare const check: (id: string) => boolean;
-export declare const log: (message: any) => string[] | undefined;
+export declare const log: (message: unknown) => string[] | undefined;
 /** it's self explanatory some how */
-export declare const store: (name: string, value: any) => void;
+export declare const store: (name: string, value: unknown) => void;
 export declare const retrieve: (name: string) => string | null;
 export declare const remove: (name: string) => void;
 export declare const getKey: (index: number) => string | null;
@@ -197,14 +215,19 @@ export declare const continuesKeys: (
   object?: Document,
   lock?: boolean
 ) => void;
-export declare const swipe: (item: Record<string, () => any>) => void;
+export declare const swipe: (item: Record<string, () => void>) => void;
 /** this is used for creating pixel stable game views across all screen width with no pixelation problem try and see the magic */
 export declare const buildCanvas: (id: string, w?: number, h?: number) => HTMLCanvasElement;
 export declare const appendCanvas: (id: string, h: number, w: number, parent: HTMLElement) => HTMLCanvasElement;
 /** this is the RE game time line algorimth */
 export declare const re: {
   build: (viewID: string) => HTMLDivElement;
-  makeWidget: (this: any, name: string) => any;
+  makeWidget: (
+    this: {
+      wig: HTMLDivElement;
+    },
+    name: string
+  ) => HTMLDivElement;
   mount: (template: any, callback: () => void) => void;
   start: () => void;
   loadImage: (img: string | string[], id: string) => void;
@@ -213,9 +236,51 @@ export declare const re: {
   getAud: (id: string) => HTMLAudioElement;
   cancel: () => void;
 };
-export declare const entity: (name: string, painter: Function, behaviors: Function) => void;
-export declare const imgPainter: (img: HTMLImageElement, delay?: number) => void;
+/** an entity is any object or thing that can be added to the game world */
+export declare class Entity {
+  /** this.id = name || "none" //name of the entity for identification can be used out side here */
+  name: string;
+  /** callback for paint the entity     can be used out side here */
+  painter: Function;
+  /** this is a callback to add additional properties to the entity at runtime */
+  behaviors: Function;
+  /** width of entiity */
+  width: number;
+  /** height of entity */
+  height: number;
+  /** distance from the top of the canvas */
+  top: number;
+  /** distance from the left of the canvas */
+  left: number;
+  /** to check if the entity is displayed */
+  visible: boolean;
+  /** to delete an entity */
+  delete: boolean;
+  /** to make the entity observer sides or not */
+  border: boolean;
+  isHit: boolean;
+  constructor(
+    /** this.id = name || "none" //name of the entity for identification can be used out side here */
+    name: string,
+    /** callback for paint the entity     can be used out side here */
+    painter: Function,
+    /** this is a callback to add additional properties to the entity at runtime */
+    behaviors: Function
+  );
+  update(context: CanvasRenderingContext2D, lastDeltalTime: number): void;
+  paint(context: CanvasRenderingContext2D, lastDeltalTime: number): void;
+  observeBorder(w: number, h: number): void;
+  run(context: CanvasRenderingContext2D, lastDeltalTime: number): void;
+}
+export declare class ImgPainter {
+  image: HTMLImageElement;
+  delay: number;
+  range: number;
+  constructor(image: HTMLImageElement, delay?: number);
+  paint(entity: Entity, context: CanvasRenderingContext2D): void;
+}
 export declare const spriteSheetPainter: (
+  this: any,
   img: HTMLImageElement,
   horizontal?: number,
   vertical?: number,
@@ -240,25 +305,25 @@ export declare const bgPainter: (
   left: boolean
 ) => void;
 export declare const physics: {
-  detectCollision: (ent: any, name: any, reduce?: number) => void;
+  detectCollision: (ent: Entity, name: Entity[], reduce?: number) => void;
 };
 /** game rendering algorithm */
 export declare const renderer: {
-  render: (canv: any, fpso?: number) => void;
-  assemble: (...players: any[]) => any[];
+  render: (canv: HTMLCanvasElement, fpso?: number) => void;
+  assemble: (...players: Entity[]) => Entity[];
   toggleRendering: () => boolean;
-  backgroundImage: (img: HTMLImageElement, speed: number, up: any, left: any) => any;
-  copyCanvasTo: (c: any, opacity: any, border: any) => any;
+  backgroundImage: (img: HTMLImageElement, speed: number, up: boolean, left: boolean) => any;
+  copyCanvasTo: (c: HTMLCanvasElement) => HTMLCanvasElement;
 };
 export declare const uiedbook: {
   css: (name: string, sel: string | Record<string, string>, properties?: Record<string, string> | undefined) => void;
   media: (value: string, ...properties: [string, Record<string, string>][]) => void;
   animate: (name: string, ...properties: [string, Record<string, string>][]) => void;
-  build: (...layouts: lay[]) => DocumentFragment | HTMLElement;
+  build: (...layouts: lay[]) => DocumentFragment | HTMLElement | Element;
   buildTo: (child: Node, parent: string | HTMLElement) => void;
-  xhr: (type: string, url: string | URL) => (this: XMLHttpRequest) => any;
+  xhr: <T>(type: string, url: string | URL) => (this: XMLHttpRequest) => T;
   u: (el: string | BaseE, ifAll_OrNum?: number | boolean | undefined) => Uied;
-  isEmptyObject: (obj: any) => obj is Record<string | number | symbol, never>;
+  isEmptyObject: (obj: unknown) => obj is Record<string | number | symbol, never>;
   intersect: (target: string, opt: IntersectionObserverInit, callback: IntersectionObserverCallback) => void;
   error: (msg: string) => never;
   get: <All extends number | boolean | undefined = undefined>(
@@ -278,8 +343,8 @@ export declare const uiedbook: {
   debounce: (func: () => void, timeout?: number) => void;
   keep: (id: string | Record<string, number>, time: number) => true | undefined;
   check: (id: string) => boolean;
-  log: (message: any) => string[] | undefined;
-  store: (name: string, value: any) => void;
+  log: (message: unknown) => string[] | undefined;
+  store: (name: string, value: unknown) => void;
   retrieve: (name: string) => string | null;
   remove: (name: string) => void;
   getKey: (index: number) => string | null;
@@ -292,12 +357,17 @@ export declare const uiedbook: {
     object?: Document,
     lock?: boolean
   ) => void;
-  swipe: (item: Record<string, () => any>) => void;
+  swipe: (item: Record<string, () => void>) => void;
   buildCanvas: (id: string, w?: number, h?: number) => HTMLCanvasElement;
   appendCanvas: (id: string, h: number, w: number, parent: HTMLElement) => HTMLCanvasElement;
   re: {
     build: (viewID: string) => HTMLDivElement;
-    makeWidget: (this: any, name: string) => any;
+    makeWidget: (
+      this: {
+        wig: HTMLDivElement;
+      },
+      name: string
+    ) => HTMLDivElement;
     mount: (template: any, callback: () => void) => void;
     start: () => void;
     loadImage: (img: string | string[], id: string) => void;
@@ -306,9 +376,15 @@ export declare const uiedbook: {
     getAud: (id: string) => HTMLAudioElement;
     cancel: () => void;
   };
-  entity: (name: string, painter: Function, behaviors: Function) => void;
-  imgPainter: (img: HTMLImageElement, delay?: number) => void;
-  spriteSheetPainter: (img: HTMLImageElement, horizontal?: number, vertical?: number, delay?: number) => void;
+  Entity: typeof Entity;
+  ImgPainter: typeof ImgPainter;
+  spriteSheetPainter: (
+    this: any,
+    img: HTMLImageElement,
+    horizontal?: number,
+    vertical?: number,
+    delay?: number
+  ) => void;
   audio: (
     this: {
       audio: HTMLAudioElement;
@@ -319,17 +395,17 @@ export declare const uiedbook: {
   ) => HTMLAudioElement;
   bgPainter: (this: any, img: HTMLImageElement, speed: number | undefined, up: boolean, left: boolean) => void;
   renderer: {
-    render: (canv: any, fpso?: number) => void;
-    assemble: (...players: any[]) => any[];
+    render: (canv: HTMLCanvasElement, fpso?: number) => void;
+    assemble: (...players: Entity[]) => Entity[];
     toggleRendering: () => boolean;
-    backgroundImage: (img: HTMLImageElement, speed: number, up: any, left: any) => any;
-    copyCanvasTo: (c: any, opacity: any, border: any) => any;
+    backgroundImage: (img: HTMLImageElement, speed: number, up: boolean, left: boolean) => any;
+    copyCanvasTo: (c: HTMLCanvasElement) => HTMLCanvasElement;
   };
   speaker: (text: string, language?: string, volume?: number, rate?: number, pitch?: number) => void;
   speakerStop: () => void;
   physics: {
-    detectCollision: (ent: any, name: any, reduce?: number) => void;
+    detectCollision: (ent: Entity, name: Entity[], reduce?: number) => void;
   };
-  route: (path: string | undefined, templateId: string, controller: () => any) => HTMLAnchorElement;
+  route: (path: string | undefined, templateId: string, controller: () => void) => HTMLAnchorElement;
 };
 export {};

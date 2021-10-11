@@ -17,25 +17,25 @@ type Uied = {
   style(obj: Partial<HTMLElement["style"]>): void;
   config(obj: Partial<ObjectConstructor>): void;
   appendTo(type: string, attribute: Record<string, string>, number?: number): void;
-  on(type: string, callback: (e: object) => void): void;
-  attr(attribute_object: object): void;
+  on(type: string, callback: (e: Event) => void): void;
+  attr(attribute_object: Partial<HTMLElement>): string | null | (string | null)[] | undefined;
   removeAttr(attr: string): void;
   html(code: string): void;
   text(text: string): void;
   addClass(clas: string): void;
-removeClass(clas: string): void;
-hide(): void;
-toggleClass(): void;
-show(): void;
-box(w: number, h: number, c?: string): void;
-scrollTo(s?: boolean): void;
-add(nod: Element | HTMLElement | Node): void;
-remove(ind: number): void;
-fullScreen(): {
+  removeClass(clas: string): void;
+  hide(): void;
+  toggleClass(): void;
+  show(): void;
+  box(w: number, h: number, c?: string): void;
+  scrollTo(s?: boolean): void;
+  add(nod: Element | HTMLElement | Node): void;
+  remove(ind: number): void;
+  fullScreen(): {
     toggle: () => void;
     set(): void;
     exist(): void;
-};
+  };
 };
 
 type BaseE = HTMLElement | NodeListOf<HTMLElement>;
@@ -144,7 +144,7 @@ u("#container").appendTo("div"{
 */
 
     // advance event listener
-    on(type: string, callback: (e: object) => void) {
+    on(type, callback) {
       function evft(e: Event) {
         return callback(e);
       }
@@ -167,24 +167,24 @@ u("#container").on("click", ()=>{
 */
 
     // for adding attributes to the dom elements
-    attr(attribute_object: object) {
+    attr(attribute_object) {
       if (typeof attribute_object !== "object") return;
       if (!all) {
         for (const prop in attribute_object) {
-          const attr = attribute_object[prop];
+          const attr = attribute_object[prop as keyof typeof attribute_object];
           if (prop === null) {
             return e.getAttribute(prop);
           } else {
-            e.setAttribute(prop, attr);
+            e.setAttribute(prop, String(attr));
           }
         }
       } else {
         for (const prop in attribute_object) {
-          const attr = attribute_object[prop];
+          const attr = attribute_object[prop as keyof typeof attribute_object];
           if (prop === null) {
-            return;
+            return Array.from(e).map(el => el.getAttribute(prop));
           } else {
-            e.forEach(el => el.setAttribute(prop, attr));
+            e.forEach(el => el.setAttribute(prop, String(attr)));
           }
         }
       }
@@ -200,10 +200,7 @@ u("#container").attr({
 */
 
     // for removing attributes from dom elements
-    removeAttr(attr: string) {
-      if (attr === null) {
-        return;
-      }
+    removeAttr(attr) {
       if (!all) {
         e.removeAttribute(attr);
       } else {
@@ -217,7 +214,7 @@ u("#container").removeAttr("className")
 
 */
     // for adding inner html contents to the dom elements
-    html(code: string) {
+    html(code) {
       if (!all) {
         e.innerHTML = code;
       } else {
@@ -231,7 +228,7 @@ u("#container").html("<div> hello am a div </div>")
 
 */
     // for adding text to the dom elements
-    text(text: string) {
+    text(text) {
       if (!all) {
         e.textContent = text;
       } else {
@@ -246,7 +243,7 @@ u("#container").html("hello am text")
 
 */
     // for adding class to the dom elements
-    addClass(clas: string) {
+    addClass(clas) {
       if (!all) {
         e.classList.add(clas);
       } else {
@@ -262,7 +259,7 @@ u("#container").addClass(".class")
 
     // for removing class from the dom elements
 
-    removeClass(clas: string) {
+    removeClass(clas) {
       if (!all) {
         e.classList.remove(clas);
       } else {
@@ -331,13 +328,13 @@ u("#container").show()
 
     box(w: number, h: number, c = "transparent") {
       if (!all) {
-        e.style.width = w + '';
-        e.style.height = h + '';
+        e.style.width = String(w);
+        e.style.height = String(h);
         e.style.backgroundColor = c;
       } else {
         e.forEach(el => {
-          el.style.width = w + '';
-          el.style.height = h + '';
+          el.style.width = String(w);
+          el.style.height = String(h);
           el.style.backgroundColor = c;
         });
       }
@@ -351,9 +348,9 @@ u("#container").box("100px","100%","#ff9800")
     // for scrollingthe dom elements into view
     scrollTo(s = true) {
       if (!all) {
-        e.scrollIntoView(s);        
+        e.scrollIntoView(s);
       } else {
-        throw new Error("can't to multiple elements");
+        e.forEach(el => el.scrollIntoView(s));
       }
     },
     /*
@@ -365,9 +362,9 @@ u("#container").scrollTo()
     // for adding elements to the dom elements
     add(nod: Element | HTMLElement | Node) {
       if (!all) {
-        e.append(nod);        
+        e.append(nod);
       } else {
-        e.forEach((el)=> el.append(nod));
+        e.forEach(el => el.append(nod));
       }
     },
     /*
@@ -379,9 +376,9 @@ u("#container").add(span)
     // for removing elements to the dom elements
     remove(ind: number) {
       if (!all) {
-        e.removeChild(e.childNodes[ind]); 
+        e.removeChild(e.childNodes[ind]);
       } else {
-        e.forEach((el)=> el.removeChild(el.childNodes[ind]))
+        e.forEach(el => el.removeChild(el.childNodes[ind]));
       }
     },
     /*
@@ -391,6 +388,40 @@ u("#container").remove(0)
 
 */
 
+    /*
+ *** HOW TO USE ***
+
+u("#container").fullscreen().toggle()
+u("#container").fullscreen().exist()
+u("#container").fullscreen().set()
+
+*/
+    fullScreen() {
+      return {
+        toggle: () => {
+          if (!document.fullscreenElement && !all) {
+            e.requestFullscreen().catch((err: Error) => {
+              alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+          } else {
+            void document.exitFullscreen();
+          }
+        },
+        set() {
+          if (all) {
+            return;
+          }
+          e.requestFullscreen().catch((err: Error) => {
+            alert(`Error! failure attempting to enable
+ full-screen mode: ${err.message}
+ (${err.name})`);
+          });
+        },
+        exist() {
+          void document.exitFullscreen();
+        }
+      };
+    }
 
     /*
  *** HOW TO USE ***
@@ -400,36 +431,15 @@ u("#container").fullscreen().exist()
 u("#container").fullscreen().set()
 
 */
-   fullScreen() {
-      return {
-        toggle: () => {
-          if (!all) {
-            if (!document.fullscreenElement) {
-              e.requestFullscreen().catch(err => {
-                alert(`Error! failure attempting to enable full-screen mode: ${err.message} (${err.name})`);
-              });
-            } else {
-              document.exitFullscreen();
-            }
-          }
-        },
-        set() {
-          if (!all) {
-            e.requestFullscreen().catch(err => {
-              alert(`Error! failure attempting to enable
-   full-screen mode: ${err.message}
-   (${err.name})`);
-            });
-          }
-        },
-        exist() {
-          document.exitFullscreen();
-        }
-      };
-    },
 
+    /*
+ *** HOW TO USE ***
 
+u("#container").fullscreen().toggle()
+u("#container").fullscreen().exist()
+u("#container").fullscreen().set()
 
+*/
   };
 };
 
@@ -678,7 +688,6 @@ export const build = (...layouts: lay[]): DocumentFragment | HTMLElement | Eleme
   return new DocumentFragment();
 };
 
-
 /**
  * this context used for rendering built layout to a parent or the document body
  * 
@@ -697,8 +706,8 @@ export const buildTo = (child: Node, parent: string | HTMLElement): void => {
   }
 };
 
-const routes: Record<string, { templateId: string; controller: () => any }> = {};
-export const route = function (path = "/", templateId: string, controller: () => any): HTMLAnchorElement {
+const routes: Record<string, { templateId: string; controller: () => void }> = {};
+export const route = function (path = "/", templateId: string, controller: () => void): HTMLAnchorElement {
   const link = document.createElement("a");
   link.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
   routes[path] = { templateId: templateId, controller: controller };
@@ -747,25 +756,21 @@ window.addEventListener("hashchange", router);
 window.addEventListener("load", router);
 
 /** in construction */
-export const xhr = function (type: string, url: string | URL): (this: XMLHttpRequest) => any {
+export const xhr = function <T>(type: string, url: string | URL): (this: XMLHttpRequest) => T {
   // for sending requests
   const xhrRequest = new XMLHttpRequest();
   let result = null;
   xhrRequest.open(type, url, true);
   result = xhrRequest.onload = function () {
-    return xhrRequest.response;
+    return xhrRequest.response as T;
   };
   xhrRequest.send();
   return result;
 };
 
 /** for checking for empty objects */
-export const isEmptyObject = function (obj: any): obj is Record<keyof any, never> {
-  for (const name in obj) {
-    return false;
-  }
-  return true;
-};
+export const isEmptyObject = (obj: unknown): obj is Record<string | number | symbol, never> =>
+  Boolean(typeof obj === "object" && obj && Object.keys(obj).length === 0);
 
 /*
  *** HOW TO USE ***
@@ -935,7 +940,7 @@ export const check = function (id: string): boolean {
   }
 };
 
-export const log = (message: any): string[] | undefined => {
+export const log = (message: unknown): string[] | undefined => {
   if (message) {
     console.log(message);
   } else {
@@ -947,7 +952,7 @@ export const log = (message: any): string[] | undefined => {
 };
 
 /** it's self explanatory some how */
-export const store = (name: string, value: any): void => {
+export const store = (name: string, value: unknown): void => {
   localStorage.setItem(name, JSON.stringify(value));
 };
 export const retrieve = (name: string): string | null => {
@@ -965,7 +970,7 @@ export const clear = (): void => {
 };
 
 // rebuilt key event lister
-const keyObject = function (keysArray: string[], callBack: (e: object) => void) {
+const keyObject = function (keysArray: string[], callBack: (e: Event) => void) {
   return {
     keysArray: keysArray,
     callBack: callBack
@@ -974,16 +979,16 @@ const keyObject = function (keysArray: string[], callBack: (e: object) => void) 
 
 type MyArray = {
   keysArray: string[];
-  callBack: (e: object) => void;
+  callBack: (e: Event) => void;
 };
 
 const keysStack: MyArray[] = [];
-const keepKeys = function (keys: string[], callback: (e: object) => void): void {
+const keepKeys = function (keys: string[], callback: (e: Event) => void): void {
   const call = keyObject(keys, callback);
   keysStack.push(call);
 };
 
-const checkKeys = function (keys: string[], e: object, delay: number): void {
+const checkKeys = function (keys: string[], e: Event, delay: number): void {
   function partOf(a: string[], b: string[]): boolean {
     let matches = 0;
     for (let i = 0; i < a.length; i++) {
@@ -1002,7 +1007,7 @@ const checkKeys = function (keys: string[], e: object, delay: number): void {
 };
 
 /** for handling even more complicated key events, it's built with the grandmother algorimth or code */
-export const onKeys = (keys: [], callback: (this: Event) => void, object = document, delay = 0, lock = false) => {
+export const onKeys = (keys: [], callback: (this: Event) => void, object = document, delay = 0, lock = false): void => {
   // for handling even more complicated key events,
   if (!keys || !callback) {
     throw new Error("no keys or callbacks given");
@@ -1057,9 +1062,9 @@ export const continuesKeys = (
     throw new Error("no keys or callbacks given");
   }
   let temporaryKeys: string[] = [];
-  object.addEventListener("keyup", ()=>{
-    temporaryKeys = []
-  })
+  object.addEventListener("keyup", () => {
+    temporaryKeys = [];
+  });
   keepKeys(keys, callback);
   object.addEventListener(
     "keydown",
@@ -1088,8 +1093,8 @@ continuesKeys(["arrowRight","control"],callback,500,true,container);
 
 */
 
-export const swipe = (item: Record<string, () => any>): void => {
-  const caller: Record<string, () => any> = {};
+export const swipe = (item: Record<string, () => void>): void => {
+  const caller: Record<string, () => void> = {};
   let startX = 0,
     startY = 0;
 
@@ -1149,22 +1154,22 @@ export const swipe = (item: Record<string, () => any>): void => {
   document.body.addEventListener("touchend", handleTouchEnd);
 
   const callback = {
-    touch(callback: () => any) {
+    touch(callback: () => void) {
       return callback();
     },
-    right(callback: () => any) {
-      return callback();
-    },
-
-    left(callback: () => any) {
+    right(callback: () => void) {
       return callback();
     },
 
-    down(callback: () => any) {
+    left(callback: () => void) {
       return callback();
     },
 
-    up(callback: () => any) {
+    down(callback: () => void) {
+      return callback();
+    },
+
+    up(callback: () => void) {
       return callback();
     }
   };
@@ -1252,8 +1257,8 @@ export const buildCanvas = function (id: string, w = window.innerWidth, h = wind
   canv.id = typeof id === "undefined" ? "canvas" : id;
   canv.width = Math.round(w * ratio);
   canv.height = Math.round(h * ratio);
-  canv.style.width = w + "px";
-  canv.style.height = h + "px";
+  canv.style.width = String(w) + "px";
+  canv.style.height = String(h) + "px";
   canv.style.backgroundColor = "black";
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
   return canv;
@@ -1275,8 +1280,10 @@ parent to append directly */
       }
     }
   }
-  par!.style.boxSizing = "border-box";
-  par!.append(cv);
+  if (par) {
+    par.style.boxSizing = "border-box";
+    par.append(cv);
+  }
   return cv;
 };
 
@@ -1364,7 +1371,7 @@ export const re = (function () {
     // fram.append(vsg())
   };
 
-  const widget = function (this: any, name: string) {
+  const widget = function (this: { wig: HTMLDivElement }, name: string) {
     this.wig = document.createElement("div");
     this.wig.className = name;
     this.wig.id = name;
@@ -1461,31 +1468,39 @@ export const re = (function () {
 /*
 other TODOs stuff will be built here
 */
-export const entity = function (this:this, name: string, painter: Function, behaviors: Function) {
-  /*an entity is any object or thing
- that can be added to the game world*/
 
-  //this.id = name || "none" //name of the entity for identification can be used out side here******
-  this.name = name || "none";
-  this.painter = painter || {}; // callback for paint the entity     can be used out side here******
-  this.width = 0; // width of entiity                              can be used out side here******
-  this.height = 0; // height of entity                             can be used out side here******
-  // this.spritWidth = 0;
-  // this.spritHeight = 0;
-  this.top = 0; // distance from the top of the canvas              can be used out side here******
-  this.left = 0; // distance from the left of the canvas            can be used out side here******
-  // this.velocityX = 0; // velocity on the x axis
-  // this.velocityY = 0; // velocity on the y axis
-  this.visible = true; // to check if the entity is displayed        can be used out side here******
-  this.behaviors = behaviors; // this is a callback to add additional properties to the entity at runtime
-  // this.frame = 0;
-  // this.timer = 0;
-  this.delete = false; //  to delete an entity                        can be used out side here******
-  this.border = true; //   to make the entity observer sides or not   can be used out side here******
-  this.isHit = false;
-};
+/** an entity is any object or thing that can be added to the game world */
+export class Entity {
+  /** width of entiity */
+  width = 0;
+  /** height of entity */
+  height = 0;
+  /** distance from the top of the canvas */
+  top = 0;
+  /** distance from the left of the canvas */
+  left = 0;
+  /** to check if the entity is displayed */
+  visible = true;
+  /** to delete an entity */
+  delete = false;
+  /** to make the entity observer sides or not */
+  border = true;
+  isHit = false;
 
-entity.prototype = {
+  // spritWidth = 0;
+  // spritHeight = 0;
+  // frame = 0;
+  // timer = 0;
+  constructor(
+    /** this.id = name || "none" //name of the entity for identification can be used out side here */
+    public name: string,
+    /** callback for paint the entity     can be used out side here */
+    public painter: Function,
+    /** this is a callback to add additional properties to the entity at runtime */
+    public behaviors: Function
+  ) {
+    this.name ||= "none";
+  }
   // this algorimth is for calling the paint function
   // to make it functional when seen at runtime
   update(context: CanvasRenderingContext2D, lastDeltalTime: number) {
@@ -1494,15 +1509,15 @@ entity.prototype = {
     } else {
       // throw new Error(`RE: entity with name of ${this.name} has no update function`);
     }
-  },
-  paint(context: CanvasRenderingContext2D, lastDeltalTime: number) {
+  }
+  paint(context: CanvasRenderingContext2D, lastDeltalTime: number): void {
     if (typeof this.painter.paint !== "undefined" && this.visible) {
       this.painter.paint(this, context, lastDeltalTime);
     } else {
       throw new Error(`RE: entity with name of ${this.name} has no paint function`);
     }
-  },
-  observeBorder(w: number, h: number) {
+  }
+  observeBorder(w: number, h: number): void {
     if (this.top <= 0) {
       this.top *= 0;
     } else {
@@ -1517,23 +1532,19 @@ entity.prototype = {
         this.left = w - this.width;
       }
     }
-  },
-  run(context: CanvasRenderingContext2D, lastDeltalTime: number) {
+  }
+  run(context: CanvasRenderingContext2D, lastDeltalTime: number): void {
     // here the entity don't have to be visble
     if (typeof this.behaviors !== "undefined") {
       this.behaviors(this, context, lastDeltalTime);
     }
   }
-};
+}
 
-export const imgPainter = function (this:this, img: HTMLImageElement, delay = 1) {
-  this.image = img;
-  this.delay = delay;
-  this.range = 0;
-};
-imgPainter.prototype = {
-  // paint only no update
-  paint(entity: { left: number; top: number; width: number; height: number; }, context: CanvasRenderingContext2D) {
+export class ImgPainter {
+  range = 0;
+  constructor(public image: HTMLImageElement, public delay = 1) {}
+  paint(entity: Entity, context: CanvasRenderingContext2D): void {
     this.range++;
     if (this.range % this.delay === 0) {
       context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
@@ -1542,12 +1553,18 @@ imgPainter.prototype = {
       this.range = 1;
     }
   }
-};
+}
 
 // this is a powerful sprite algorith for
 // rendering the exact sprite from a
 // spritesheet in successful orders
-export const spriteSheetPainter = function (this:this, img: HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
+export const spriteSheetPainter = function (
+  this: this,
+  img: HTMLImageElement,
+  horizontal = 1,
+  vertical = 1,
+  delay = 1
+) {
   this.image = img;
   this.framesWidth = Math.round(this.image.width / horizontal);
   this.framesHeight = Math.round(this.image.height / vertical);
@@ -1604,7 +1621,7 @@ spriteSheetPainter.prototype = {
       this.range = 1;
     }
   },
-  paint(entity: { left: number; top: number; width: number; height: number; }, context: CanvasRenderingContext2D) {
+  paint(entity: { left: number; top: number; width: number; height: number }, context: CanvasRenderingContext2D) {
     context.drawImage(
       this.image,
       this.framesWidth * this.frameWidthCount,
@@ -1658,7 +1675,7 @@ audio.prototype = {
   }
 };
 
-export const bgPainter = function (this:this, img: HTMLImageElement, speed = 10, up: boolean, left: boolean): void {
+export const bgPainter = function (this: this, img: HTMLImageElement, speed = 10, up: boolean, left: boolean): void {
   this.image = img;
   this.range = 0;
   this.speed = speed;
@@ -1697,7 +1714,7 @@ bgPainter.prototype = {
 };
 
 export const physics = (function () {
-  function detectCollision(ent: any, name: any, reduce = 0) {
+  function detectCollision(ent: Entity, name: Entity[], reduce = 0) {
     for (let j = 0; j < name.length; j++) {
       if (
         ent.left + reduce > name[j].left + name[j].width ||
@@ -1727,7 +1744,7 @@ export const renderer = (function () {
     id: any, // for pausing or playing the game
     context: CanvasRenderingContext2D,
     // variables for the timing
-    fps:number,
+    fps: number,
     // background varible
     lastdt = 0,
     nextdt = 0,
@@ -1735,15 +1752,15 @@ export const renderer = (function () {
     deltaTime;
   const bg: any[] = [],
     // entity storage array
-    entitysArray: object[] = [];
+    entitysArray: Entity[] = [];
 
-  function bgPaint(img: HTMLImageElement, speed: number, up:boolean, left:boolean) {
+  function bgPaint(img: HTMLImageElement, speed: number, up: boolean, left: boolean) {
     const bgImg = new bgPainter(img, speed, up, left);
     bg.push(bgImg);
     return bgImg;
   }
 
-  function animatebg(canvas:HTMLCanvasElement) {
+  function animatebg(canvas: HTMLCanvasElement) {
     if (bg === []) return false;
     bg.forEach(b => {
       b.paint(canvas);
@@ -1751,14 +1768,14 @@ export const renderer = (function () {
     });
   }
 
-  function _assemble(...players: ObjectConstructor[]) {
+  function _assemble(...players: Entity[]) {
     if (!players) throw new Error("RE: No players assembled");
     players.forEach(player => {
       entitysArray.push(player);
     });
     return entitysArray;
   }
-  function copyCanvasTo(c:HTMLCanvasElement) {
+  function copyCanvasTo(c: HTMLCanvasElement) {
     if (!c) {
       throw new Error("RE: the main game canvas cannot be copied to a null element");
     }
@@ -1801,13 +1818,13 @@ export const renderer = (function () {
           ent.paint(context, dt);
         });
       } catch (error) {
-        throw new Error(`RE: the canvas cannot be animated due to some errors > ${error}`);
+        throw new Error(`RE: the canvas cannot be animated due to some errors > ${String(error)}`);
       }
     }
     nextdt = 0;
   }
 
-  function _render(canv: HTMLCanvasElement, fpso:number = 0) {
+  function _render(canv: HTMLCanvasElement, fpso = 0) {
     if (!canv) {
       throw new Error("RE: game needs to be rendered EXP: renderer.render(canvas)");
     }
@@ -1857,8 +1874,8 @@ export const uiedbook = {
   buildCanvas,
   appendCanvas,
   re,
-  entity,
-  imgPainter,
+  Entity,
+  ImgPainter,
   spriteSheetPainter,
   audio,
   bgPainter,
@@ -1871,5 +1888,5 @@ export const uiedbook = {
 // 40 apis contexts
 
 if (typeof window !== "undefined") {
-  (window as any).uiedbook = uiedbook;
+  (window as unknown as { uiedbook: typeof uiedbook }).uiedbook = uiedbook;
 }
