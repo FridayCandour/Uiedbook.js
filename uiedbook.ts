@@ -27,6 +27,7 @@ type Uied = {
   hide(): void;
   toggleClass(): void;
   show(): void;
+  off(type: string, callback: any): void;
   box(w: number, h: number, c?: string): void;
   scrollTo(s?: boolean): void;
   add(nod: Element | HTMLElement | Node): void;
@@ -103,8 +104,15 @@ u(object).config({
 */
 
     /** for adding new elements more powerfully */
-    appendTo(type, attribute, number = 1) {
+    appendTo(type: string, attribute: Record<string, string> = {}, number: number = 1): Node | Node[] {
+      // for adding new elements more powerfully
+      if (typeof attribute === "undefined" || typeof type === "undefined") {
+        throw new Error("type or attribute not given | not enough parameters to work with");
+      }
+
       const frag = new DocumentFragment();
+      let returned = null;
+      let allElements: HTMLElement[] | Node[] = [];
       if (!all) {
         for (let i = 0; i < number; i++) {
           const element: HTMLElement = document.createElement(type);
@@ -112,7 +120,9 @@ u(object).config({
             const v = attribute[k];
             element.setAttribute(k, v);
           }
+          returned = frag.childNodes[0];
           frag.append(element);
+          allElements.push(element);
         }
         e.append(frag);
       } else {
@@ -123,14 +133,19 @@ u(object).config({
             element.setAttribute(k, v);
           }
           frag.append(element);
+          allElements.push(element);
         }
 
         e.forEach(el => {
           el.append(frag);
         });
       }
-
-      return;
+      if (allElements.length === 1) {
+        returned = allElements[0];
+      } else {
+        returned = allElements;
+      }
+      return returned;
     },
 
     /*
@@ -143,16 +158,22 @@ u("#container").appendTo("div"{
 
 */
 
-    // advance event listener
     on(type, callback) {
-      function evft(e: Event) {
-        return callback(e);
-      }
       if (!all) {
-        return e.addEventListener(type, evft, false);
+        return e.removeEventListener(type, callback, true);
       } else {
         return e.forEach(element => {
-          element.addEventListener(type, evft, false);
+          element.removeEventListener(type, callback, true);
+        });
+      }
+    },
+
+    off(type, callback) {
+      if (!all) {
+        e.removeEventListener(type, callback, true);
+      } else {
+        e.forEach(element => {
+          element.removeEventListener(type, callback, true);
         });
       }
     },
@@ -688,6 +709,7 @@ export const build = (...layouts: lay[]): DocumentFragment | HTMLElement | Eleme
   return new DocumentFragment();
 };
 
+type bui = Node | HTMLElement;
 /**
  * this context used for rendering built layout to a parent or the document body
  * 
@@ -698,11 +720,21 @@ export const build = (...layouts: lay[]): DocumentFragment | HTMLElement | Eleme
 buildTo(p, "body");
 */
 
-export const buildTo = (child: Node, parent: string | HTMLElement): void => {
+export const buildTo = (child: bui | bui[], parent: string | HTMLElement): void => {
   if (typeof parent === "string") {
-    document.querySelectorAll(parent).forEach(par => par.appendChild(child));
+    document.querySelectorAll(parent).forEach(par => {
+      if (Array.isArray(child)) {
+        child.forEach(ch => {
+          par.append(ch);
+        });
+      }
+    });
   } else {
-    parent.append(child);
+    if (Array.isArray(child)) {
+      child.forEach(ch => {
+        parent.append(ch);
+      });
+    }
   }
 };
 
@@ -983,12 +1015,12 @@ type MyArray = {
 };
 
 const keysStack: MyArray[] = [];
-const keepKeys = function (keys: string[], callback: (e: Event) => void): void {
+const keepKeys = function (keys: string[], callback: (e: Event) => void) {
   const call = keyObject(keys, callback);
   keysStack.push(call);
 };
 
-const checkKeys = function (keys: string[], e: Event, delay: number): void {
+const checkKeys = function (keys: string[], e: Event, delay: number) {
   function partOf(a: string[], b: string[]): boolean {
     let matches = 0;
     for (let i = 0; i < a.length; i++) {
@@ -1004,6 +1036,7 @@ const checkKeys = function (keys: string[], e: Event, delay: number): void {
       debounce(() => keysStack[i].callBack(e), delay);
     }
   }
+  return keysStack.length;
 };
 
 /** for handling even more complicated key events, it's built with the grandmother algorimth or code */
@@ -1061,23 +1094,32 @@ export const continuesKeys = (
   if (!keys || !callback) {
     throw new Error("no keys or callbacks given");
   }
-  let temporaryKeys: string[] = [];
-  object.addEventListener("keyup", () => {
-    temporaryKeys = [];
-  });
   keepKeys(keys, callback);
+  const temporaryKeys: string[] = [];
+  object.addEventListener(
+    "keyup",
+    e => {
+      for (let i = 0; i < temporaryKeys.length; i++) {
+        if (temporaryKeys[i] === e.key) {
+          temporaryKeys.splice(i, 1);
+        }
+      }
+    },
+    true
+  );
+
   object.addEventListener(
     "keydown",
-    e => {
+    function (e) {
       if (lock) {
         e.preventDefault();
       }
-      if (temporaryKeys.indexOf(e.key) !== 0) {
+      if (temporaryKeys.indexOf(e.key) < 0) {
         temporaryKeys.push(e.key);
       }
       checkKeys(temporaryKeys, e, delay);
     },
-    false
+    true
   );
 };
 /*
@@ -1293,6 +1335,7 @@ export const re = (function () {
  where game views (view) are
  sequenced on.*/
   const games: any[] = [];
+  let RE_gameframe;
 
   // the build function is for creating the game div
   // and allowing the dev to build upon it
@@ -1314,7 +1357,7 @@ export const re = (function () {
   // and the callback can be used to run a function
   // perculiar to this effect.
   function mount(template: any, callback: () => void) {
-    u("body").appendTo("div", { id: "RE_gameframe" });
+    RE_gameframe = u("body").appendTo("div", { id: "RE_gameframe" });
     if (games.length === 1) {
       return;
     } else {
@@ -1323,14 +1366,11 @@ export const re = (function () {
     if (!callback) return;
     return callback();
   }
-  // the flow function ochastrate the game play
-  function flow(fram: HTMLElement) {
-    fram.append(games[0]);
-  }
+
   // the start function starts the game
   // and manathe dom
   const start = () => {
-    if (games.length < 1 || games.length > 1) {
+    if (games.length < 1) {
       throw new Error("RE: re.mount() should be called and given a built game world");
     }
 
@@ -1341,7 +1381,7 @@ export const re = (function () {
       border: "none"
     });
 
-    u("#RE_gameframe").style({
+    u("RE_gameframe").style({
       width: "100vw",
       height: "100vh",
       position: "fixed",
@@ -1361,7 +1401,7 @@ export const re = (function () {
       boxSizing: "border-box"
     });
     const gameframe = get("#RE_gameframe")!;
-    flow(gameframe);
+    gameframe.append(games[0]);
   };
   // this stops the game
   const cancel = () => {
@@ -1369,14 +1409,6 @@ export const re = (function () {
     fram.innerHTML = "";
     renderer.toggleRendering();
     // fram.append(vsg())
-  };
-
-  const widget = function (this: { wig: HTMLDivElement }, name: string) {
-    this.wig = document.createElement("div");
-    this.wig.className = name;
-    this.wig.id = name;
-    document.body.append(this.wig);
-    return this.wig;
   };
 
   const imagesArray: HTMLImageElement[] = [],
@@ -1452,7 +1484,6 @@ export const re = (function () {
 
   return {
     build: build,
-    makeWidget: widget,
     mount: mount,
     start: start,
     loadImage: loadImage,
@@ -1469,6 +1500,7 @@ export const re = (function () {
 other TODOs stuff will be built here
 */
 
+type maker = { update: Function; paint: Function };
 /** an entity is any object or thing that can be added to the game world */
 export class Entity {
   /** width of entiity */
@@ -1487,15 +1519,11 @@ export class Entity {
   border = true;
   isHit = false;
 
-  // spritWidth = 0;
-  // spritHeight = 0;
-  // frame = 0;
-  // timer = 0;
   constructor(
     /** this.id = name || "none" //name of the entity for identification can be used out side here */
     public name: string,
     /** callback for paint the entity     can be used out side here */
-    public painter: Function,
+    public painter: maker,
     /** this is a callback to add additional properties to the entity at runtime */
     public behaviors: Function
   ) {
@@ -1542,11 +1570,20 @@ export class Entity {
 }
 
 export class ImgPainter {
-  range = 0;
-  constructor(public image: HTMLImageElement, public delay = 1) {}
+  constructor(public image: HTMLImageElement, public delay = 1) {
+    this.image = image;
+    this.delay = delay;
+    this.range = 0;
+    this.rotate = false;
+  }
   paint(entity: Entity, context: CanvasRenderingContext2D): void {
     this.range++;
     if (this.range % this.delay === 0) {
+      if (this.rotate) {
+        context.translate(entity.left, entity.top);
+        context.rotate((this.rotate * Math.PI) / 180);
+        context.translate(-entity.left, -entity.top);
+      }
       context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
     }
     if (this.range > 100) {
@@ -1558,13 +1595,7 @@ export class ImgPainter {
 // this is a powerful sprite algorith for
 // rendering the exact sprite from a
 // spritesheet in successful orders
-export const spriteSheetPainter = function (
-  this: this,
-  img: HTMLImageElement,
-  horizontal = 1,
-  vertical = 1,
-  delay = 1
-) {
+export const spriteSheetPainter = function (this: any, img: HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
   this.image = img;
   this.framesWidth = Math.round(this.image.width / horizontal);
   this.framesHeight = Math.round(this.image.height / vertical);
@@ -1577,6 +1608,7 @@ export const spriteSheetPainter = function (
   this.isLastImage = false;
   this.animateAllFrames = true;
   this.animate = true;
+  this.rotate = false;
   this.changeSheet = function (img: HTMLImageElement, horizontal = 0, vertical = 0, delay = 1) {
     this.image = img;
     this.framesWidth = Math.round(this.image.width / horizontal);
@@ -1611,6 +1643,7 @@ spriteSheetPainter.prototype = {
           }
         } else {
           this.frameHeightCount = 0;
+          this.isLastImage = true;
         }
         if (this.frameHeightCount === this.verticalPictures) {
           this.frameHeightCount++;
@@ -1622,6 +1655,12 @@ spriteSheetPainter.prototype = {
     }
   },
   paint(entity: { left: number; top: number; width: number; height: number }, context: CanvasRenderingContext2D) {
+    context.save();
+    if (this.rotate) {
+      context.translate(entity.left, entity.top);
+      context.rotate((this.rotate * Math.PI) / 180);
+      context.translate(-entity.left, -entity.top);
+    }
     context.drawImage(
       this.image,
       this.framesWidth * this.frameWidthCount,
@@ -1633,6 +1672,7 @@ spriteSheetPainter.prototype = {
       entity.width,
       entity.height
     );
+    context.restore();
   }
 };
 
@@ -1644,7 +1684,7 @@ export const speaker = function (text: string, language = "", volume = 1, rate =
   // build utterance and speak
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = language;
-  utterance.volume = volume * 0.3 * 3;
+  utterance.volume = volume;
   utterance.rate = rate;
   utterance.pitch = pitch;
   speechSynthesis.speak(utterance);
@@ -1656,7 +1696,7 @@ export const speakerStop = () => speechSynthesis && speechSynthesis.cancel();
 export const audio = function (this: { audio: HTMLAudioElement }, audio: HTMLAudioElement, loop = 0, volumeScale = 1) {
   this.audio = audio;
   this.audio.loop = loop !== 0;
-  this.audio.volume = volumeScale * 0.3;
+  this.audio.volume = volumeScale;
   return this.audio;
 };
 audio.prototype = {
@@ -1675,7 +1715,7 @@ audio.prototype = {
   }
 };
 
-export const bgPainter = function (this: this, img: HTMLImageElement, speed = 10, up: boolean, left: boolean): void {
+export const bgPainter = function (this: any, img: HTMLImageElement, speed = 10, up: boolean, left: boolean): void {
   this.image = img;
   this.range = 0;
   this.speed = speed;
@@ -1713,31 +1753,37 @@ bgPainter.prototype = {
   }
 };
 
-export const physics = (function () {
-  function detectCollision(ent: Entity, name: Entity[], reduce = 0) {
-    for (let j = 0; j < name.length; j++) {
-      if (
-        ent.left + reduce > name[j].left + name[j].width ||
-        ent.left + ent.width < name[j].left + reduce ||
-        ent.top > name[j].top + name[j].height ||
-        ent.top + ent.height < name[j].top + reduce
-      ) {
-        // console.log("no collisions");
-        // return false;
+const physics = (function () {
+  function detectCollision(ent: Entity, entityArray: Entity[], reduce = 0, skipMe: true, freeMan: string) {
+    for (let j = 0; j < entityArray.length; j++) {
+      if (skipMe && entityArray[j].name === ent.name) {
         continue;
       } else {
-        // console.log(`${ent.name} has collided with name of ${name[j].name}`);
-        // return true;
-        name[j].isHit = true;
+        if (
+          ent.left - reduce > entityArray[j].left + entityArray[j].width ||
+          ent.left + ent.width < entityArray[j].left - reduce ||
+          ent.top + reduce > entityArray[j].top + entityArray[j].height ||
+          ent.top + ent.height < entityArray[j].top - reduce
+        ) {
+          continue;
+        } else {
+          entityArray[j].isHit = true;
+          ent.isHit = true;
+          if (entityArray[j].name !== freeMan) {
+            entityArray.splice(j, 1);
+            --j;
+          }
+          // console.log(entityArray[j].name,j);
+        }
       }
     }
+    return entityArray;
   }
 
   return {
     detectCollision: detectCollision
   };
 })();
-
 /** game rendering algorithm */
 export const renderer = (function () {
   let canvas: HTMLCanvasElement,
@@ -1812,7 +1858,6 @@ export const renderer = (function () {
           if (ent.border) {
             ent.observeBorder(canvas.width, canvas.height);
           }
-          //   console.log(entitysArray);
           ent.update(context, dt);
           ent.run(context, dt);
           ent.paint(context, dt);
