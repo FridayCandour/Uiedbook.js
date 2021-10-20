@@ -12,9 +12,11 @@
  
 YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WITH THIS MODULE 
 */
+type BaseE = HTMLElement | NodeListOf<HTMLElement>;
 
 type Uied = {
-  style(obj: Partial<HTMLElement["style"]>): void;
+  each(fn: { call: (arg0: NodeListOf<HTMLElement>, ind: number) => void }): void;
+  style(obj: Partial<HTMLElement["style"]>): BaseE;
   config(obj: Partial<ObjectConstructor>): void;
   appendTo(type: string, attribute: Record<string, string>, number?: number): void;
   on(type: string, callback: (e: Event) => void): void;
@@ -27,7 +29,7 @@ type Uied = {
   hide(): void;
   toggleClass(): void;
   show(): void;
-  off(type: string, callback: any): void;
+  off(type: string, callback: (e: Event) => void): void;
   box(w: number, h: number, c?: string): void;
   scrollTo(s?: boolean): void;
   add(nod: Element | HTMLElement | Node): void;
@@ -39,8 +41,6 @@ type Uied = {
   };
 };
 
-type BaseE = HTMLElement | NodeListOf<HTMLElement>;
-
 /** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
 export const u = (el: string | BaseE, ifAll_OrNum?: boolean | number): Uied => {
   const e = get(el, ifAll_OrNum);
@@ -51,6 +51,15 @@ export const u = (el: string | BaseE, ifAll_OrNum?: boolean | number): Uied => {
   // to manipulate dom  elements are below!
 
   return {
+    each(fn: { call: (arg0: NodeListOf<HTMLElement>) => void }) {
+      if (all) {
+        e.forEach((el, ind) => {
+          fn.call(el, ind);
+        });
+      } else {
+        return;
+      }
+    },
     // for styling
     style(obj) {
       for (const k in obj) {
@@ -64,6 +73,7 @@ export const u = (el: string | BaseE, ifAll_OrNum?: boolean | number): Uied => {
           e.forEach(_e => (_e.style[k] = v));
         }
       }
+      return e;
     },
     /*
  *** HOW TO USE ***
@@ -104,7 +114,7 @@ u(object).config({
 */
 
     /** for adding new elements more powerfully */
-    appendTo(type: string, attribute: Record<string, string> = {}, number: number = 1): Node | Node[] {
+    appendTo(type: string, attribute: Record<string, string> = {}, number = 1): Node | Node[] {
       // for adding new elements more powerfully
       if (typeof attribute === "undefined" || typeof type === "undefined") {
         throw new Error("type or attribute not given | not enough parameters to work with");
@@ -112,7 +122,7 @@ u(object).config({
 
       const frag = new DocumentFragment();
       let returned = null;
-      let allElements: HTMLElement[] | Node[] = [];
+      const allElements: HTMLElement[] | Node[] = [];
       if (!all) {
         for (let i = 0; i < number; i++) {
           const element: HTMLElement = document.createElement(type);
@@ -396,10 +406,17 @@ u("#container").add(span)
 */
     // for removing elements to the dom elements
     remove(ind: number) {
-      if (!all) {
+      if (!all && ind) {
         e.removeChild(e.childNodes[ind]);
       } else {
-        e.forEach(el => el.removeChild(el.childNodes[ind]));
+        if (ind) {
+          e.forEach(el => el.removeChild(el.childNodes[ind]));
+        }
+      }
+      if (!all && !ind) {
+        e.parentElement?.remove(e);
+      } else {
+        e.forEach(el => el.removeChild(el.parentElement?.remove(el)));
       }
     },
     /*
@@ -879,18 +896,6 @@ rad(5);
 // you will get random values from 0 to 5
 */
 
-/** for making css classes */
-export const makeClass = (name: string, stylings: string): void => {
-  const clas = document.createElement("style");
-  const styling = "" + name + "{" + stylings + "}";
-  clas.innerHTML = styling;
-  document.body.appendChild(clas);
-};
-/*
- *** HOW TO USE ***
-class(".container","color: red;");
-*/
-
 /** it's self explanatory some how */
 export const create = (type = "div", id = ""): HTMLElement => {
   const element = document.createElement(type);
@@ -900,7 +905,7 @@ export const create = (type = "div", id = ""): HTMLElement => {
 };
 /*
  *** HOW TO USE ***
-let div = create("div","newdiv");
+let div = create("div",{id:"newdiv"});
 */
 
 /** an easy to use download function that returns the link element that should be clicked */
@@ -908,9 +913,7 @@ export const download = function (type: string, source: { buffer: Uint8Array }, 
   const file = new Blob([source.buffer], { type: type });
   const fileURL = URL.createObjectURL(file);
   const linkElement = document.createElement("a");
-  // add the file url
   linkElement.setAttribute("href", fileURL);
-  // add the download attribute with name suggestion
   linkElement.setAttribute("download", name);
   return linkElement;
 };
@@ -1282,7 +1285,7 @@ for 2D rendering */
 /** this is used for creating pixel stable game views across all screen width with no pixelation problem try and see the magic */
 export const buildCanvas = function (id: string, w = window.innerWidth, h = window.innerHeight): HTMLCanvasElement {
   const canv = document.createElement("canvas"),
-    context = canv.getContext("2d")!,
+    context = canv.getContext("2d"),
     backingStores: (string | number)[] = [
       "webkitBackingStorePixelRatio",
       "mozBackingStorePixelRatio",
@@ -1901,7 +1904,6 @@ export const uiedbook = {
   error,
   get,
   rad,
-  makeClass,
   create,
   download,
   debounce,
