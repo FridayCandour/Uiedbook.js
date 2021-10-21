@@ -67,9 +67,8 @@ import u from "uiedbook";
  u(document.body).appendTo("div",
  {
    id: "new-div"
-  }, 5)
+  }, 5);
   // 5 is the number created
- });
 ```
 
 # uiedbook Documentation
@@ -350,7 +349,7 @@ buildTo(p, "body");
 
 ### isEmptyObject
 
-for checking if an object is eempty or not
+for checking if an object is empty or not
 
 ```js
 let objA = { a: "kd" };
@@ -561,7 +560,7 @@ Uiedbook.js has been given birth to in order for Developers to quickly create, m
 
 ## Thanks
 
-- **[@suppen](https://github.com/suppen), [@mrtii](https://github.com/mrtii)** and all the contributors who helped making Uiedbook.
+- **[@suppen](https://github.com/suppen), [@trgwii](https://github.com/trgwii)** and all the contributors who helped making Uiedbook.
 - **[Sauce Labs](https://saucelabs.com)** - The cross-browser testing platform we use for testing our builds in all the supported environments.
 
 ## License
