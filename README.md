@@ -26,13 +26,13 @@ Is holding reasonable standards needed in the future.
 ## support features
 
 | Features                 | uiedbook | jQuery Slim 3.4.1     |
-| ------------------------ | -------- | --------------------- | ------------------------ |
-| Supports Older Browsers  | ✔        |                       | ✔                        |
-| Supports Modern Browsers | ✔        |                       | ✔                        |
-| Actively Maintained      | ✔        |                       | ✔                        |
-| Namespaced Events        | ✔        |                       | ✔                        |
+| ------------------------ | -------  | --------------------- | ------------------------ |
+| Supports Older Browsers  | ✔        |                       | ✔                       |
+| Supports Modern Browsers | ✔        |                       | ✔                       |
+| Actively Maintained      | ✔        |                       | ✔                       |
+| Namespaced Events        | ✔        |                       | ✔                       |
 | Typed Codebase           | ✔        | (TypeScript)          | ❌                       |
-| TypeScript Types         | ✔        | (generated from code) | ⚠️ (via DefinitelyTyped) |
+| TypeScript Types         | ✔        | (generated from code) |   (via DefinitelyTyped)  |
 | first class node support | ✔        |                       |                          |
 
 ## installing to your project
@@ -82,7 +82,7 @@ And in this brand new version there are 40 contexts covering wide use cases for 
 
 ### u(selector) context
 
-This is one of the selectors contexts available for uiedbook. once the DOM is ready, it is configured by default to only get the first element matching the given selector only. to get all the available nodes matching the selector, a second argument "all", is introduce, as far as the second argument is not a number and not given, it will get all the nodes matching the selector. If it's a numer, it will get the node at the index of the number only. 20 useful methods are bundled to the u() context.
+This is one of the selectors contexts available for uiedbook. once the DOM is ready, it is configured by default to only get the first element matching the given selector only. to get all the available nodes matching the selector, a second argument "all", is introduce, as far as the second argument is not a number and given, it will get all the nodes matching the selector. If it's a numer, it will get the node at the index of the number only. 20 useful methods are bundled to the u() context.
 
 The selector value of the u() context is not limited only to DOM selectors values like "div" or "body",
 objects, functions and variables holding refernce to html elements can be used as the selector and will be manipulated based the attached methods only pertaining to the type of the selector, making the u() context highly useful for many use cases.
