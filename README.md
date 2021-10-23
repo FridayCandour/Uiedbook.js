@@ -4,7 +4,7 @@
 
 # uiedbook
 
-Uiedbook is a javascript library for building web apps and games, it's a jquery alternative that comes with tested speed, less size and more juice, everyone always say that.
+Uiedbook is a javascript library for building web apps and games.
 
 It has been given birth to in order for
 Developers to quickly create, maintain and publish
@@ -13,27 +13,27 @@ Their products in less time.
 uiedbook shines on it's modern design and
 Is holding reasonable standards needed in the future.
 
-## size comparison
+## size 
 
-| Size               | uiedbook    | jQuery Slim 3.4.1 |
-| ------------------ | ----------- | ----------------- |
-| Unminified         | **36.5 KB** | 227 KB            |
-| Minified           | **16 KB**   | 71 KB             |
-| Minified & Gzipped | **6 KB**    | 24.4 KB           |
+| Size               | uiedbook    |
+| ------------------ | ----------- |
+| Unminified         | **36.5 KB** |
+| Minified           | **16 KB**   |
+| Minified & Gzipped | **6 KB**    |
 
 ### custom builds are available too!
 
 ## support features
 
-| Features                 | uiedbook | jQuery Slim 3.4.1     |
-| ------------------------ | -------  | --------------------- | ------------------------ |
-| Supports Older Browsers  | ✔        |                       | ✔                       |
-| Supports Modern Browsers | ✔        |                       | ✔                       |
-| Actively Maintained      | ✔        |                       | ✔                       |
-| Namespaced Events        | ✔        |                       | ✔                       |
-| Typed Codebase           | ✔        | (TypeScript)          | ❌                       |
-| TypeScript Types         | ✔        | (generated from code) |   (via DefinitelyTyped)  |
-| first class node support | ✔        |                       |                          |
+| Features                 | uiedbook |
+| ------------------------ | -------  |
+| Supports Older Browsers  | ✔        |
+| Supports Modern Browsers | ✔        |
+| Actively Maintained      | ✔        |
+| Namespaced Events        | ✔        |
+| Typed Codebase           | ✔        |
+| TypeScript Types         | ✔        |
+| first class node support | ✔        |
 
 ## installing to your project
 
