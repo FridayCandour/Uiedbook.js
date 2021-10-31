@@ -1,17 +1,3 @@
-/*
- @publisher : friday candour;
- @project : uiedbook library;
- @copyright-lincense :  Apache;
-
-
-
-                                  Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
- 
- 
-YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WITH THIS MODULE
-*/
 /** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
 export const u = (el, ifAll_OrNum) => {
     const e = get(el, ifAll_OrNum);
@@ -21,6 +7,16 @@ export const u = (el, ifAll_OrNum) => {
     // the funny parts or extra methods that can be used
     // to manipulate dom  elements are below!
     return {
+        each(fn) {
+            if (all) {
+                e.forEach((el, ind) => {
+                    fn.call(el, ind);
+                });
+            }
+            else {
+                return;
+            }
+        },
         // for styling
         style(obj) {
             for (const k in obj) {
@@ -35,6 +31,7 @@ export const u = (el, ifAll_OrNum) => {
                     e.forEach(_e => (_e.style[k] = v));
                 }
             }
+            return e;
         },
         /*
      *** HOW TO USE ***
@@ -82,7 +79,7 @@ export const u = (el, ifAll_OrNum) => {
             }
             const frag = new DocumentFragment();
             let returned = null;
-            let allElements = [];
+            const allElements = [];
             if (!all) {
                 for (let i = 0; i < number; i++) {
                     const element = document.createElement(type);
@@ -375,11 +372,19 @@ export const u = (el, ifAll_OrNum) => {
     */
         // for removing elements to the dom elements
         remove(ind) {
-            if (!all) {
+            if (!all && ind) {
                 e.removeChild(e.childNodes[ind]);
             }
             else {
-                e.forEach(el => el.removeChild(el.childNodes[ind]));
+                if (ind) {
+                    e.forEach(el => el.removeChild(el.childNodes[ind]));
+                }
+            }
+            if (!all && !ind) {
+                e.parentElement?.remove(e);
+            }
+            else {
+                e.forEach(el => el.removeChild(el.parentElement?.remove(el)));
             }
         },
         /*
@@ -678,7 +683,7 @@ export const buildTo = (child, parent) => {
     if (typeof parent === "string") {
         document.querySelectorAll(parent).forEach(par => {
             if (Array.isArray(child)) {
-                child.forEach((ch) => {
+                child.forEach(ch => {
                     par.append(ch);
                 });
             }
@@ -686,7 +691,7 @@ export const buildTo = (child, parent) => {
     }
     else {
         if (Array.isArray(child)) {
-            child.forEach((ch) => {
+            child.forEach(ch => {
                 parent.append(ch);
             });
         }
@@ -811,17 +816,6 @@ export const rad = (num) => {
 rad(5);
 // you will get random values from 0 to 5
 */
-/** for making css classes */
-export const makeClass = (name, stylings) => {
-    const clas = document.createElement("style");
-    const styling = "" + name + "{" + stylings + "}";
-    clas.innerHTML = styling;
-    document.body.appendChild(clas);
-};
-/*
- *** HOW TO USE ***
-class(".container","color: red;");
-*/
 /** it's self explanatory some how */
 export const create = (type = "div", id = "") => {
     const element = document.createElement(type);
@@ -831,16 +825,14 @@ export const create = (type = "div", id = "") => {
 };
 /*
  *** HOW TO USE ***
-let div = create("div","newdiv");
+let div = create("div",{id:"newdiv"});
 */
 /** an easy to use download function that returns the link element that should be clicked */
 export const download = function (type, source, name) {
     const file = new Blob([source.buffer], { type: type });
     const fileURL = URL.createObjectURL(file);
     const linkElement = document.createElement("a");
-    // add the file url
     linkElement.setAttribute("href", fileURL);
-    // add the download attribute with name suggestion
     linkElement.setAttribute("download", name);
     return linkElement;
 };
@@ -996,7 +988,7 @@ export const continuesKeys = (keys, callback, delay = 0, object = document, lock
     }
     keepKeys(keys, callback);
     const temporaryKeys = [];
-    object.addEventListener("keyup", (e) => {
+    object.addEventListener("keyup", e => {
         for (let i = 0; i < temporaryKeys.length; i++) {
             if (temporaryKeys[i] === e.key) {
                 temporaryKeys.splice(i, 1);
@@ -1451,7 +1443,7 @@ export class ImgPainter {
         if (this.range % this.delay === 0) {
             if (this.rotate) {
                 context.translate(entity.left, entity.top);
-                context.rotate(this.rotate * Math.PI / 180);
+                context.rotate((this.rotate * Math.PI) / 180);
                 context.translate(-entity.left, -entity.top);
             }
             context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
@@ -1528,7 +1520,7 @@ spriteSheetPainter.prototype = {
         context.save();
         if (this.rotate) {
             context.translate(entity.left, entity.top);
-            context.rotate(this.rotate * Math.PI / 180);
+            context.rotate((this.rotate * Math.PI) / 180);
             context.translate(-entity.left, -entity.top);
         }
         context.drawImage(this.image, this.framesWidth * this.frameWidthCount, this.framesHeight * this.frameHeightCount, this.framesWidth, this.framesHeight, entity.left, entity.top, entity.width, entity.height);
@@ -1615,10 +1607,10 @@ const physics = (function () {
                 continue;
             }
             else {
-                if ((ent.left - reduce) > (entityArray[j].left + entityArray[j].width) ||
-                    (ent.left + ent.width) < (entityArray[j].left - reduce) ||
-                    ent.top + reduce > (entityArray[j].top + entityArray[j].height) ||
-                    (ent.top + ent.height) < (entityArray[j].top - reduce)) {
+                if (ent.left - reduce > entityArray[j].left + entityArray[j].width ||
+                    ent.left + ent.width < entityArray[j].left - reduce ||
+                    ent.top + reduce > entityArray[j].top + entityArray[j].height ||
+                    ent.top + ent.height < entityArray[j].top - reduce) {
                     continue;
                 }
                 else {
@@ -1746,7 +1738,6 @@ export const uiedbook = {
     error,
     get,
     rad,
-    makeClass,
     create,
     download,
     debounce,

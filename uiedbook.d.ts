@@ -1,5 +1,9 @@
+declare type BaseE = HTMLElement | NodeListOf<HTMLElement>;
 declare type Uied = {
-    style(obj: Partial<HTMLElement["style"]>): void;
+    each(fn: {
+        call: (arg0: NodeListOf<HTMLElement>, ind: number) => void;
+    }): void;
+    style(obj: Partial<HTMLElement["style"]>): BaseE;
     config(obj: Partial<ObjectConstructor>): void;
     appendTo(type: string, attribute: Record<string, string>, number?: number): void;
     on(type: string, callback: (e: Event) => void): void;
@@ -12,7 +16,7 @@ declare type Uied = {
     hide(): void;
     toggleClass(): void;
     show(): void;
-    off(type: string, callback: any): void;
+    off(type: string, callback: (e: Event) => void): void;
     box(w: number, h: number, c?: string): void;
     scrollTo(s?: boolean): void;
     add(nod: Element | HTMLElement | Node): void;
@@ -23,7 +27,6 @@ declare type Uied = {
         exist(): void;
     };
 };
-declare type BaseE = HTMLElement | NodeListOf<HTMLElement>;
 /** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
 export declare const u: (el: string | BaseE, ifAll_OrNum?: number | boolean | undefined) => Uied;
 /** This is for creating css styles using javascipt
@@ -163,8 +166,6 @@ export declare const error: (msg: string) => never;
 export declare const get: <All extends number | boolean | undefined = undefined>(el: string | BaseE, ifAll_OrNum?: All | undefined) => (All extends undefined ? HTMLElement : NodeListOf<HTMLElement>) | null;
 /** for getting more purer random number */
 export declare const rad: (num: number) => number;
-/** for making css classes */
-export declare const makeClass: (name: string, stylings: string) => void;
 /** it's self explanatory some how */
 export declare const create: (type?: string, id?: string) => HTMLElement;
 /** an easy to use download function that returns the link element that should be clicked */
@@ -275,7 +276,6 @@ export declare const uiedbook: {
     error: (msg: string) => never;
     get: <All extends number | boolean | undefined = undefined>(el: string | BaseE, ifAll_OrNum?: All | undefined) => (All extends undefined ? HTMLElement : NodeListOf<HTMLElement>) | null;
     rad: (num: number) => number;
-    makeClass: (name: string, stylings: string) => void;
     create: (type?: string, id?: string) => HTMLElement;
     download: (type: string, source: {
         buffer: Uint8Array;

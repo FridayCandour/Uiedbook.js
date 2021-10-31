@@ -25,8 +25,8 @@ Without a selector specified, returns a collection of child elements.
 With a selector, returns child elements that match the selector.
 
 ```js
-$(element).children () // => collection
-$(element).children ( selector ) // => collection
+$(element).children(); // => collection
+$(element).children(selector); // => collection
 ```
 
 #### fn.clone ()
@@ -34,7 +34,7 @@ $(element).children ( selector ) // => collection
 Returns a collection with cloned elements.
 
 ```js
-$(element).clone () // => collection
+$(element).clone(); // => collection
 ```
 
 #### fn.detach ()
@@ -42,8 +42,8 @@ $(element).clone () // => collection
 Removes collection elements, optionally that match the selector, from the DOM.
 
 ```js
-$(element).detach () // => collection
-$(element).detach ( selector ) // => collection
+$(element).detach(); // => collection
+$(element).detach(selector); // => collection
 ```
 
 #### fn.empty ()
@@ -51,7 +51,7 @@ $(element).detach ( selector ) // => collection
 Empties the elements interior markup.
 
 ```js
-$(element).empty () // => collection
+$(element).empty(); // => collection
 ```
 
 #### fn.filter ()
@@ -59,8 +59,8 @@ $(element).empty () // => collection
 Returns the collection that results from applying the filter selector/method.
 
 ```js
-$(element).filter ( selector ) // => collection
-$(element).filter ( function ( index, element ) {} ) // => collection
+$(element).filter(selector); // => collection
+$(element).filter(function (index, element) {}); // => collection
 ```
 
 #### fn.first ()
@@ -68,7 +68,7 @@ $(element).filter ( function ( index, element ) {} ) // => collection
 Returns a collection containing only the first element.
 
 ```js
-$(element).first () // => collection
+$(element).first(); // => collection
 ```
 
 #### fn.get ()
@@ -76,8 +76,8 @@ $(element).first () // => collection
 Returns the element at the index, or returns all elements.
 
 ```js
-$(element).get ( index ) // => domNode
-$(element).get () // => domNode[]
+$(element).get(index); // => domNode
+$(element).get(); // => domNode[]
 ```
 
 #### fn.has ()
@@ -85,8 +85,8 @@ $(element).get () // => domNode[]
 Reduce the set of matched elements to those that have a descendant that matches the selector or DOM element.
 
 ```js
-$(element).has ( selector ) // => collection
-$(element).has ( element ) // => collection
+$(element).has(selector); // => collection
+$(element).has(element); // => collection
 ```
 
 #### fn.hasClass ()
@@ -94,7 +94,7 @@ $(element).has ( element ) // => collection
 Returns the boolean result of checking if any element in the collection has the `className` attribute.
 
 ```js
-$(element).hasClass ( className ) // => boolean
+$(element).hasClass(className); // => boolean
 ```
 
 #### fn.height ()
@@ -102,8 +102,8 @@ $(element).hasClass ( className ) // => boolean
 Returns or sets the height of the element.
 
 ```js
-$(element).height () // => Integer
-$(element).height ( number ) // => collection
+$(element).height(); // => Integer
+$(element).height(number); // => collection
 ```
 
 #### fn.index ()
@@ -111,8 +111,8 @@ $(element).height ( number ) // => collection
 Returns the index of the element in its parent if an element or selector isn't provided. Returns index within element or selector if it is.
 
 ```js
-$(element).index () // => Integer
-$(element).index ( element ) // => Integer
+$(element).index(); // => Integer
+$(element).index(element); // => Integer
 ```
 
 #### fn.innerHeight ()
@@ -120,7 +120,7 @@ $(element).index ( element ) // => Integer
 Returns the height of the element + padding.
 
 ```js
-$(element).innerHeight () // => Integer
+$(element).innerHeight(); // => Integer
 ```
 
 #### fn.innerWidth ()
@@ -128,7 +128,7 @@ $(element).innerHeight () // => Integer
 Returns the width of the element + padding.
 
 ```js
-$(element).innerWidth () // => Integer
+$(element).innerWidth(); // => Integer
 ```
 
 #### fn.insertAfter ()
@@ -136,7 +136,7 @@ $(element).innerWidth () // => Integer
 Inserts collection after specified element.
 
 ```js
-$(element).insertAfter ( element ) // => collection
+$(element).insertAfter(element); // => collection
 ```
 
 #### fn.insertBefore ()
@@ -144,14 +144,15 @@ $(element).insertAfter ( element ) // => collection
 Inserts collection before specified element.
 
 ```js
-$(element).insertBefore ( element ) // => collection
+$(element).insertBefore(element); // => collection
 ```
+
 #### fn.last ()
 
 Returns a collection containing only the last element.
 
 ```js
-$(element).last () // => collection
+$(element).last(); // => collection
 ```
 
 #### fn.map ()
@@ -159,7 +160,7 @@ $(element).last () // => collection
 Returns a new collection, mapping each element with `callback ( index, element )`.
 
 ```js
-$(selector).map ( callback ) // => collection
+$(selector).map(callback); // => collection
 ```
 
 #### fn.not ()
@@ -167,8 +168,8 @@ $(selector).map ( callback ) // => collection
 Filters collection by false match on collection/selector.
 
 ```js
-$(element).not ( selector ) // => collection
-$(element).not ( collection ) // => collection
+$(element).not(selector); // => collection
+$(element).not(collection); // => collection
 ```
 
 #### fn.off ()
@@ -180,10 +181,10 @@ Accepts space-separated `eventName` for removing multiple events listeners.
 Removes all event listeners if called without arguments.
 
 ```js
-$(element).off ( eventName, eventHandler ) // => collection
-$(element).off ( eventName ) // => collection
-$(element).off ( eventsMap ) // => collection
-$(element).off () // => collection
+$(element).off(eventName, eventHandler); // => collection
+$(element).off(eventName); // => collection
+$(element).off(eventsMap); // => collection
+$(element).off(); // => collection
 ```
 
 #### fn.offset ()
@@ -191,7 +192,7 @@ $(element).off () // => collection
 Get the coordinates of the first element in a collection relative to the document.
 
 ```js
-$(element).offset () // => Object
+$(element).offset(); // => Object
 ```
 
 #### fn.offsetParent ()
@@ -199,7 +200,7 @@ $(element).offset () // => Object
 Get the first element's ancestor that's positioned.
 
 ```js
-$(element).offsetParent () // => collection
+$(element).offsetParent(); // => collection
 ```
 
 #### fn.on ()
@@ -211,9 +212,9 @@ Accepts space-separated `eventName` for listening to multiple events.
 Event is delegated if delegate is supplied.
 
 ```js
-$(element).on ( eventsMap ) // => collection
-$(element).on ( eventName, eventHandler ) // => collection
-$(element).on ( eventName, delegate, eventHandler ) // => collection
+$(element).on(eventsMap); // => collection
+$(element).on(eventName, eventHandler); // => collection
+$(element).on(eventName, delegate, eventHandler); // => collection
 ```
 
 #### fn.outerHeight ()
@@ -221,8 +222,8 @@ $(element).on ( eventName, delegate, eventHandler ) // => collection
 Returns the outer height of the element. Includes margins if `includeMargings` is set to true.
 
 ```js
-$(element).outerHeight () // => Integer
-$(element).outerHeight ( includeMargins ) // => Integer
+$(element).outerHeight(); // => Integer
+$(element).outerHeight(includeMargins); // => Integer
 ```
 
 #### fn.outerWidth ()
@@ -230,8 +231,8 @@ $(element).outerHeight ( includeMargins ) // => Integer
 Returns the outer width of the element. Includes margins if `includeMargings` is set to true.
 
 ```js
-$(element).outerWidth () // => Integer
-$(element).outerWidth ( includeMargins ) // => Integer
+$(element).outerWidth(); // => Integer
+$(element).outerWidth(includeMargins); // => Integer
 ```
 
 #### fn.parent ()
@@ -239,8 +240,8 @@ $(element).outerWidth ( includeMargins ) // => Integer
 Returns collection of elements who are parent of elements.
 
 ```js
-$(element).parent () // => collection
-$(element).parent ( selector ) // => collection
+$(element).parent(); // => collection
+$(element).parent(selector); // => collection
 ```
 
 #### fn.parents ()
@@ -248,8 +249,8 @@ $(element).parent ( selector ) // => collection
 Returns collection of elements who are parents of elements. Optionally filtering by selector.
 
 ```js
-$(element).parents () // => collection
-$(element).parents ( selector ) // => collection
+$(element).parents(); // => collection
+$(element).parents(selector); // => collection
 ```
 
 #### fn.parentsUntil ()
@@ -257,8 +258,8 @@ $(element).parents ( selector ) // => collection
 Returns collection of elements who are parents of elements, until a provided selector matches. Optionally filtering by selector.
 
 ```js
-$(element).parentsUntil ( selector ) // => collection
-$(element).parentsUntil ( selector, filterSelector ) // => collection
+$(element).parentsUntil(selector); // => collection
+$(element).parentsUntil(selector, filterSelector); // => collection
 ```
 
 #### fn.position ()
@@ -266,7 +267,7 @@ $(element).parentsUntil ( selector, filterSelector ) // => collection
 Get the coordinates of the first element in a collection relative to its `offsetParent`.
 
 ```js
-$(element).position () // => object
+$(element).position(); // => object
 ```
 
 #### fn.prepend ()
@@ -284,7 +285,7 @@ $(element).prepend ( content [, content] ) // => collection
 Prepends elements in a collection to the target element(s).
 
 ```js
-$(element).prependTo ( element ) // => collection
+$(element).prependTo(element); // => collection
 ```
 
 #### fn.prev ()
@@ -292,8 +293,8 @@ $(element).prependTo ( element ) // => collection
 Returns the previous adjacent elements.
 
 ```js
-$(element).prev () // => collection
-$(element).prev ( selector ) // => collection
+$(element).prev(); // => collection
+$(element).prev(selector); // => collection
 ```
 
 #### fn.prevAll ()
@@ -301,8 +302,8 @@ $(element).prev ( selector ) // => collection
 Returns all the previous elements.
 
 ```js
-$(element).prevAll () // => collection
-$(element).prevAll ( selector ) // => collection
+$(element).prevAll(); // => collection
+$(element).prevAll(selector); // => collection
 ```
 
 #### fn.prevUntil ()
@@ -310,15 +311,16 @@ $(element).prevAll ( selector ) // => collection
 Returns all the previous elements, until the provided selector matches.
 
 ```js
-$(element).prevUntil ( selector ) // => collection
-$(element).prevUntil ( selector, filterSelector ) // => collection
+$(element).prevUntil(selector); // => collection
+$(element).prevUntil(selector, filterSelector); // => collection
 ```
+
 #### fn.replaceWith ()
 
 Replace collection elements with the provided new content.
 
 ```js
-$(element).replaceWith ( content ) // => collection
+$(element).replaceWith(content); // => collection
 ```
 
 #### fn.serialize ()
@@ -326,7 +328,7 @@ $(element).replaceWith ( content ) // => collection
 When called on a form, serializes and returns form data.
 
 ```js
-$(form).serialize () // => String
+$(form).serialize(); // => String
 ```
 
 #### fn.siblings ()
@@ -334,8 +336,8 @@ $(form).serialize () // => String
 Returns a collection of sibling elements.
 
 ```js
-$(element).siblings () // => collection
-$(element).siblings ( selector ) // => collection
+$(element).siblings(); // => collection
+$(element).siblings(selector); // => collection
 ```
 
 #### fn.slice ()
@@ -343,7 +345,7 @@ $(element).siblings ( selector ) // => collection
 Returns a new collection with elements taken from start to end.
 
 ```js
-$(selector).slice ( start, end ) // => collection
+$(selector).slice(start, end); // => collection
 ```
 
 #### fn.toggle ()
@@ -351,7 +353,7 @@ $(selector).slice ( start, end ) // => collection
 Hide or show the elements.
 
 ```js
-$(element).toggle () // => collection
+$(element).toggle(); // => collection
 ```
 
 #### fn.trigger ()
@@ -359,10 +361,10 @@ $(element).toggle () // => collection
 Triggers supplied event on elements in collection. Data can be passed along as the second parameter.
 
 ```js
-$(element).trigger ( eventName ) // => collection
-$(element).trigger ( eventObj ) // => collection
-$(element).trigger ( eventName, data ) // => collection
-$(element).trigger ( eventObj, data ) // => collection
+$(element).trigger(eventName); // => collection
+$(element).trigger(eventObj); // => collection
+$(element).trigger(eventName, data); // => collection
+$(element).trigger(eventObj, data); // => collection
 ```
 
 #### fn.unwrap ()
@@ -370,7 +372,7 @@ $(element).trigger ( eventObj, data ) // => collection
 Removes the wrapper from all elements.
 
 ```js
-$(element).unwrap () // => collection
+$(element).unwrap(); // => collection
 ```
 
 #### fn.val ()
@@ -378,8 +380,8 @@ $(element).unwrap () // => collection
 Returns an inputs value. If value is supplied, sets all inputs in collection's value to the value argument.
 
 ```js
-$(input).val () // => value
-$(input).val ( value ) // => collection
+$(input).val(); // => value
+$(input).val(value); // => collection
 ```
 
 #### fn.width ()
@@ -387,8 +389,8 @@ $(input).val ( value ) // => collection
 Returns or sets the width of the element.
 
 ```js
-$(element).width () // => number
-$(element).width ( number ) // => collection
+$(element).width(); // => number
+$(element).width(number); // => collection
 ```
 
 #### fn.wrap ()
@@ -396,7 +398,7 @@ $(element).width ( number ) // => collection
 Wraps a structure around each element.
 
 ```js
-$(element).wrap ( structure ) // => collection
+$(element).wrap(structure); // => collection
 ```
 
 #### fn.wrapAll ()
@@ -404,7 +406,7 @@ $(element).wrap ( structure ) // => collection
 Wraps a structure around all elements.
 
 ```js
-$(element).wrapAll ( structure ) // => collection
+$(element).wrapAll(structure); // => collection
 ```
 
 #### fn.wrapInner ()
@@ -412,5 +414,5 @@ $(element).wrapAll ( structure ) // => collection
 Wraps a structure around all children.
 
 ```js
-$(element).wrapInner ( structure ) // => collection
+$(element).wrapInner(structure); // => collection
 ```
