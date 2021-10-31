@@ -10,6 +10,34 @@ It has been given birth to in order for
 Developers to quickly create, maintain and publish
 Their products in less time.
 
+---
+
+<p align="center">
+ <a href="#contributing">
+   <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome">
+ </a>
+ <a href="https://github.com/Fridaycandour/uiedbook/main/LICENSE">
+  <img src="https://img.shields.io/badge/License-MIT-brightgreen.svg?style=flat-square" alt="MIT License">
+ </a>
+ <a href="https://github.com/Fridaycandour/uiedbook//discussions">
+  <img src="https://img.shields.io/badge/GitHub-Discussions-brightgreen.svg?style=flat-square" alt="Discussions">
+ </a>
+</p>
+
+<p align="center">
+ <a href="#donate-and-support-us">
+  <img src="https://img.shields.io/badge/GitHub-Sponsors-EA4AAA.svg?style=flat-square" alt="GitHub Sponsors">
+ </a>
+ <a href="https://opencollective.com/uiedbook">
+  <img src="https://img.shields.io/badge/Open%20Collective-Support%20Us-3385FF.svg?style=flat-square" alt="Open Collective">
+ </a>
+ <a href="https://www.patreon.com/uiedbook">
+  <img src="https://img.shields.io/badge/Patreon-Become%20a%20Patron-E95420.svg?style=flat-square" alt="Patreon">
+ </a>
+</p>
+
+---
+
 uiedbook shines on it's modern design and
 Is holding reasonable standards needed in the future.
 
