@@ -573,6 +573,7 @@ documentation for the engine will be given soon, support the project :)
 buildCanvas, appendCanvas, re, Entity, ImgPainter, spriteSheetPainter, audio, bgPainter, renderer, speaker, speakerStop, physics.
 
 ## Contributing uiedbook
+support me on patreon: https://www.patreon.com/Fridaycandour
 
 If you found a problem, or have a feature request, please open an [issue](https://github.com/FridayCandour/uiedbook/issues) about it.
 
@@ -580,8 +581,8 @@ If you want to make a pull request you should:
 
 1. Clone the repository: `git clone https://github.com/FridayCandour/uiedbook.git`.
 2. Enter the cloned repository: `cd uiedbook`
-3. Install the dependencies: `npm install`.
-4. Automatically recompile Cash whenever a change is made: `npm build`.
+3. Install the dev dependencies: `npm install`.
+4. Automatically recompile uiedbook whenever a change is made: `npm build`.
 5. Remember to update the readme, if necessary.
 
 Uiedbook.js has been given birth to in order for Developers to quickly create, maintain and publish Their products in less time.
