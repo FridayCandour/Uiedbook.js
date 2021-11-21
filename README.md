@@ -65,10 +65,10 @@ Is holding reasonable standards needed in the future.
 
 ## installing to your project
 
-you can get uiedbook from [CloudFlare](https://cdnjs.cloudflare.com/ajax/libs/uiedbook/1.0.56/uiedbook.min.js) or [jsDelivr](https://cdn.jsdelivr.net/npm/uiedbook@1.0.56/uiedbook.min.js) and use it like this:
+you can get uiedbook from [uiedbook](https://cdn.jsdelivr.net/gh/fridaycandour/Uiedbook.js/uiedbook.js) and use it like this:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/uiedbook@1.0.56/uiedbook.min.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/gh/fridaycandour/Uiedbook.js/uiedbook.js" type="module"></script>
 <script>
   u("#container").style({
     color: "aqua",
