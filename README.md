@@ -41,7 +41,7 @@ Their products in less time.
 uiedbook shines on it's modern design and
 Is holding reasonable standards needed in the future.
 
-## size 
+## size
 
 | Size               | uiedbook    |
 | ------------------ | ----------- |
@@ -54,7 +54,7 @@ Is holding reasonable standards needed in the future.
 ## support features
 
 | Features                 | uiedbook |
-| ------------------------ | -------  |
+| ------------------------ | -------- |
 | Supports Older Browsers  | ✔        |
 | Supports Modern Browsers | ✔        |
 | Actively Maintained      | ✔        |
@@ -65,10 +65,10 @@ Is holding reasonable standards needed in the future.
 
 ## installing to your project
 
-you can get uiedbook from [CloudFlare](https://cdnjs.cloudflare.com/ajax/libs/uiedbook/1.0.56/uiedbook.min.js) or [jsDelivr](https://cdn.jsdelivr.net/npm/uiedbook@1.0.56/uiedbook.min.js) and use it like this:
+you can get uiedbook from [uiedbook](https://cdn.jsdelivr.net/gh/fridaycandour/Uiedbook.js/uiedbook.js) and use it like this:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/uiedbook@1.0.56/uiedbook.min.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/gh/fridaycandour/Uiedbook.js/uiedbook.js" type="module"></script>
 <script>
   u("#container").style({
     color: "aqua",
@@ -92,11 +92,14 @@ That you can then use like this:
 ```js
 import u from "uiedbook";
 
- u(document.body).appendTo("div",
- {
-   id: "new-div"
-  }, 5);
-  // 5 is the number created
+u(document.body).appendTo(
+  "div",
+  {
+    id: "new-div"
+  },
+  5
+);
+// 5 is the number created
 ```
 
 # uiedbook Documentation
@@ -574,14 +577,16 @@ buildCanvas, appendCanvas, re, Entity, ImgPainter, spriteSheetPainter, audio, bg
 
 ## Contributing uiedbook
 
+support me on patreon: https://www.patreon.com/Fridaycandour
+
 If you found a problem, or have a feature request, please open an [issue](https://github.com/FridayCandour/uiedbook/issues) about it.
 
 If you want to make a pull request you should:
 
 1. Clone the repository: `git clone https://github.com/FridayCandour/uiedbook.git`.
 2. Enter the cloned repository: `cd uiedbook`
-3. Install the dependencies: `npm install`.
-4. Automatically recompile Cash whenever a change is made: `npm build`.
+3. Install the dev dependencies: `npm install`.
+4. Automatically recompile uiedbook whenever a change is made: `npm build`.
 5. Remember to update the readme, if necessary.
 
 Uiedbook.js has been given birth to in order for Developers to quickly create, maintain and publish Their products in less time.
