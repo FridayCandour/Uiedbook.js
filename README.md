@@ -576,6 +576,7 @@ documentation for the engine will be given soon, support the project :)
 buildCanvas, appendCanvas, re, Entity, ImgPainter, spriteSheetPainter, audio, bgPainter, renderer, speaker, speakerStop, physics.
 
 ## Contributing uiedbook
+
 support me on patreon: https://www.patreon.com/Fridaycandour
 
 support me on patreon: https://www.patreon.com/Fridaycandour

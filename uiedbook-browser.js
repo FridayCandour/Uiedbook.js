@@ -14,6 +14,74 @@ YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WIT
 */
 
 "use strict";
+function lit(type, label) {
+  label = typeof label === "number" ? `line ${label}` : label;
+
+  // let S_arrays = ["string"];
+  // let N_arrays = ["number"];
+  // let O_arrays = ["object"];
+  // let A_arrays = ["array"];
+  // let F_arrays = ["function"];
+
+  return function (value) {
+    if (Array.isArray(type) && Array.isArray(value)) {
+      // typing for arrays
+      value = value.sort();
+      type = type.sort();
+      for (let i = 0; i < type.length; i++) {
+        if (typeof value[i] === type[i] || value[i] === type[i]) {
+          continue;
+        } else {
+          console.warn(`WARNING:-: type ${value} is not assignable to type ${type} at ${label}`);
+        }
+      }
+    } else {
+      // checking for objects
+      for (const k in type) {
+        if (typeof value[k] === type[k] || value[k] === type[k]) {
+          continue;
+        } else {
+          console.warn(`WARNING:-: the object types for type and value are not assignable at ${label}`);
+          break;
+        }
+      }
+    }
+    return value;
+  };
+}
+
+// single values not objects
+const t = function (...args) {
+  let label = args.pop();
+  label = typeof label === "number" ? `line ${label}` : label;
+  const type = args.length === 1 ? args.pop() : args;
+  return function (value) {
+    if (!Array.isArray(type)) {
+      // for single types
+      if (value === type || typeof value === type) {
+        return value;
+      } else {
+        console.warn(`WARNING:-: type ${typeof value} is not assignable to type ${type} at ${label}`);
+      }
+    } else {
+      // for union types
+      for (let i = 0; i < type.length; i++) {
+        const typ = type[i];
+        if (typeof value === typ || value === typ) {
+          return value;
+        } else {
+          if (i === type.length - 1) {
+            console.warn(
+              `warning type ${typeof value} is not assignable to types ${type[0]}, ${type[1]}...  at ${label}`
+            );
+            return false;
+          }
+        }
+      }
+    }
+  };
+};
+
 const css = (name, sel, properties) => {
   /*This is for creating
  css styles using javascipt*/
@@ -362,7 +430,7 @@ u("#container").style({
           e[k] = v;
         }
       } else {
-        throw new Error(`the variable is not an object ${obj}`);
+        throw new Error(`paramental not an object ${obj}`);
       }
     },
     /*
@@ -378,7 +446,7 @@ u(object).config({
     appendTo(type, attribute = {}, number = 1) {
       // for adding new elements more powerfully
       if (typeof attribute === "undefined" || typeof type === "undefined") {
-        throw new Error("type or attribute not given | not enough parameters to work with");
+        throw new Error("type or attribute not given or not enough parameters to work with");
       }
       const frag = new DocumentFragment();
       let returned = null;
@@ -1368,9 +1436,10 @@ parent to append directly */
   return cv;
 };
 
-/*this is the RE game time line algorimth*/
+/** this is the game engine algorithm*/
+
 const game = (function () {
-  /*Re is an interface
+  /*game is an interface
  where game views (view) are
  sequenced on.*/
   const games = [];
@@ -1410,10 +1479,10 @@ const game = (function () {
     fram.append(games[0]);
   }
   // the start function starts the game
-  // and manathe dom
-  const start = (canvas, fps) => {
-    if (games.length < 1 || games.length > 1) {
-      throw new Error("uiedbook: game.mount() should be called and given a built game world");
+  // and manages the dom
+  const start = (canvas, fps = 0) => {
+    if (!canvas) {
+      throw new Error("uiedbook: cannot start game without a canvas. EXP game.start(canvas)");
     }
 
     u(document.body).style({
@@ -1445,7 +1514,7 @@ const game = (function () {
       boxSizing: "border-box"
     });
     const gameframe = get("#gameframe");
-    flow(gameframe);
+    gameframe.append(games[0]);
     renderer.render(canvas, fps);
   };
   // this stops the game
@@ -1639,7 +1708,7 @@ const entity = function (name, painter, behaviors) {
   if (!painter || !behaviors) {
     throw new Error("cannot create entity without a paiter and behavior objects");
   }
-  //this.id = name || "none" //name of the entity for identification can be used out side here******
+  this.id = name || "none"; //name of the entity for identification can be used out side here******
   this.name = name || "none";
   this.painter = painter; // callback for paint the entity     can be used out side here******
   this.width = 0; // width of entiity                              can be used out side here******
@@ -1657,6 +1726,15 @@ const entity = function (name, painter, behaviors) {
   this.delete = false; //  to delete an entity                        can be used out side here******
   this.border = true; //   to make the entity observer sides or not   can be used out side here******
   this.isHit = false;
+  this.config = function (top, left, bottom, right) {
+    if (!top || !left || !bottom || !right) {
+      throw new Error(`uiedbook: entity.config(top, left, bottom, right) on ${this.name} is invalid`);
+    }
+    this.left = left;
+    this.top = top;
+    this.height = bottom;
+    this.width = right;
+  };
 };
 
 entity.prototype = {
@@ -1700,15 +1778,43 @@ entity.prototype = {
   }
 };
 
-const imgPainter = function (img, delay = 1) {
+const entityShader = function (name, img, map, behaviors, delay = 1) {
+  /*
+just like an entity, this can also be
+ added to the game world
+but these are stationary
+*/
+  if (!name || !img || !map) {
+    throw new Error("cannot create entity shader without a map or image objects");
+  }
+
+  this.id = name || "none"; //name of the entity for identification can be used out side here******
+  this.name = name || "none";
+  this.positionMap = map; // let's the hit detector act on the mapper object passed
+  this.width = 0; // width of entiity                              can be used out side here******
+  this.height = 0; // height of entity                             can be used out side here******
+  this.top = 0; // distance from the top of the canvas              can be used out side here******
+  this.left = 0; // distance from the left of the canvas            can be used out side here******
+  this.visible = true; // to check if the entity is displayed        can be used out side here******
+  this.behavior = behaviors; // this is a callback to add additional properties to the entity at runtime
+  this.delete = false; //  to delete an entity                        can be used out side here******
+  this.isHit = false;
   this.image = img;
   this.delay = delay;
   this.range = 0;
-  this.rotate = false;
+  this.config = function (top, left, bottom, right) {
+    if (!top || !left || !bottom || !right) {
+      throw new Error(`uiedbook: entityShader.config(top, left, bottom, right) on ${this.name} is invalid`);
+    }
+    this.left = left;
+    this.top = top;
+    this.height = bottom;
+    this.width = right;
+  };
 };
-imgPainter.prototype = {
-  // paint only no update
-  paint(entity, context) {
+
+entityShader.prototype = {
+  paint(context) {
     this.range++;
     if (this.range % this.delay === 0) {
       context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
@@ -1716,10 +1822,51 @@ imgPainter.prototype = {
     if (this.range > 100) {
       this.range = 1;
     }
+  },
+
+  update(context, lastDeltalTime) {
+    if (this.behaviors) {
+      this.behaviors(this, context, lastDeltalTime);
+    }
+  },
+  // well this has to be here for known reasons, yep it's empty but better to avoid a thousand if check ):
+  run() {}
+};
+
+const imgPainter = function (img, delay = 1) {
+  this.image = img;
+  this.delay = delay;
+  this.range = 0;
+  this.rotate = false;
+  this.observeChange = false;
+  this.shouldPaint = false;
+};
+imgPainter.prototype = {
+  update(entity) {
+    this.range++;
+    if (this.range % this.delay === 0) {
+      if (
+        !lit(this.observeChange, "")({ left: entity.left, top: entity.top, width: entity.width, height: entity.height })
+      )
+        return;
+      this.observeChange = { left: entity.left, top: entity.top, width: entity.width, height: entity.height };
+      this.shouldPaint = true;
+    }
+
+    if (this.range > 100) {
+      this.range = 1;
+    }
+  },
+
+  paint(entity, context) {
+    if (this.shouldPaint) {
+      context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
+      this.shouldPaint = false;
+    }
   }
 };
 
-// this is a powerful sprite algorith for
+// this is a powerful sprite algorithm for
 // rendering the exact sprite from a
 // spritesheet in successful orders
 const spriteSheetPainter = function (img, horizontal = 1, vertical = 1, delay = 1) {
@@ -1749,13 +1896,16 @@ const spriteSheetPainter = function (img, horizontal = 1, vertical = 1, delay = 
   this.animateFrameOf = function (frameY = 0) {
     this.frameY = frameY;
   };
+  this.shouldPaint = false;
 };
 
 spriteSheetPainter.prototype = {
   update() {
     this.range++;
     if (this.range % this.delay === 0 && this.animate) {
+      this.shouldPaint = true;
       if (this.animateAllFrames) {
+        // animating all frames from the fisrt image to last in an infinite loop
         if (this.frameHeightCount < this.verticalPictures - 1) {
           if (this.frameWidthCount <= this.horizontalPictures - 2) {
             this.frameWidthCount++;
@@ -1774,36 +1924,40 @@ spriteSheetPainter.prototype = {
 
       if (this.frameY) {
         this.frameHeightCount = this.frameY;
-        if (this.frameWidthCount <= this.horizontalPictures - 2) {
+        if (this.frameWidthCount < this.horizontalPictures - 1) {
           this.frameWidthCount++;
         } else {
           this.frameWidthCount = 0;
         }
       }
     }
+
     if (this.range > 100) {
       this.range = 1;
     }
   },
   paint(entity, context) {
-    context.save();
-    if (this.rotate) {
-      context.translate(entity.left, entity.top);
-      context.rotate((this.rotate * Math.PI) / 180);
-      context.translate(-entity.left, -entity.top);
+    if (this.shouldPaint) {
+      context.save();
+      if (this.rotate) {
+        context.translate(entity.left, entity.top);
+        context.rotate((this.rotate * Math.PI) / 180);
+        context.translate(-entity.left, -entity.top);
+      }
+      context.drawImage(
+        this.image,
+        this.framesWidth * this.frameWidthCount,
+        this.framesHeight * this.frameHeightCount,
+        this.framesWidth,
+        this.framesHeight,
+        entity.left,
+        entity.top,
+        entity.width,
+        entity.height
+      );
+      context.restore();
+      this.shouldPaint = false;
     }
-    context.drawImage(
-      this.image,
-      this.framesWidth * this.frameWidthCount,
-      this.framesHeight * this.frameHeightCount,
-      this.framesWidth,
-      this.framesHeight,
-      entity.left,
-      entity.top,
-      entity.width,
-      entity.height
-    );
-    context.restore();
   }
 };
 
@@ -1847,69 +2001,150 @@ audio.prototype = {
   }
 };
 
-const bgPainter = function (img, speed = 10, up, left) {
+const bgPainter = function (img, speed = 10, up, left, t, l, delay = 0) {
   this.image = img;
-  this.range = 0;
   this.speed = speed;
-  this.top = 0;
-  this.left = 0;
+  this.range = 0;
   this.width = this.image.width;
   this.height = this.image.height;
   this.GoesUp = up;
   this.GoesLeft = left;
+  this.top = t || 0;
+  this.left = l || 0;
+  this.delay = delay;
+  this.shouldPaint = false;
 };
 bgPainter.prototype = {
   update() {
-    if (this.GoesLeft) {
-      if (this.left <= -this.width) {
-        this.left = 0;
-      }
-      this.left = this.left - this.speed;
-    }
+    this.range++;
+    if (this.delay % this.range === 0) {
+      this.shouldPaint = true;
 
-    if (this.GoesUp) {
-      if (this.top >= this.height) {
-        this.top = 0;
+      if (this.GoesLeft) {
+        if (this.left <= -this.width) {
+          this.left = 0;
+        }
+        this.left -= this.speed;
       }
-      this.top += this.speed;
+
+      if (this.GoesUp) {
+        if (this.top >= this.height) {
+          this.top = 0;
+        }
+        this.top += this.speed;
+      }
     }
   },
-  paint(canvas) {
-    const context = canvas.getContext("2d");
-    context.drawImage(this.image, this.left, this.top, canvas.width, this.height);
-    if (this.GoesLeft) {
-      context.drawImage(this.image, this.left + this.width, this.top, canvas.width, canvas.height);
-    } else {
-      context.drawImage(this.image, this.left, this.top - this.height, canvas.width, this.height);
+  paint(context, w, h) {
+    if (this.shouldPaint === true) {
+      if (this.GoesLeft) {
+        context.drawImage(this.image, this.left, this.top, w, h);
+        context.drawImage(this.image, this.left + this.width, this.top, this.width, h);
+      } else {
+        context.drawImage(this.image, this.left, this.top, w, h);
+        context.drawImage(this.image, this.left, this.top - this.height, w, this.height);
+      }
+      this.shouldPaint = false;
     }
   }
 };
 
 const physics = (function () {
-  function detectCollision(ent, entityArray, reduce = 0, skipMe, freeMan) {
-    for (let j = 0; j < entityArray.length; j++) {
-      if (skipMe && entityArray[j].name === ent.name) {
-        continue;
-      } else {
-        if (
-          ent.left - reduce > entityArray[j].left + entityArray[j].width ||
-          ent.left + ent.width < entityArray[j].left - reduce ||
-          ent.top + reduce > entityArray[j].top + entityArray[j].height ||
-          ent.top + ent.height < entityArray[j].top - reduce
-        ) {
+  function detectCollision(ent, entityArray, reduce = 0, freeMan) {
+    if (typeof entityArray === "string") {
+      entityArray = renderer.getAllEtities(entityArray);
+    }
+
+    if (!ent.positionMap) {
+      for (let j = 0; j < entityArray.length; j++) {
+        if (entityArray[j].name === ent.name) {
           continue;
         } else {
-          entityArray[j].isHit = true;
-          ent.isHit = true;
-          if (entityArray[j].name !== freeMan) {
-            entityArray.splice(j, 1);
-            --j;
+          if (
+            ent.left - reduce > entityArray[j].left + entityArray[j].width ||
+            ent.left + ent.width < entityArray[j].left - reduce ||
+            ent.top + reduce > entityArray[j].top + entityArray[j].height ||
+            ent.top + ent.height < entityArray[j].top - reduce
+          ) {
+            continue;
+          } else {
+            entityArray[j].isHit = true;
+            ent.isHit = true;
+            if (entityArray[j].name !== freeMan) {
+              entityArray.splice(j, 1);
+              --j;
+              continue;
+            }
+            // console.log(entityArray[j].name,j);
           }
-          // console.log(entityArray[j].name,j);
         }
       }
+      return entityArray;
+    } else {
+      // collision detector for shaders
+      let map = ent.positionMap;
+      const detected = function (j) {
+        entityArray[j].isHit = true;
+        ent.isHit = true;
+        if (entityArray[j].name !== freeMan) {
+          entityArray.splice(j, 1);
+          --j;
+        }
+        // console.log(entityArray[j].name,j);
+      };
+      /*
+      A has 4 parts like
+
+      {
+      top:  [top1 , top2 , top3 , top4 , ...],
+      down: [down1 , down2 , down3 , down4 , ...],
+      left: [left1 , left2 , left3 , left4 , ...],
+      right:[right , right2 , right3 , right4 , ...]
+      }
+      
+      */
+      for (let j = 0; j < entityArray.length; j++) {
+        if (entityArray[j].name === ent.name) {
+          continue;
+        } else {
+          // for top position
+          for (let i = 0; i < map.top.length; i++) {
+            if (!(map.top[i] + reduce > entityArray[j].top + entityArray[j].height)) {
+              // set the bomb here dev
+              detected(j);
+              break;
+            }
+          }
+
+          // for bottom position
+          for (let i = 0; i < map.top.length; i++) {
+            if (!(map.top[i] + ent.height) < entityArray[j].top - reduce) {
+              // set the bomb here dev
+              detected(j);
+              break;
+            }
+          }
+
+          // for left position
+          for (let i = 0; i < map.top.length; i++) {
+            if (!(map.left[i] - reduce) > entityArray[j].left + entityArray[j].width) {
+              // set the bomb here dev
+              detected(j);
+              break;
+            }
+          }
+          // for right position
+          for (let i = 0; i < map.top.length; i++) {
+            if (!(map.left[i] + ent.width) < entityArray[j].left - reduce) {
+              // set the bomb here dev
+              detected(j);
+              break;
+            }
+          }
+        }
+      }
+      return entityArray;
     }
-    return entityArray;
   }
 
   return {
@@ -1933,47 +2168,39 @@ const renderer = (function () {
   const bg = [],
     entitysArray = [], // entity storage array
     screen = buildCanvas("uiedbook_game_canvas"),
-    painter = screen.getContext("2d"),
-    pool = [];
-
-  function keepEntity(ent) {
-    if (!ent) return;
-    pool.push(ent);
-  }
-
-  function getFreeEntity(id) {
-    let freeNigga;
-    if (pool.length !== 0) {
-      for (let i = 0; i < pool.length; i++) {
-        if (pool[i].name === id) {
-          freeNigga = pool[i];
-          pool.splice(i, 1);
-          i--;
-          break;
-        }
-      }
-    }
-    return freeNigga;
-  }
+    painter = screen.getContext("2d");
 
   function bgPaint(img, speed, up, left) {
     const bgImg = new bgPainter(img, speed, up, left);
     bg.push(bgImg);
     useBg = true;
-    return bgImg;
   }
 
   function _assemble(...players) {
-    if (!players) throw new Error("RE: No players assembled");
+    if (!players) throw new Error("uiedbook: No players assembled");
     players.forEach(player => {
       entitysArray.push(player);
     });
     return entitysArray;
   }
-  function getAll() {
-    return entitysArray;
+
+  function getAllEtities(name) {
+    if (name === "all") {
+      return entitysArray;
+    } else {
+      const these = [];
+      for (let i = 0; i < entitysArray.length; i++) {
+        if (entitysArray[i].name === name || entitysArray[i].id === name) {
+          these.push(entitysArray[i]);
+        }
+      }
+      return these;
+    }
   }
   function copyCanvasTo(c, opacity, border) {
+    if (!c) {
+      throw new Error("uiedbook: the main game canvas cannot be copied to a null element");
+    }
     const cx = c.getContext("2d");
     cx.drawImage(screen, 0, 0, c.width, c.height);
     c.style.opacity = opacity;
@@ -1983,7 +2210,7 @@ const renderer = (function () {
 
   function toggleRendering() {
     if (!started) {
-      throw new Error("renderer.render() has not been called");
+      throw new Error("uiedbook: game.start() has not been called");
     }
     if (pause) {
       window.requestAnimationFrame(animate);
@@ -1995,7 +2222,7 @@ const renderer = (function () {
   }
 
   function currentFPS() {
-    console.log(fpso);
+    console.log("current fps is  " + fpso);
     return fpso;
   }
 
@@ -2006,7 +2233,7 @@ const renderer = (function () {
     seconds = seconds - deltaTime;
     fpso++;
     if (seconds < 1) {
-      console.log(fpso);
+      console.log("current fps is  " + fpso);
       fpso = 0;
       seconds = 1000;
     }
@@ -2022,19 +2249,17 @@ const renderer = (function () {
     id = window.requestAnimationFrame(animate);
     if (calcFPS(dt)) {
       try {
-        // if (useBg){
-        //  bg.forEach(b => {
-        //   b.paint(screen);
-        //   b.update();
-        // });
-        // painter.drawImage(game.getImg("space7"), 0, 0, screen.width, screen.height)
-        // }
+        if (useBg) {
+          bg.forEach(b => {
+            b.paint(painter, screen.width, screen.height);
+            b.update();
+          });
+        }
         // screen.width = screen.height = 0;
         // screen.width = canvas.width
         //  screen.height = canvas.height;
         entitysArray.forEach((ent, i) => {
           if (ent.delete) {
-            keepEntity(ent);
             entitysArray.splice(i, 1);
             --i;
           }
@@ -2057,9 +2282,6 @@ const renderer = (function () {
   }
 
   function _render(canv, fpso = 0) {
-    if (!canv) {
-      throw new Error("game needs to be rendered EXP: renderer.render(canvas)");
-    }
     canvas = canv;
     context = canv.getContext("2d");
     screen.height = canvas.height;
@@ -2075,10 +2297,8 @@ const renderer = (function () {
     toggleRendering: toggleRendering,
     backgroundImage: bgPaint,
     copyCanvasTo: copyCanvasTo,
-    keepEntity: keepEntity,
-    getFreeEntity: getFreeEntity,
     currentFPS: currentFPS,
-    getAll: getAll
+    getAllEtities: getAllEtities
   };
 })();
 
@@ -2114,6 +2334,7 @@ const uiedbook = {
   appendCanvas,
   game,
   entity,
+  entityShader,
   imgPainter,
   spriteSheetPainter,
   audio,
@@ -2122,9 +2343,11 @@ const uiedbook = {
   speaker,
   speakerStop,
   physics,
-  route
+  route,
+  t,
+  lit
 };
-// 38 apis contexts
+// 43 apis contexts
 
 if (typeof module !== "undefined") {
   module["exports"] = uiedbook;
