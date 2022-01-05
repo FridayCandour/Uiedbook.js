@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /*
  @publisher : friday candour;
  @project : uiedbook library;
@@ -846,6 +843,11 @@ export const animate = (name: string, ...properties: [string, Record<string, str
   document.head.append(aniStyleTag);
 };
 
+/** for checking for empty objects */
+// needed below
+export const isEmptyObject = (obj: unknown): obj is Record<string | number | symbol, never> =>
+  Boolean(typeof obj === "object" && obj && Object.keys(obj).length === 0);
+
 type lay = [a: string, b?: { [k: string]: string | number }, ...c: HTMLElement[]];
 /**
  * The build is a context used as a template engine for building layouts
@@ -878,8 +880,7 @@ export const build = (...layouts: lay): DocumentFragment | HTMLElement => {
   function createElement(node: lay) {
     let type: string = typeof node[0] === "string" ? node[0] : "";
     const op: { [k: string]: string | number } = typeof node[1] === "object" ? node[1] : {};
-    let children: HTMLElement[] | string | undefined = "";
-    console.log(type, children);
+    let children: unknown | string = "";
 
     if (type === "" && op === {}) {
       type = "div";
@@ -887,11 +888,16 @@ export const build = (...layouts: lay): DocumentFragment | HTMLElement => {
     } else {
       children = node.splice(0, 2);
     }
-    const element = document.createElement(type);
-    for (const [k, v] of Object.entries(op)) {
-      element.setAttribute(k, v);
+    if (type === "") {
+      type = "div";
     }
-    if (children) {
+    const element = document.createElement(type);
+    if (!isEmptyObject(op)) {
+      for (const [k, v] of Object.entries(op)) {
+        element[k] = v;
+      }
+    }
+    if (children[0]) {
       if (Array.isArray(children)) {
         const frag = new DocumentFragment();
         // templating testing should be done here
@@ -1003,10 +1009,6 @@ export const xhr = function <T>(type: string, url: string | URL): (this: XMLHttp
   xhrRequest.send();
   return result;
 };
-
-/** for checking for empty objects */
-export const isEmptyObject = (obj: unknown): obj is Record<string | number | symbol, never> =>
-  Boolean(typeof obj === "object" && obj && Object.keys(obj).length === 0);
 
 /*
  *** HOW TO USE ***
@@ -1765,7 +1767,7 @@ const game = (function () {
     const ctx = canv.getContext("2d"),
       img = new Image();
     img.onload = () => ctx!.drawImage(img, 0, 0, canv.width, canv.height);
-    img.src = "game-logo.png";
+    // img.src = "game-logo.png";
   };
   /**This prepares the dom and call the _render function which calls the animate function which starts the game
    * it is first called by the game.assemble(entities) function
@@ -1803,11 +1805,11 @@ const game = (function () {
     });
     // done styling let's have some coffee
     gameframe.append(canvas);
-    intro(canvas);
-    setTimeout(() => {
-      _render(canvas, fps);
-      toggleRendering();
-    }, 2000);
+    // intro(canvas);
+    // setTimeout(() => {
+    _render(canvas, fps);
+    toggleRendering();
+    // }, 2000);
     // just  the game
   };
 
@@ -1832,7 +1834,7 @@ const game = (function () {
    * @param {*url of the image} url
    * @returns {*html image or audio element } node
    */
-  function contentLoader(type: string, id: string, url: string) {
+  function contentLoader(type: string, id: string, url: string): HTMLImageElement | HTMLAudioElement | undefined {
     if (type === "img") {
       const p = new Image();
       p.src = url;
@@ -1848,18 +1850,18 @@ const game = (function () {
     }
   }
 
-  class imageFinder {
-    constructor(array: HTMLImageElement[]) {
-      this.images = array;
-    }
-    find(id: string): HTMLImageElement | never {
-      const p: HTMLImageElement = this.images.find(ent => ent.id === id);
-      if (p) {
-        return p;
-      } else {
-        throw new Error(`uiedbook: image of id  ${id}  not found`);
+  function imageFinder(array: HTMLImageElement[]) {
+    const images = array;
+    return {
+      find(id: string): HTMLImageElement | never {
+        const p: HTMLImageElement | undefined = images.find((ent: HTMLImageElement) => ent.id === id);
+        if (p) {
+          return p;
+        } else {
+          throw new Error(`uiedbook: image of id  ${id}  not found`);
+        }
       }
-    }
+    };
   }
   const imagesArray: HTMLImageElement[] = [],
     audioArray: HTMLAudioElement[] = [];
@@ -1869,18 +1871,18 @@ const game = (function () {
         if (!img[i][0] || !img[i][1]) {
           throw new Error(`uiedbook: image url or id not specified correctly for the ${i} image`);
         }
-        const p = contentLoader("img", img[i][1], img[i][0]);
+        const p: undefined | HTMLImageElement | HTMLAudioElement = contentLoader("img", img[i][1], img[i][0]);
         imagesArray.push(p);
       }
     } else {
       if (img && id) {
-        const i = contentLoader("img", img, id);
+        const i: HTMLImageElement | HTMLAudioElement | undefined = contentLoader("img", img, id);
         imagesArray.push(i);
       } else {
         throw new Error(`uiedbook: image url or id not specified`);
       }
     }
-    return new imageFinder(imagesArray);
+    return imageFinder(imagesArray);
   }
   function loadAudio(img: string, id: string) {
     if (Array.isArray(img) && !id) {

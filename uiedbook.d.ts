@@ -1,12 +1,10 @@
-/**
- * structure of the UIEDBOOK contexts
- *
- * typer > lit() + t()
- * for typing in javascript
- *
- *
- */
-declare function lit(type: unknown[], label: string | number): unknown;
+export declare const typer: {
+    sequential: boolean;
+    log: boolean;
+    config(errorsOrLogs: boolean): void;
+};
+export declare function lit(type: unknown, label: number | string): (value: unknown) => unknown;
+export declare const t: (...args: unknown[]) => (value: unknown) => unknown;
 declare type Uied = {
     each(fn: {
         call: (arg0: Element | Element[], ind: number) => void;
@@ -124,9 +122,8 @@ export declare const media: (value: string, ...properties: [string, Record<strin
  *
 */
 export declare const animate: (name: string, ...properties: [string, Record<string, string>][]) => void;
-declare type lay = [a: string, b?: {
-    [k: string]: string;
-}, c?: HTMLElement | Node];
+/** for checking for empty objects */
+export declare const isEmptyObject: (obj: unknown) => obj is Record<string | number | symbol, never>;
 /**
  * The build is a context used as a template engine for building layouts
  *
@@ -153,7 +150,9 @@ declare type lay = [a: string, b?: {
   *
 );
  */
-export declare const build: (...layouts: lay[]) => DocumentFragment | HTMLElement | Element;
+export declare const build: (a: string, b?: {
+    [k: string]: string | number;
+} | undefined, ...c: HTMLElement[]) => DocumentFragment | HTMLElement;
 declare type bui = Node | HTMLElement;
 /**
  * this context used for rendering built layout to a parent or the document body
@@ -168,8 +167,6 @@ export declare const buildTo: (child: bui | bui[], parent: string | HTMLElement)
 export declare const route: (path: string | undefined, templateId: string, controller: () => void) => HTMLAnchorElement;
 /** in construction */
 export declare const xhr: <T>(type: string, url: string | URL) => (this: XMLHttpRequest) => T;
-/** for checking for empty objects */
-export declare const isEmptyObject: (obj: unknown) => obj is Record<string | number | symbol, never>;
 export declare const intersect: (target: string, opt: IntersectionObserverInit, callback: IntersectionObserverCallback) => void;
 /** `error("there was an error!");` */
 export declare const error: (msg: string) => never;
@@ -286,7 +283,9 @@ export declare const uiedbook: {
     css: (name: string, sel: string | Record<string, string>, properties?: Record<string, string> | undefined) => void;
     media: (value: string, ...properties: [string, Record<string, string>][]) => void;
     animate: (name: string, ...properties: [string, Record<string, string>][]) => void;
-    build: (...layouts: lay[]) => DocumentFragment | HTMLElement | Element;
+    build: (a: string, b?: {
+        [k: string]: string | number;
+    } | undefined, ...c: HTMLElement[]) => DocumentFragment | HTMLElement;
     buildTo: (child: bui | bui[], parent: string | HTMLElement) => void;
     xhr: <T>(type: string, url: string | URL) => (this: XMLHttpRequest) => T;
     u: (el: string | Element | Element[], ifAll_OrNum?: number | boolean | undefined) => Uied;
@@ -312,7 +311,9 @@ export declare const uiedbook: {
     buildCanvas: (id: string, w?: number, h?: number) => HTMLCanvasElement;
     game: {
         assemble: (...players: unknown[]) => unknown[];
-        loadImage: (img: string, id: string) => HTMLImageElement[];
+        loadImage: (img: string, id: string) => {
+            find(id: string): HTMLImageElement | never;
+        };
         loadAudio: (img: string, id: string) => HTMLAudioElement[];
         getImg: (id: string) => HTMLImageElement | never;
         getAud: (id: string) => HTMLAudioElement | never;
@@ -360,7 +361,7 @@ export declare const uiedbook: {
     speaker: (text: string, language?: string, volume?: number, rate?: number, pitch?: number) => void;
     speakerStop: () => void;
     route: (path: string | undefined, templateId: string, controller: () => void) => HTMLAnchorElement;
-    t: (...args: unknown[]) => unknown;
+    t: (...args: unknown[]) => (value: unknown) => unknown;
     lit: typeof lit;
 };
 export {};

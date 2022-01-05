@@ -1,10 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
-import { NodeFlags } from "typescript";
-
 /*
  @publisher : friday candour;
  @project : uiedbook library;
@@ -809,6 +803,9 @@ export const animate = (name, ...properties) => {
     aniStyleTag.innerHTML = totalAnimation;
     document.head.append(aniStyleTag);
 };
+/** for checking for empty objects */
+// needed below
+export const isEmptyObject = (obj) => Boolean(typeof obj === "object" && obj && Object.keys(obj).length === 0);
 /**
  * The build is a context used as a template engine for building layouts
  *
@@ -835,7 +832,7 @@ export const animate = (name, ...properties) => {
   *
 );
  */
-export const build = (layouts) => {
+export const build = (...layouts) => {
     function createElement(node) {
         let type = typeof node[0] === "string" ? node[0] : "";
         const op = typeof node[1] === "object" ? node[1] : {};
@@ -844,12 +841,19 @@ export const build = (layouts) => {
             type = "div";
             children = node;
         }
-        console.log(p, children);
-        const element = document.createElement(type);
-        for (const [k, v] of Object.entries(op)) {
-            element.setAttribute(k, v);
+        else {
+            children = node.splice(0, 2);
         }
-        if (children) {
+        if (type === "") {
+            type = "div";
+        }
+        const element = document.createElement(type);
+        if (!isEmptyObject(op)) {
+            for (const [k, v] of Object.entries(op)) {
+                element[k] = v;
+            }
+        }
+        if (children[0]) {
             if (Array.isArray(children)) {
                 const frag = new DocumentFragment();
                 // templating testing should be done here
@@ -871,7 +875,6 @@ export const build = (layouts) => {
     }
     return new DocumentFragment();
 };
-
 /**
  * this context used for rendering built layout to a parent or the document body
  *
@@ -959,8 +962,6 @@ export const xhr = function (type, url) {
     xhrRequest.send();
     return result;
 };
-/** for checking for empty objects */
-export const isEmptyObject = (obj) => Boolean(typeof obj === "object" && obj && Object.keys(obj).length === 0);
 /*
  *** HOW TO USE ***
 let objA = { a: "kd" };
@@ -1568,7 +1569,7 @@ const game = (function () {
     const intro = (canv) => {
         const ctx = canv.getContext("2d"), img = new Image();
         img.onload = () => ctx.drawImage(img, 0, 0, canv.width, canv.height);
-        img.src = "game-logo.png";
+        // img.src = "game-logo.png";
     };
     /**This prepares the dom and call the _render function which calls the animate function which starts the game
      * it is first called by the game.assemble(entities) function
@@ -1605,11 +1606,11 @@ const game = (function () {
         });
         // done styling let's have some coffee
         gameframe.append(canvas);
-        intro(canvas);
-        setTimeout(() => {
-            _render(canvas, fps);
-            toggleRendering();
-        }, 2000);
+        // intro(canvas);
+        // setTimeout(() => {
+        _render(canvas, fps);
+        toggleRendering();
+        // }, 2000);
         // just  the game
     };
     const deleteAllEntities = function () {
@@ -1648,19 +1649,19 @@ const game = (function () {
             }
         }
     }
-    class imageFinder {
-        constructor(array) {
-            this.images = array;
-        }
-        find(id) {
-            const p = this.images.find(ent => ent.id === id);
-            if (p) {
-                return p;
+    function imageFinder(array) {
+        const images = array;
+        return {
+            find(id) {
+                const p = images.find((ent) => ent.id === id);
+                if (p) {
+                    return p;
+                }
+                else {
+                    throw new Error(`uiedbook: image of id  ${id}  not found`);
+                }
             }
-            else {
-                throw new Error(`uiedbook: image of id  ${id}  not found`);
-            }
-        }
+        };
     }
     const imagesArray = [], audioArray = [];
     function loadImage(img, id) {
@@ -1682,7 +1683,7 @@ const game = (function () {
                 throw new Error(`uiedbook: image url or id not specified`);
             }
         }
-        return new imageFinder(imagesArray);
+        return imageFinder(imagesArray);
     }
     function loadAudio(img, id) {
         if (Array.isArray(img) && !id) {

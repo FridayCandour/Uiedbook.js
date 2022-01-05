@@ -1,8 +1,8 @@
 node_modules/
-test.html
-new_features.js
-new_features.ts
-next_uiedbook_version_look_intos.md
-.vscode
-.eslintrc.json
-.prettierrc.json
+test.html /
+new_features.js /
+new_features.ts /
+next_uiedbook_version_look_intos.md /
+.vscode /
+.eslintrc.json /
+.prettierrc.json 

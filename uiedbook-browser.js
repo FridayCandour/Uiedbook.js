@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /*
  @publisher : friday candour;
  @project : uiedbook library;
@@ -16,7 +13,6 @@
  
 YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WITH THIS MODULE
 */
-
 const typer = {
   sequential: true,
   log: false,
@@ -776,6 +772,10 @@ const animate = (name, ...properties) => {
   aniStyleTag.innerHTML = totalAnimation;
   document.head.append(aniStyleTag);
 };
+
+/** for checking for empty objects */
+// needed below
+const isEmptyObject = obj => Boolean(typeof obj === "object" && obj && Object.keys(obj).length === 0);
 /**
  * The build is a context used as a template engine for building layouts
  *
@@ -802,24 +802,28 @@ const animate = (name, ...properties) => {
   *
 );
  */
-
 const build = (...layouts) => {
-  console.log(layouts);
   function createElement(node) {
     let type = typeof node[0] === "string" ? node[0] : "";
     const op = typeof node[1] === "object" ? node[1] : {};
     let children = "";
-    if (type === "" && op === {}) {
+    if (type == "" && op === {}) {
       type = "div";
       children = node;
+    } else {
+      children = node.slice(2);
     }
-    console.log(node);
-
+    if (type === "") {
+      type = "div";
+    }
     const element = document.createElement(type);
-    for (const [k, v] of Object.entries(op)) {
-      element.setAttribute(k, v);
+    if (!isEmptyObject(op)) {
+      for (const [k, v] of Object.entries(op)) {
+        element[k] = v;
+      }
     }
-    if (children) {
+    if (children[0]) {
+      // console.log(children);
       if (Array.isArray(children)) {
         const frag = new DocumentFragment();
         // templating testing should be done here
@@ -831,15 +835,16 @@ const build = (...layouts) => {
         element.append(children);
       }
     }
+    console.log(element);
     // return the element after building the dom objects
     return element;
   }
   const element = createElement(layouts);
-  console.log(element);
-  return element;
+  if (element) {
+    return element;
+  }
   return new DocumentFragment();
 };
-
 /**
  * this context used for rendering built layout to a parent or the document body
  *
@@ -847,15 +852,18 @@ const build = (...layouts) => {
  *
  * const p =   build("span", { innerText: "am a span", title: "title" });
  *
- buildTo(p, "body");
- */
+buildTo(p, "body");
+*/
 const buildTo = (child, parent) => {
   if (typeof parent === "string") {
-    document.querySelectorAll(parent).forEach(par => {
+    parent = document.querySelectorAll(parent);
+    parent.forEach(par => {
       if (Array.isArray(child)) {
         child.forEach(ch => {
           par.append(ch);
         });
+      } else {
+        parent.forEach(par => par.append(child));
       }
     });
   } else {
@@ -867,9 +875,18 @@ const buildTo = (child, parent) => {
   }
 };
 
-const p = build("span", { innerText: "am a span", title: "title" });
-console.log(p);
-buildTo([p], "body");
+// const song = ({ id }) => {
+//   return build("div", {id: "div"},
+//     build("p", { id: id }, "i am ready to sing my song for you oh lord my creator am happy that ypu saved my life")
+//   );
+// };
+// console.log(song());
+// buildTo(song({ id: "friday" }), "body");
+// console.log(
+//   build("span", {
+//     id: "dxsn"
+//   })
+// );
 
 const routes = {};
 const route = function (path = "/", templateId, controller) {
@@ -882,11 +899,11 @@ const route = function (path = "/", templateId, controller) {
  * example.
  *
  * route("/", "home", function () {
- *
- get("div").innerText = " welcome to the home page";
- *
- console.log("we are at the home page");
- *
+*
+get("div").innerText = " welcome to the home page";
+*
+  console.log("we are at the home page");
+*
 });
 *
 *
@@ -903,7 +920,6 @@ const about = route("/about", "about", function () {
  *
  *
 */
-
 const router = function (e) {
   e.preventDefault();
   const url = globalThis.location.hash.slice(1) || "/";
@@ -932,8 +948,7 @@ const xhr = function (type, url) {
   xhrRequest.send();
   return result;
 };
-/** for checking for empty objects */
-const isEmptyObject = obj => Boolean(typeof obj === "object" && obj && Object.keys(obj).length === 0);
+
 /*
  *** HOW TO USE ***
 let objA = { a: "kd" };
@@ -1661,18 +1676,18 @@ const game = (function () {
       }
     }
   }
-  class imageFinder {
-    constructor(array) {
-      this.images = array;
-    }
-    find(id) {
-      const p = this.images.find(ent => ent.id === id);
-      if (p) {
-        return p;
-      } else {
-        throw new Error(`uiedbook: image of id  ${id}  not found`);
+  function imageFinder(array) {
+    const images = array;
+    return {
+      find(id) {
+        const p = images.find(ent => ent.id === id);
+        if (p) {
+          return p;
+        } else {
+          throw new Error(`uiedbook: image of id  ${id}  not found`);
+        }
       }
-    }
+    };
   }
   const imagesArray = [],
     audioArray = [];
@@ -1693,7 +1708,7 @@ const game = (function () {
         throw new Error(`uiedbook: image url or id not specified`);
       }
     }
-    return new imageFinder(imagesArray);
+    return imageFinder(imagesArray);
   }
   function loadAudio(img, id) {
     if (Array.isArray(img) && !id) {
