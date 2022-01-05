@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /*
  @publisher : friday candour;
@@ -14,16 +17,23 @@
 YOU SHOULD GET A COPY OF THE APACHE LICENSE V 2.0 IF IT DOESN'T ALREADY COME WITH THIS MODULE 
 */
 
-function lit(type: unknown[] | Partial<ObjectConstructor>, label: string | number) {
+export const typer = {
+  sequential: true,
+  log: false,
+  config(errorsOrLogs: boolean): void {
+    this.sequential = errorsOrLogs;
+  }
+};
+
+export function lit(type: unknown, label: number | string): (value: unknown) => unknown {
+  if (!typer.log) {
+    console.log("Typer:-: Done checking");
+    typer.log = true;
+  }
+
   label = typeof label === "number" ? `line ${label}` : label;
 
-  // let S_arrays = ["string"];
-  // let N_arrays = ["number"];
-  // let O_arrays = ["object"];
-  // let A_arrays = ["array"];
-  // let F_arrays = ["function"];
-
-  return function (value: unknown[]) {
+  return function (value) {
     if (Array.isArray(type) && Array.isArray(value)) {
       // typing for arrays
       value = value.sort();
@@ -32,36 +42,68 @@ function lit(type: unknown[] | Partial<ObjectConstructor>, label: string | numbe
         if (typeof value[i] === type[i] || value[i] === type[i]) {
           continue;
         } else {
-          console.warn(`WARNING:-: type ${value} is not assignable to type ${type} at ${label}`);
+          if (typer.sequential) {
+            console.warn(`WARNING:-: type ${value} is not assignable to type ${type} at ${label}`);
+            break;
+          } else {
+            throw new Error(`ERROR:-: type ${value} is not assignable to type ${type} at ${label}`);
+          }
         }
       }
+      return value;
     } else {
       // checking for objects
       for (const k in type) {
-        if (typeof value[k] === type[k] || value[k] === type[k]) {
-          continue;
+        console.log(typeof value[k], typeof type[k], value[k] === type[k]);
+        if (typeof type[k] === "object" && !Array.isArray(type[k])) {
+          lit(type[k], label + "internal")(value[k]);
         } else {
-          console.warn(`WARNING:-: the object types for type and value are not assignable at ${label}`);
-          break;
+          if (typeof value[k] === type[k] || value[k] === type[k]) {
+            continue;
+          } else {
+            if (typer.sequential) {
+              console.warn(`WARNING:-: the object types for type and value are not assignable at ${label}`);
+              break;
+            } else {
+              throw new Error(`ERROR:-: the object types for type and value are not assignable at ${label}`);
+            }
+          }
         }
       }
+      return value;
     }
-    return value;
   };
 }
 
 // single values not objects
-const t = function (...args: string[]) {
-  let label: string | number = args.pop();
-  label = typeof label === "number" ? `line ${label}` : label;
+export const t = function (...args: unknown[]): (value: unknown) => unknown {
+  if (!typer.log) {
+    console.log("Typer:-: Done checking");
+    typer.log = true;
+  }
+
+  let label: string;
+  args.forEach((item, ind) => {
+    [...item].forEach(txt => {
+      if (txt === ".") {
+        label = item;
+        args.splice(ind, 1);
+      }
+    });
+  });
+
   const type = args.length === 1 ? args.pop() : args;
-  return function (value: unknown) {
+  return function (value) {
     if (!Array.isArray(type)) {
       // for single types
       if (value === type || typeof value === type) {
         return value;
       } else {
-        console.warn(`WARNING:-: type ${typeof value} is not assignable to type ${type} at ${label}`);
+        if (typer.sequential) {
+          console.warn(`WARNING:-: type ${typeof value} is not assignable to type ${type} at ${label}`);
+        } else {
+          throw new Error(`TYPER:-: type ${typeof value} is not assignable to type ${type} at ${label}`);
+        }
       }
     } else {
       // for union types
@@ -71,10 +113,15 @@ const t = function (...args: string[]) {
           return value;
         } else {
           if (i === type.length - 1) {
-            console.warn(
-              `warning type ${typeof value} is not assignable to types ${type[0]}, ${type[1]}...  at ${label}`
-            );
-            return false;
+            if (typer.sequential) {
+              console.warn(
+                `warning type ${typeof value} is not assignable to types ${type[0]}, ${type[1]}...  at ${label}`
+              );
+            } else {
+              throw new Error(
+                `TYPER:-: type ${typeof value} is not assignable to types ${type[0]}, ${type[1]}...  at ${label}`
+              );
+            }
           }
         }
       }
@@ -82,12 +129,10 @@ const t = function (...args: string[]) {
   };
 };
 
-type BaseE = HTMLElement | NodeListOf<HTMLElement>;
-
 type Uied = {
-  each(fn: { call: (arg0: NodeListOf<HTMLElement>, ind: number) => void }): void;
-  style(obj: Partial<HTMLElement["style"]>): BaseE;
-  config(obj: Partial<ObjectConstructor>): void;
+  each(fn: { call: (arg0: Element | Element[], ind: number) => void }): void;
+  style(obj: Partial<HTMLElement["style"]>): Element | Element[];
+  config(obj: Record<string, string>): void;
   appendTo(type: string, attribute: Record<string, string>, number?: number): void;
   on(type: string, callback: (e: Event) => void): void;
   attr(attribute_object: Partial<HTMLElement>): string | null | (string | null)[] | undefined;
@@ -102,8 +147,11 @@ type Uied = {
   off(type: string, callback: (e: Event) => void): void;
   box(w: number, h: number, c?: string): void;
   scrollTo(s?: boolean): void;
-  add(nod: Element | HTMLElement | Node): void;
+  add(nod: Element | Element[] | Node): void;
   remove(ind: number): void;
+  removeChildAtIndex(ind: number): void;
+  scaleIn(): void;
+  scaleOut(): void;
   fullScreen(): {
     toggle: () => void;
     set(): void;
@@ -112,18 +160,40 @@ type Uied = {
 };
 
 /** the u function is a powerful selector function with added attributes to manipulate dom elements, it does it in a more fast and efficient manner. */
-export const u = (el: string | BaseE, ifAll_OrNum?: boolean | number): Uied => {
-  const e = get(el, ifAll_OrNum);
-  if (!e) throw new Error('element "' + String(el) + '" not found');
-  const all = !(e instanceof HTMLElement);
+export const u = (el: string | Element | Element[], ifAll_OrNum?: boolean | number): Uied => {
+  let all = false,
+    e: unknown | unknown[];
+  if (!ifAll_OrNum && typeof el === "string") {
+    e = document.querySelector(el)!;
+  } else {
+    if (!ifAll_OrNum && typeof el !== "string") {
+      e = el;
+    } else {
+      if (ifAll_OrNum && typeof ifAll_OrNum !== "number" && typeof el !== "object") {
+        //all el is being grabbed from the dom
+        all = true;
+        e = Array.from(document.querySelectorAll(el));
+      } else {
+        if (typeof ifAll_OrNum === "number" && typeof el === "string") {
+          e = document.querySelectorAll(el)[ifAll_OrNum];
+        } else {
+          if (typeof el === "object" && typeof ifAll_OrNum === "string") {
+            e = el;
+            all = true;
+          }
+        }
+      }
+    }
+  }
+  if (typeof e === "undefined") throw new Error('element "' + String(el) + '" not found');
 
   // the funny parts or extra methods that can be used
   // to manipulate dom  elements are below!
 
   return {
-    each(fn: { call: (arg0: NodeListOf<HTMLElement> | HTMLElement, id: number) => void }) {
+    each(fn: { call: (arg0: Element | Element[], id: number) => unknown }) {
       if (all) {
-        e.forEach((el, ind) => {
+        e.forEach((el: Element, ind: number) => {
           fn.call(el, ind);
         });
       } else {
@@ -140,7 +210,7 @@ export const u = (el: string | BaseE, ifAll_OrNum?: boolean | number): Uied => {
         if (!all) {
           e.style[k] = v;
         } else {
-          e.forEach(_e => (_e.style[k] = v));
+          e.forEach((_e: Element) => (_e.style[k] = v));
         }
       }
       return e;
@@ -216,7 +286,7 @@ u(object).config({
           allElements.push(element);
         }
 
-        e.forEach(el => {
+        e.forEach((el: Element) => {
           el.append(frag);
         });
       }
@@ -238,12 +308,26 @@ u("#container").appendTo("div"{
 
 */
 
+    replaceWidth(content: Element) {
+      if (!all) {
+        const par = e.parentElement;
+        par.remove(e);
+        par.append(content);
+      } else {
+        e.forEach(el => {
+          const par = el.parentElement;
+          par.remove(el);
+          par.append(content);
+        });
+      }
+    },
+
     on(type, callback) {
       if (!all) {
-        return e.removeEventListener(type, callback, true);
+        e.addEventListener(type, callback, true);
       } else {
-        return e.forEach(element => {
-          element.removeEventListener(type, callback, true);
+        e.forEach((element: Element) => {
+          element.addEventListener(type, callback, true);
         });
       }
     },
@@ -252,7 +336,7 @@ u("#container").appendTo("div"{
       if (!all) {
         e.removeEventListener(type, callback, true);
       } else {
-        e.forEach(element => {
+        e.forEach((element: Element) => {
           element.removeEventListener(type, callback, true);
         });
       }
@@ -283,9 +367,11 @@ u("#container").on("click", ()=>{
         for (const prop in attribute_object) {
           const attr = attribute_object[prop as keyof typeof attribute_object];
           if (prop === null) {
-            return Array.from(e).map(el => el.getAttribute(prop));
+            Array.from(e).map((el: Element) => el.getAttribute(prop));
           } else {
-            e.forEach(el => el.setAttribute(prop, String(attr)));
+            e.forEach((el: { setAttribute: (arg0: string, arg1: string) => any }) =>
+              el.setAttribute(prop, String(attr))
+            );
           }
         }
       }
@@ -305,7 +391,7 @@ u("#container").attr({
       if (!all) {
         e.removeAttribute(attr);
       } else {
-        e.forEach(el => el.removeAttribute(attr));
+        e.forEach((el: { removeAttribute: (arg0: string) => any }) => el.removeAttribute(attr));
       }
     },
     /*
@@ -319,7 +405,7 @@ u("#container").removeAttr("className")
       if (!all) {
         e.innerHTML = code;
       } else {
-        e.forEach(el => (el.innerHTML = code));
+        e.forEach((el: { innerHTML: string }) => (el.innerHTML = code));
       }
     },
     /*
@@ -333,7 +419,7 @@ u("#container").html("<div> hello am a div </div>")
       if (!all) {
         e.textContent = text;
       } else {
-        e.forEach(el => (el.textContent = text));
+        e.forEach((el: { textContent: string }) => (el.textContent = text));
       }
     },
     /*
@@ -348,7 +434,7 @@ u("#container").html("hello am text")
       if (!all) {
         e.classList.add(clas);
       } else {
-        e.forEach(el => el.classList.add(clas));
+        e.forEach((el: { classList: { add: (arg0: string) => any } }) => el.classList.add(clas));
       }
     },
     /*
@@ -364,7 +450,7 @@ u("#container").addClass(".class")
       if (!all) {
         e.classList.remove(clas);
       } else {
-        e.forEach(el => el.classList.remove(clas));
+        e.forEach((el: { classList: { remove: (arg0: string) => any } }) => el.classList.remove(clas));
       }
     },
     /*
@@ -379,7 +465,7 @@ u("#container").removeClass(".class")
       if (!all) {
         e.style.display = "none";
       } else {
-        e.forEach(el => (el.style.display = "none"));
+        e.forEach((el: { style: { display: string } }) => (el.style.display = "none"));
       }
     },
     /*
@@ -398,9 +484,9 @@ u("#container").hide()
         }
       } else {
         if (e[0].style.display === "none") {
-          e.forEach(el => (el.style.display = "block"));
+          e.forEach((el: { style: { display: string } }) => (el.style.display = "block"));
         } else {
-          e.forEach(el => (el.style.display = "none"));
+          e.forEach((el: { style: { display: string } }) => (el.style.display = "none"));
         }
       }
     },
@@ -416,7 +502,7 @@ u("#container").toggleClass(".class")
       if (!all) {
         e.style.display = "block";
       } else {
-        e.forEach(el => (el.style.display = "block"));
+        e.forEach((el: { style: { display: string } }) => (el.style.display = "block"));
       }
     },
     /*
@@ -433,7 +519,7 @@ u("#container").show()
         e.style.height = String(h);
         e.style.backgroundColor = c;
       } else {
-        e.forEach(el => {
+        e.forEach((el: Element) => {
           el.style.width = String(w);
           el.style.height = String(h);
           el.style.backgroundColor = c;
@@ -451,7 +537,7 @@ u("#container").box("100px","100%","#ff9800")
       if (!all) {
         e.scrollIntoView(s);
       } else {
-        e.forEach(el => el.scrollIntoView(s));
+        e.forEach((el: { scrollIntoView: (arg0: boolean) => any }) => el.scrollIntoView(s));
       }
     },
     /*
@@ -461,11 +547,13 @@ u("#container").scrollTo()
 
 */
     // for adding elements to the dom elements
-    add(nod: Element | HTMLElement | Node) {
+    add(nod) {
       if (!all) {
         e.append(nod);
       } else {
-        e.forEach(el => el.append(nod));
+        e.forEach((el: { append: (arg0: Element | Node | Element[]) => void }) => {
+          el.append(nod);
+        });
       }
     },
     /*
@@ -475,18 +563,19 @@ u("#container").add(span)
 
 */
     // for removing elements to the dom elements
-    remove(ind: number) {
-      if (!all && ind) {
+    remove() {
+      e.childNodes.forEach((child: { parentElement: { remove: (arg0: any) => void } }) => {
+        child.parentElement.remove(child);
+      });
+    },
+
+    removeChildAtIndex(ind: number) {
+      if (!all) {
         e.removeChild(e.childNodes[ind]);
       } else {
-        if (ind) {
-          e.forEach(el => el.removeChild(el.childNodes[ind]));
-        }
-      }
-      if (!all && !ind) {
-        e.parentElement.remove(e);
-      } else {
-        e.forEach(el => el.parentElement.remove(el));
+        e.forEach((el: { removeChild: (arg0: any) => void }) => {
+          el.removeChild(e.childNodes[ind]);
+        });
       }
     },
     /*
@@ -495,6 +584,42 @@ u("#container").add(span)
 u("#container").remove(0)
 
 */
+    /*
+ *** HOW TO USE ***
+
+u("#container").remove(0)
+
+*/
+
+    scaleOut() {
+      if (!all) {
+        e.style.transform = "scale(1)";
+        e.style.transform = "translate(-50%, -50%)";
+        e.style.top = "50%";
+        e.style.left = "50%";
+        e.style.transformOrigin = "center";
+      } else {
+        e.forEach((el: { style: { transform: string; top: string; left: string; transformOrigin: string } }) => {
+          el.style.transform = "scale(1)";
+          el.style.transform = "translate(-50%, -50%)";
+          el.style.top = "50%";
+          el.style.left = "50%";
+          el.style.transformOrigin = "center";
+        });
+      }
+    },
+
+    scaleIn() {
+      if (!all) {
+        e.style.transform = "scale(0)";
+        // e.style.transform = "translate(50%, 50%)";
+      } else {
+        e.forEach((el: { style: { transform: string } }) => {
+          el.style.transform = "scale(0)";
+          // el.style.transform = "translate(50%, 50%)";
+        });
+      }
+    },
 
     /*
  *** HOW TO USE ***
@@ -721,7 +846,7 @@ export const animate = (name: string, ...properties: [string, Record<string, str
   document.head.append(aniStyleTag);
 };
 
-type lay = [a: string, b?: { [k: string]: string }, c?: HTMLElement | Node];
+type lay = [a: string, b?: { [k: string]: string | number }, ...c: HTMLElement[]];
 /**
  * The build is a context used as a template engine for building layouts
  * 
@@ -748,50 +873,42 @@ type lay = [a: string, b?: { [k: string]: string }, c?: HTMLElement | Node];
   *
 ); 
  */
-export const build = (...layouts: lay[]): DocumentFragment | HTMLElement | Element => {
-  function createElement(
-    type = "",
-    op: { [k: string]: string } = {},
-    chil?: (HTMLElement | Node)[] | HTMLElement | Node
-  ) {
+
+export const build = (...layouts: lay): DocumentFragment | HTMLElement => {
+  function createElement(node: lay) {
+    let type: string = typeof node[0] === "string" ? node[0] : "";
+    const op: { [k: string]: string | number } = typeof node[1] === "object" ? node[1] : {};
+    let children: HTMLElement[] | string | undefined = "";
+    console.log(type, children);
+
+    if (type === "" && op === {}) {
+      type = "div";
+      children = node;
+    } else {
+      children = node.splice(0, 2);
+    }
     const element = document.createElement(type);
-    for (const k in op) {
-      const v: string | number = op[k];
+    for (const [k, v] of Object.entries(op)) {
       element.setAttribute(k, v);
     }
-    if (chil) {
-      if (Array.isArray(chil)) {
+    if (children) {
+      if (Array.isArray(children)) {
         const frag = new DocumentFragment();
         // templating testing should be done here
-        chil.forEach(ch => {
+        children.forEach(ch => {
           frag.append(ch);
         });
         element.append(frag);
       } else {
-        element.append(chil);
+        element.append(children);
       }
     }
     // return the element after building the dom objects
     return element;
   }
-
-  let i = 0;
-  if (layouts.length > 1) {
-    i = layouts.length;
-    const frag = new DocumentFragment();
-    while (i > 0) {
-      // templating testing should be done here
-      const ele = createElement(layouts[i][0], layouts[i][1], layouts[i][2]);
-      frag.append(ele);
-      i--;
-    }
-    return frag;
-  } else {
-    if (typeof layouts[0] === "string") {
-      // templating testing should be done here
-      const element = createElement(layouts[0][0], layouts[0][1], layouts[0][2]);
-      return element;
-    }
+  const element = createElement(layouts);
+  if (element) {
+    return element;
   }
   return new DocumentFragment();
 };
@@ -828,7 +945,7 @@ export const buildTo = (child: bui | bui[], parent: string | HTMLElement): void 
 const routes: Record<string, { templateId: string; controller: () => void }> = {};
 export const route = function (path = "/", templateId: string, controller: () => void): HTMLAnchorElement {
   const link = document.createElement("a");
-  link.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
+  link.href = globalThis.location.href.replace(/#(.*)$/, "") + "#" + path;
   routes[path] = { templateId: templateId, controller: controller };
   return link;
 };
@@ -859,7 +976,7 @@ const about = route("/about", "about", function () {
 */
 const router = function (e: Event): void {
   e.preventDefault();
-  const url = window.location.hash.slice(1) || "/";
+  const url = globalThis.location.hash.slice(1) || "/";
   const route = routes[url];
   if (route) {
     route.controller();
@@ -868,11 +985,11 @@ const router = function (e: Event): void {
   //   if (this.mode === "history") {
   //     history.pushState(null, null, this.root + this.clearSlashes(path));
   //   } else {
-  //     window.location.href = window.location.href.replace(/#(.*)$/, "") + "#" + path;
+  //     globalThis.location.href = globalThis.location.href.replace(/#(.*)$/, "") + "#" + path;
   //   }
 };
-window.addEventListener("hashchange", router);
-window.addEventListener("load", router);
+globalThis.addEventListener("hashchange", router);
+globalThis.addEventListener("load", router);
 
 /** in construction */
 export const xhr = function <T>(type: string, url: string | URL): (this: XMLHttpRequest) => T {
@@ -942,7 +1059,7 @@ export const error = (msg: string): never => {
 
 /** the get function is the u function but without any sweet methods it is used if you want to enjoy the easiness of the u function but don't want to use it awesome methods */
 export const get = <All extends boolean | number | undefined = undefined>(
-  el: string | BaseE,
+  el: string | Element | Element[],
   ifAll_OrNum?: All
 ): null | (All extends undefined ? HTMLElement : NodeListOf<HTMLElement>) => {
   return (
@@ -1003,56 +1120,9 @@ export const debounce = (func: () => void, timeout = 600): void => {
 debounce(function , 1000);
 */
 
-const callStack: string[] = [];
-/** the grandmother algorith for managing ids of anything, don't use it if you don't understand it's power it looks simple. */
-export const keep = function (id: string | Record<string, number>, time: number): true | undefined {
-  const callObj = typeof id === "object" ? id : null;
-  let runtime = typeof time === "number" ? time : 1;
-  if (typeof id === "string" && typeof runtime === "number") {
-    if (callStack.indexOf(id) > -1) {
-      return;
-    }
-
-    for (; runtime > 0; runtime--) {
-      callStack.push(id);
-    }
-  } else {
-    if (callObj !== null) {
-      // eslint-disable-next-line prefer-const
-      for (let k in callObj) {
-        let v: number = callObj[k];
-        if (callStack.indexOf(k) > -1) {
-          callStack.splice(Number(id), 1);
-          return true;
-        } else {
-          for (; v > 0; v--) {
-            callStack.push(k);
-          }
-        }
-      }
-    }
-  }
-};
-
-export const check = function (id: string): boolean {
-  const ind = callStack.indexOf(id);
-  if (ind > -1) {
-    callStack.filter(key => !(id === key));
-    // callStack.splice(ind,1)
-    return true;
-  } else {
-    return false;
-  }
-};
-
-export const log = (message: unknown): string[] | undefined => {
+export const log = (...message: unknown[]): void => {
   if (message) {
-    console.log(message);
-  } else {
-    if (callStack.length > 0) {
-      console.log(callStack);
-      return callStack;
-    }
+    console.log(...message);
   }
 };
 
@@ -1068,7 +1138,7 @@ export const remove = (name: string): void => {
   localStorage.removeItem(name);
 };
 export const getKey = (index: number): string | null => {
-  return window.localStorage.key(index);
+  return globalThis.localStorage.key(index);
 };
 export const clear = (): void => {
   localStorage.clear();
@@ -1339,20 +1409,16 @@ related operations like motion
 detection key map and all that
 useful stuff in one single 
 bundle it's a game rendering engine library
-called the RE engine
+called the uiedbook engine
 with minimal functionality
 for 2D rendering */
 
-/*
-@ TODOs 
-
- 1. a widget systmen for adding widgets to the gameplay
- 2. a movable background image
- 3. ......
-*/
-
 /** this is used for creating pixel stable game views across all screen width with no pixelation problem try and see the magic */
-export const buildCanvas = function (id: string, w = window.innerWidth, h = window.innerHeight): HTMLCanvasElement {
+export const buildCanvas = function (
+  id: string,
+  w = globalThis.innerWidth,
+  h = globalThis.innerHeight
+): HTMLCanvasElement {
   const canv = document.createElement("canvas"),
     context = canv.getContext("2d"),
     backingStores: (string | number)[] = [
@@ -1362,7 +1428,7 @@ export const buildCanvas = function (id: string, w = window.innerWidth, h = wind
       "oBackingStorePixelRatio",
       "backingStorePixelRatio"
     ],
-    deviceRatio = window.devicePixelRatio,
+    deviceRatio = globalThis.devicePixelRatio,
     backingRatio = backingStores.reduce(function (prev, curr) {
       // eslint-disable-next-line no-prototype-builtins
       return context?.hasOwnProperty(curr) ? (context[curr as keyof CanvasRenderingContext2D] as unknown as string) : 1;
@@ -1378,281 +1444,6 @@ export const buildCanvas = function (id: string, w = window.innerWidth, h = wind
   return canv;
 };
 
-export const appendCanvas = (id: string, h: number, w: number, parent: HTMLElement): HTMLCanvasElement => {
-  /*same as above but with a 
-parent to append directly */
-  const cv = buildCanvas(id, h, w);
-  let par: HTMLElement | undefined;
-  if (typeof parent !== "string" && typeof parent !== "undefined") {
-    par = parent;
-  } else {
-    if (typeof parent === "string") {
-      par = document.querySelector(parent) ?? undefined;
-    } else {
-      if (typeof parent === "undefined") {
-        par = document.body;
-      }
-    }
-  }
-  if (par) {
-    par.style.boxSizing = "border-box";
-    par.append(cv);
-  }
-  return cv;
-};
-
-/** this is the RE game time line algorimth */
-export const game = (function () {
-  /*game is an interface
- where game views (view) are
- sequenced on.*/
-  const games: Node[] = [];
-  // the build function is for creating the game div
-  // and allowing the dev to build upon it
-  function build(viewID: string, callback: () => void) {
-    const frame = document.createElement("div");
-    if (viewID) {
-      frame.setAttribute("id", viewID);
-    }
-    u(frame).style({
-      height: "100vh",
-      width: "100vw",
-      backgroundColor: "black"
-    });
-    mount(frame, callback);
-  }
-
-  // the mount function notifies the flow function
-  // that the game should be started
-  // and the callback can be used to run a function
-  // perculiar to this effect.
-  function mount(template: Node, callback: () => void) {
-    u("body").appendTo("div", { id: "gameframe" });
-    if (games.length === 1) {
-      return;
-    } else {
-      games.push(template);
-    }
-    if (!callback) return;
-    return callback.call(template);
-  }
-
-  // the start function starts the game
-  // and manages the dom
-
-  const start = (canvas: HTMLCanvasElement, fps = 0) => {
-    if (!canvas) {
-      throw new Error("uiedbook: cannot start game without a canvas. EXP game.start(canvas)");
-    }
-
-    u(document.body).style({
-      margin: "0px",
-      padding: "0px",
-      boxSizing: "border-box",
-      border: "none"
-    });
-
-    u("#gameframe").style({
-      width: "100vw",
-      height: "100vh",
-      position: "fixed",
-      top: "0px",
-      left: "0px",
-      bottom: "0px",
-      right: "0px",
-      zIndex: "0",
-      backgroundColor: "black",
-      overflow: "hidden",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      margin: "0px",
-      padding: "0px",
-      boxSizing: "border-box"
-    });
-    const gameframe = get("#gameframe")!;
-    gameframe.append(games[0]);
-    renderer.render(canvas, fps);
-  };
-  // this stops the game
-  const cancel = () => {
-    const fram = get("#gameframe")!;
-    fram.innerHTML = "";
-    renderer.toggleRendering();
-    // fram.append(vsg())
-  };
-
-  function contentLoader(type: string, id: string, url: string) {
-    if (type === "img") {
-      const p = new Image();
-      p.src = url;
-      p.id = id;
-      return p;
-    } else {
-      if (type === "aud") {
-        const p = new Audio();
-        p.src = url;
-        p.id = id;
-        return p;
-      }
-    }
-  }
-
-  const imagesArray: HTMLImageElement[] = [],
-    audioArray: HTMLAudioElement[] = [];
-  function loadImage(img: string, id: string) {
-    if (Array.isArray(img) && !id) {
-      for (let i = 0; i < img.length; i++) {
-        if (!img[i][0] || !img[i][1]) {
-          throw new Error(`uiedbook: image url or id not specified correctly for the ${i} image`);
-        }
-        const p = contentLoader("img", img[i][1], img[i][0]);
-        imagesArray.push(p);
-      }
-    } else {
-      if (img && id) {
-        const i = contentLoader("img", img, id);
-        imagesArray.push(i);
-      } else {
-        throw new Error(`uiedbook: image url or id not specified`);
-      }
-    }
-  }
-  function loadAudio(img: string, id: string) {
-    if (Array.isArray(img) && !id) {
-      for (let i = 0; i < img.length; i++) {
-        if (!img[i][0] || !img[i][1]) {
-          throw new Error(`uiedbook: audio url or id not specified correctly for the ${i} audio`);
-        }
-        const p = contentLoader("aud", img[i][1], img[i][0]);
-        audioArray.push(p);
-      }
-    } else {
-      if (img && id) {
-        const i = contentLoader("aud", img, id);
-        audioArray.push(i);
-      } else {
-        throw new Error(`uiedbook: audio url or id not specified`);
-      }
-    }
-  }
-
-  /*
-  async function contentLoader(type, id, url) {
-    if (type === "img") {
-      let img;
-      const loaded = await new Promise((res, rej) => {
-        const p = new Image();
-        try {
-        p.src = url;
-        p.id = id;
-        p.addEventListener("load", res.call(p), { once: true });
-        img =  p;
-        } catch (error) {
-          rej(error)
-        }
-      })
-      return img;
-    } else {
-      if (type === "aud") {
-        let aud;
-          const loaded = await new Promise((res, rej) => {
-        try {
-        const p = new Audio();
-        p.src = url;
-        p.id = id;
-          p.addEventListener("load", res.call(p), { once: true });
-          aud =  p;
-        } catch (error) {
-          rej(error)
-        }
-      })
-      return aud;
-      }
-    }
-  }
-
-  const imagesArray = [],
-    audioArray = [];
-  async function loadImage(img, id) {
-    if (Array.isArray(img) && !id) {
-      for (let i = 0; i < img.length; i++) {
-        if (!img[i][0] || !img[i][1]) {
-          throw new Error(`uiedbook: image url or id not specified correctly for the ${i} image`);
-        }
-        const p = await contentLoader("img", img[i][1], img[i][0]);
-        imagesArray.push(p);
-      }
-    } else {
-      if (img && id) {
-        const i = await contentLoader("img", img, id);
-        imagesArray.push(i);
-      } else {
-        throw new Error(`uiedbook: image url or id not specified`);
-      }
-    }
-  }
-  async function loadAudio(img, id) {
-    if (Array.isArray(img) && !id) {
-      for (let i = 0; i < img.length; i++) {
-         if (!img[i][0] || !img[i][1]) {
-          throw new Error(`uiedbook: audio url or id not specified correctly for the ${i} audio`);
-        }
-        const p = await contentLoader("aud", img[i][1], img[i][0]);
-        audioArray.push(p);
-      }
-    } else {
-      if (img && id) {
-        const i = await contentLoader("aud", img, id);
-        audioArray.push(i);
-      } else {
-        throw new Error(`uiedbook: audio url or id not specified`);
-      }
-    }
-  }
-
-  */
-
-  function getAud(id: string) {
-    const p = audioArray.find(ent => ent.id === id);
-    if (p) {
-      // console.log(p);
-      return p;
-    } else {
-      throw new Error('uiedbook: audio of id "' + id + '" not found');
-    }
-  }
-
-  function getImg(id: string) {
-    const p = imagesArray.find(ent => ent.id === id);
-    if (p) {
-      // console.log(p);
-      return p;
-    } else {
-      throw new Error('uiedbook: image of id "' + id + '" not found');
-    }
-  }
-
-  return {
-    build: build,
-    mount: mount,
-    start: start,
-    loadImage: loadImage,
-    loadAudio: loadAudio,
-    getImg: getImg,
-    getAud: getAud,
-    cancel: cancel
-  };
-})();
-
-// END OF THE main uiedbook ENGINE////////////////////////
-
-/*
-other TODOs stuff will be built here
-*/
-
-type maker = { update: () => void; paint: () => void };
 /** an entity is any object or thing that can be added to the game world */
 export class Entity {
   /** width of entiity */
@@ -1670,34 +1461,69 @@ export class Entity {
   /** to make the entity observer sides or not */
   border = true;
   isHit = false;
+  callBacks = null;
 
   constructor(
     /** this.id = name || "none" //name of the entity for identification can be used out side here */
     public name: string,
     public id: string,
     /** callback for paint the entity     can be used out side here */
-    public painter: maker,
+    public painter: { paint: (this: unknown, context: CanvasRenderingContext2D, lastDeltalTime: number) => void },
     /** this is a callback to add additional properties to the entity at runtime */
-    public behaviors: () => void
+    public behaviors: (this: unknown, context: CanvasRenderingContext2D, lastDeltalTime: number) => void
   ) {
     this.name ||= "none";
   }
   // this algorimth is for calling the paint function
   // to make it functional when seen at runtime
-  update(context: CanvasRenderingContext2D, lastDeltalTime: number): void {
-    if (typeof this.painter.update !== "undefined" && this.visible) {
-      this.painter.update(this, context, lastDeltalTime);
-    } else {
-      // throw new Error(`RE: entity with name of ${this.name} has no update function`);
+
+  config(top: number, left: number, bottom: number, right: number): void {
+    if (!top || !left || !bottom || !right) {
+      throw new Error(`uiedbook: entity.config(top, left, bottom, right) on ${this.name} is invalid`);
     }
+    this.left = left;
+    this.top = top;
+    this.height = bottom;
+    this.width = right;
   }
-  paint(context: CanvasRenderingContext2D): void {
-    if (typeof this.painter.paint !== "undefined" && this.visible) {
-      this.painter.paint(this, context);
+
+  observeEntity = function (this: Entity, ent: { top: number; left: number; bottom: number; right: number }): boolean {
+    if (
+      this.left > ent.left + ent.width ||
+      this.left + this.width < ent.left ||
+      this.top > ent.top + ent.height ||
+      this.top + this.height < ent.top
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  exec(context: CanvasRenderingContext2D, lastDeltalTime: number): void {
+    if (this.painter.update && this.visible) {
+      this.painter.update(this, context, lastDeltalTime);
+    }
+
+    if (this.painter.paint && this.visible) {
+      this.painter.paint(this, context, lastDeltalTime);
     } else {
       throw new Error(`uiedbook: entity with name of ${this.name} has no paint function`);
     }
+
+    if (this.behaviors) {
+      this.behaviors(this, context, lastDeltalTime);
+    }
+
+    if (Array.isArray(this.callBacks)) {
+      this.callBacks.forEach(fuc => fuc.call(this, context, lastDeltalTime));
+    }
   }
+
+  callBack(...functions: Function[]) {
+    this.callBacks = [...functions];
+  }
+
   observeBorder(w: number, h: number): void {
     if (this.top <= 0) {
       this.top *= 0;
@@ -1714,209 +1540,7 @@ export class Entity {
       }
     }
   }
-  run(context: CanvasRenderingContext2D, lastDeltalTime: number): void {
-    // here the entity don't have to be visble
-    if (typeof this.behaviors !== "undefined") {
-      this.behaviors(this, context, lastDeltalTime);
-    }
-  }
 }
-
-const entityShader = function (
-  this: unknown,
-  name: string,
-  img: HTMLImageElement,
-  map: { top: number[]; down: number[]; left: number[]; right: number[] },
-  behaviors: () => void,
-  delay = 1
-) {
-  /*
-just like an entity, this can also be
- added to the game world
-but these are stationary
-*/
-  if (!name || !img || !map) {
-    throw new Error("cannot create entity shader without a map or image objects");
-  }
-
-  this.id = name || "none"; //name of the entity for identification can be used out side here******
-  this.name = name || "none";
-  this.positionMap = map; // let's the hit detector act on the mapper object passed
-  this.width = 0; // width of entiity                              can be used out side here******
-  this.height = 0; // height of entity                             can be used out side here******
-  this.top = 0; // distance from the top of the canvas              can be used out side here******
-  this.left = 0; // distance from the left of the canvas            can be used out side here******
-  this.visible = true; // to check if the entity is displayed        can be used out side here******
-  this.behavior = behaviors; // this is a callback to add additional properties to the entity at runtime
-  this.delete = false; //  to delete an entity                        can be used out side here******
-  this.isHit = false;
-  this.image = img;
-  this.delay = delay;
-  this.range = 0;
-  this.config = function (top: number, left: number, bottom: number, right: number) {
-    if (!top || !left || !bottom || !right) {
-      throw new Error(`uiedbook: entityShader.config(top, left, bottom, right) on ${this.name} is invalid`);
-    }
-    this.left = left;
-    this.top = top;
-    this.height = bottom;
-    this.width = right;
-  };
-};
-
-entityShader.prototype = {
-  paint(context: {
-    drawImage: (arg0: HTMLImageElement, arg1: number, arg2: number, arg3: number, arg4: number) => void;
-  }) {
-    this.range++;
-    if (this.range % this.delay === 0) {
-      context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
-    }
-    if (this.range > 100) {
-      this.range = 1;
-    }
-  },
-
-  update(
-    context: {
-      drawImage: (arg0: HTMLImageElement, arg1: number, arg2: number, arg3: number, arg4: number) => void;
-    },
-    lastDeltalTime: number
-  ) {
-    if (this.behaviors) {
-      this.behaviors(this, context, lastDeltalTime);
-    }
-  },
-  // well this has to be here for known reasons, yep it's empty but better to avoid a thousand if check ):
-  run() {}
-};
-
-export function ImgPainter(this: unknown, image: HTMLImageElement, delay = 1): void {
-  this.image = image;
-  this.delay = delay;
-  this.range = 0;
-  this.rotate = false;
-}
-ImgPainter.prototype = {
-  paint(this: unknown, entity: Entity, context: CanvasRenderingContext2D): void {
-    this.range++;
-    if (this.range % this.delay === 0) {
-      if (this.rotate) {
-        context.translate(entity.left, entity.top);
-        context.rotate((this.rotate * Math.PI) / 180);
-        context.translate(-entity.left, -entity.top);
-      }
-      context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
-    }
-    if (this.range > 100) {
-      this.range = 1;
-    }
-  }
-};
-
-// this is a powerful sprite algorith for
-// rendering the exact sprite from a
-// spritesheet in successful orders
-export const spriteSheetPainter = function (
-  this: unknown,
-  img: HTMLImageElement,
-  horizontal = 1,
-  vertical = 1,
-  delay = 1
-): void {
-  this.image = img;
-  this.framesWidth = Math.round(this.image.width / horizontal);
-  this.framesHeight = Math.round(this.image.height / vertical);
-  this.horizontalPictures = horizontal;
-  this.verticalPictures = vertical;
-  this.frameHeightCount = 0;
-  this.frameWidthCount = 0;
-  this.range = 0;
-  this.delay = delay;
-  this.isLastImage = false;
-  this.animateAllFrames = horizontal === 1 && vertical === 1 ? false : true;
-  this.animate = true;
-  this.rotate = false;
-  this.changeSheet = function (img: HTMLImageElement, horizontal = 0, vertical = 0, delay = 1) {
-    this.image = img;
-    this.framesWidth = Math.round(this.image.width / horizontal);
-    this.framesHeight = Math.round(this.image.height / vertical);
-    this.horizontalPictures = horizontal;
-    this.verticalPictures = vertical;
-    this.delay = delay;
-    this.animateAllFrames = horizontal === 1 && vertical === 1 ? false : true;
-  };
-
-  this.animateFrameOf = function (frameY = 0) {
-    this.frameHeightCount = frameY;
-  };
-  this.shouldPaint = false;
-};
-spriteSheetPainter.prototype = {
-  update(this: unknown) {
-    this.range++;
-    if (this.range % this.delay === 0 && this.animate) {
-      this.shouldPaint = true;
-      if (this.animateAllFrames) {
-        // animating all frames from the fisrt image to last in an infinite loop
-        if (this.frameHeightCount < this.verticalPictures - 1) {
-          if (this.frameWidthCount <= this.horizontalPictures - 2) {
-            this.frameWidthCount++;
-          } else {
-            this.frameWidthCount = 0;
-            this.frameHeightCount++;
-          }
-        } else {
-          this.isLastImage = true;
-          this.frameHeightCount = 0;
-        }
-        if (this.frameHeightCount === this.verticalPictures - 1) {
-          this.isLastImage = false;
-        }
-      }
-
-      if (this.frameY) {
-        this.frameHeightCount = this.frameY;
-        if (this.frameWidthCount < this.horizontalPictures - 1) {
-          this.frameWidthCount++;
-        } else {
-          this.frameWidthCount = 0;
-        }
-      }
-    }
-
-    if (this.range > 100) {
-      this.range = 1;
-    }
-  },
-  paint(
-    this: unknown,
-    entity: { left: number; top: number; width: number; height: number },
-    context: CanvasRenderingContext2D
-  ) {
-    if (this.shouldPaint) {
-      context.save();
-      if (this.rotate) {
-        context.translate(entity.left, entity.top);
-        context.rotate((this.rotate * Math.PI) / 180);
-        context.translate(-entity.left, -entity.top);
-      }
-      context.drawImage(
-        this.image,
-        this.framesWidth * this.frameWidthCount,
-        this.framesHeight * this.frameHeightCount,
-        this.framesWidth,
-        this.framesHeight,
-        entity.left,
-        entity.top,
-        entity.width,
-        entity.height
-      );
-      context.restore();
-      this.shouldPaint = false;
-    }
-  }
-};
 
 export const speaker = function (text: string, language = "", volume = 1, rate = 1, pitch = 1): void {
   // common languages (not supported by all browsers)
@@ -1962,135 +1586,588 @@ audio.prototype = {
   }
 };
 
-const physics = (function () {
-  function detectCollision(ent: Entity, entityArray: Entity[], reduce = 0, freeMan: string) {
-    if (typeof entityArray === "string") {
-      entityArray = renderer.getAllEtities(entityArray);
+class imgPainter {
+  image: HTMLImageElement;
+  delay: number;
+  range: number;
+  rotate: boolean;
+  observeChange: boolean;
+  constructor(img: HTMLImageElement, delay = 1) {
+    this.image = img;
+    this.delay = delay;
+    this.range = 0;
+    this.rotate = false;
+    this.observeChange = false;
+  }
+
+  update(entity: unknown): void {
+    this.range++;
+    if (this.range % this.delay === 0) {
+      if (
+        lit(this.observeChange, 422)({ left: entity.left, top: entity.top, width: entity.width, height: entity.height })
+      )
+        return;
+      this.observeChange = { left: entity.left, top: entity.top, width: entity.width, height: entity.height };
     }
 
-    if (!ent.positionMap) {
-      for (let j = 0; j < entityArray.length; j++) {
-        if (entityArray[j].name === ent.name) {
-          continue;
-        } else {
-          if (
-            ent.left - reduce > entityArray[j].left + entityArray[j].width ||
-            ent.left + ent.width < entityArray[j].left - reduce ||
-            ent.top + reduce > entityArray[j].top + entityArray[j].height ||
-            ent.top + ent.height < entityArray[j].top - reduce
-          ) {
-            continue;
+    if (this.range > 100) {
+      this.range = 1;
+    }
+  }
+
+  paint(entity: unknown, context: CanvasRenderingContext2D): void {
+    context.drawImage(this.image, entity.left, entity.top, entity.width, entity.height);
+  }
+}
+
+// this is a powerful sprite algorithm for
+// rendering the exact sprite from a
+// spritesheet in successful orders
+class spriteSheetPainter {
+  image: HTMLImageElement;
+  framesWidth: number;
+  framesHeight: number;
+  horizontalPictures: number;
+  verticalPictures: number;
+  frameHeightCount: number;
+  frameWidthCount: number;
+  range: number;
+  delay: number;
+  isLastImage: boolean;
+  animateAllFrames: boolean;
+  animate: boolean;
+  rotate: boolean;
+  bugCorrecter: number;
+  frameY: number;
+  constructor(img: HTMLImageElement, horizontal = 1, vertical = 1, delay = 1) {
+    this.image = img;
+    this.framesWidth = Math.round(this.image.width / horizontal);
+    this.framesHeight = Math.round(this.image.height / vertical);
+    this.horizontalPictures = horizontal;
+    this.verticalPictures = vertical;
+    this.frameHeightCount = 0;
+    this.frameWidthCount = 0;
+    this.range = 0;
+    this.delay = delay;
+    this.isLastImage = false;
+    this.animateAllFrames = horizontal === 1 && vertical === 1 ? false : true;
+    this.animate = true;
+    this.rotate = false;
+    this.bugCorrecter = 5;
+  }
+
+  changeSheet(img: HTMLImageElement, horizontal = 0, vertical = 0, delay = 1): void {
+    this.image = img;
+    this.framesWidth = Math.round(this.image.width / horizontal);
+    this.framesHeight = Math.round(this.image.height / vertical);
+    this.horizontalPictures = horizontal;
+    this.verticalPictures = vertical;
+    this.delay = delay;
+    this.animateAllFrames = horizontal === 1 && vertical === 1 ? false : true;
+  }
+
+  animateFrameOf(frameY = 0): void {
+    this.frameY = frameY;
+  }
+
+  update(): void {
+    this.range++;
+    if (this.range % this.delay === 0 && this.animate) {
+      if (this.animateAllFrames) {
+        // animating all frames from the fisrt image to last in an infinite loop
+        if (this.frameHeightCount < this.verticalPictures - 1) {
+          if (this.frameWidthCount <= this.horizontalPictures - 2) {
+            this.frameWidthCount++;
           } else {
-            entityArray[j].isHit = true;
-            ent.isHit = true;
-            if (entityArray[j].name !== freeMan) {
-              entityArray.splice(j, 1);
-              --j;
-              continue;
-            }
-            // console.log(entityArray[j].name,j);
+            this.frameWidthCount = 0;
+            this.frameHeightCount++;
           }
+        } else {
+          this.isLastImage = true;
+          this.frameHeightCount = 0;
+        }
+        if (this.frameHeightCount === this.verticalPictures - 1) {
+          this.isLastImage = false;
         }
       }
-      return entityArray;
+
+      if (this.frameY) {
+        this.frameHeightCount = this.frameY;
+        if (this.frameWidthCount < this.horizontalPictures - 1) {
+          this.frameWidthCount++;
+        } else {
+          this.frameWidthCount = 0;
+        }
+      }
+    }
+
+    if (this.range > 100) {
+      this.range = 1;
+    }
+
+    if (this.bugCorrecter > 0) {
+      console.log(this.bugCorrecter);
+      this.bugCorrecter--;
+      this.changeSheet(this.image, this.horizontalPictures, this.verticalPictures);
+    }
+  }
+
+  paint(entity: unknown, context: CanvasRenderingContext2D): void {
+    context.save();
+    if (this.rotate) {
+      context.translate(entity.left, entity.top);
+      context.rotate((this.rotate * Math.PI) / 180);
+      context.translate(-entity.left, -entity.top);
+    }
+    context.drawImage(
+      this.image,
+      this.framesWidth * this.frameWidthCount,
+      this.framesHeight * this.frameHeightCount,
+      this.framesWidth,
+      this.framesHeight,
+      entity.left,
+      entity.top,
+      entity.width,
+      entity.height
+    );
+    context.restore();
+  }
+}
+
+/** This is the game engine algorithm*/
+const game = (function () {
+  /* the start function starts the game
+  and prepares the dom, it called by the assemble 
+  function below 
+  */
+
+  let canvas: HTMLCanvasElement,
+    id: number,
+    gameId: number,
+    context: CanvasRenderingContext2D,
+    /** the difference between these two is that one is used for calculating and the other is for the game rendering */
+    fps: number,
+    fpso = 0,
+    lastdt = 0,
+    pause = false,
+    deltaTime,
+    useBg = false,
+    gameStart = true;
+
+  const bg: unknown[] = [],
+    entitysArray: unknown[] = [],
+    /**A canvas for the game */
+    screen = buildCanvas("uiedbook_game_canvas"),
+    painter = screen.getContext("2d");
+  /**the div which the game canvas is mounted on */
+  const gameframe = build("div", { id: "gameframe" });
+  const intro = (canv: HTMLCanvasElement) => {
+    const ctx = canv.getContext("2d"),
+      img = new Image();
+    img.onload = () => ctx!.drawImage(img, 0, 0, canv.width, canv.height);
+    img.src = "game-logo.png";
+  };
+  /**This prepares the dom and call the _render function which calls the animate function which starts the game
+   * it is first called by the game.assemble(entities) function
+   */
+  const start = (fps = 0) => {
+    const canvas = buildCanvas("gamecanvas");
+    document.body.append(gameframe);
+    u(document.body).style({
+      margin: "0px",
+      padding: "0px",
+      boxSizing: "border-box",
+      border: "none",
+      backgroundColor: "black",
+      overflow: "hidden"
+    });
+
+    u(gameframe).style({
+      width: "100vw",
+      height: "100vh",
+      position: "fixed",
+      top: "0px",
+      left: "0px",
+      bottom: "0px",
+      right: "0px",
+      zIndex: "0",
+      backgroundColor: "black",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      margin: "0px",
+      padding: "0px",
+      boxSizing: "border-box"
+    });
+    // done styling let's have some coffee
+    gameframe.append(canvas);
+    intro(canvas);
+    setTimeout(() => {
+      _render(canvas, fps);
+      toggleRendering();
+    }, 2000);
+    // just  the game
+  };
+
+  const deleteAllEntities = function () {
+    if (entitysArray[0]) {
+      for (let i = 0; i < entitysArray.length; i++) {
+        entitysArray[i].delete = true;
+      }
+    }
+  };
+  /**this destroy the game world and pause game rendering */
+  const end = () => {
+    deleteAllEntities();
+    toggleRendering();
+    gameframe.parentElement!.remove(gameframe);
+  };
+
+  /**
+   *
+   * @param {*img or aud } type
+   * @param {*id for the image for retrieval } id
+   * @param {*url of the image} url
+   * @returns {*html image or audio element } node
+   */
+  function contentLoader(type: string, id: string, url: string) {
+    if (type === "img") {
+      const p = new Image();
+      p.src = url;
+      p.id = id;
+      return p;
     } else {
-      // collision detector for shaders
-      for (let j = 0; j < entityArray.length; j++) {
-        let map = ent.positionMap;
-        const detected = function (j: number) {
+      if (type === "aud") {
+        const p = new Audio();
+        p.src = url;
+        p.id = id;
+        return p;
+      }
+    }
+  }
+
+  class imageFinder {
+    constructor(array: HTMLImageElement[]) {
+      this.images = array;
+    }
+    find(id: string): HTMLImageElement | never {
+      const p: HTMLImageElement = this.images.find(ent => ent.id === id);
+      if (p) {
+        return p;
+      } else {
+        throw new Error(`uiedbook: image of id  ${id}  not found`);
+      }
+    }
+  }
+  const imagesArray: HTMLImageElement[] = [],
+    audioArray: HTMLAudioElement[] = [];
+  function loadImage(img: string, id: string) {
+    if (Array.isArray(img) && !id) {
+      for (let i = 0; i < img.length; i++) {
+        if (!img[i][0] || !img[i][1]) {
+          throw new Error(`uiedbook: image url or id not specified correctly for the ${i} image`);
+        }
+        const p = contentLoader("img", img[i][1], img[i][0]);
+        imagesArray.push(p);
+      }
+    } else {
+      if (img && id) {
+        const i = contentLoader("img", img, id);
+        imagesArray.push(i);
+      } else {
+        throw new Error(`uiedbook: image url or id not specified`);
+      }
+    }
+    return new imageFinder(imagesArray);
+  }
+  function loadAudio(img: string, id: string) {
+    if (Array.isArray(img) && !id) {
+      for (let i = 0; i < img.length; i++) {
+        if (!img[i][0] || !img[i][1]) {
+          throw new Error(`uiedbook: audio url or id not specified correctly for the ${i} audio`);
+        }
+        const p = contentLoader("aud", img[i][1], img[i][0]);
+        audioArray.push(p);
+      }
+    } else {
+      if (img && id) {
+        const i = contentLoader("aud", img, id);
+        audioArray.push(i);
+      } else {
+        throw new Error(`uiedbook: audio url or id not specified`);
+      }
+    }
+    return audioArray;
+  }
+
+  /**function to get sounds by id */
+  function getAud(id: string): HTMLAudioElement | never {
+    const p = audioArray.find(ent => ent.id === id);
+
+    if (p) {
+      return p;
+    } else {
+      throw new Error('uiedbook: audio of id "' + id + '" not found');
+    }
+  }
+
+  /**function to get images by id */
+  function getImg(id: string): HTMLImageElement | never {
+    const p = imagesArray.find(ent => ent.id === id);
+    if (p) {
+      return p;
+    } else {
+      throw new Error(`uiedbook: image of id  ${id}  not found`);
+    }
+  }
+
+  /**
+   *
+   * @param {*image element} img
+   * @param {*number background speed} speed
+   * @param {*boolean to move backgroung up or down} up
+   * @param {*boolean to move background right or left} left
+   */
+  function bgPaint(img: HTMLImageElement, speed: number, up: boolean, left: boolean) {
+    const bgImg = new bgPainter(img, speed, up, left, 0, 0, 0);
+    bg.push(bgImg);
+    useBg = true;
+  }
+
+  /**This save the entities to the rendering list and starts the game*/
+  function _assemble(...players: unknown[]) {
+    if (!players) throw new Error("uiedbook: No players assembled");
+    players.forEach(player => {
+      entitysArray.push(player);
+    });
+
+    if (gameStart) {
+      start();
+      gameStart = false;
+    }
+    return entitysArray;
+  }
+
+  /**This is called to detect collisions between entities and set their isHit flag to true, and let you do the rest */
+  function detectCollision(
+    ent: { name: string; top: number; left: number; width: number; height: number; isHit: boolean },
+    entityArray: { name: string; top: number; left: number; width: number; height: number; isHit: boolean }[],
+    reduce = 0,
+    freeMan: string
+  ) {
+    if (typeof entityArray === "string") {
+      entityArray = getAllEntities(entityArray);
+    }
+
+    for (let j = 0; j < entityArray.length; j++) {
+      if (entityArray[j].name === ent.name) {
+        continue;
+      } else {
+        if (
+          ent.left - reduce > entityArray[j].left + entityArray[j].width ||
+          ent.left + ent.width < entityArray[j].left - reduce ||
+          ent.top + reduce > entityArray[j].top + entityArray[j].height ||
+          ent.top + ent.height < entityArray[j].top - reduce
+        ) {
+          continue;
+        } else {
           entityArray[j].isHit = true;
           ent.isHit = true;
           if (entityArray[j].name !== freeMan) {
             entityArray.splice(j, 1);
             --j;
-          }
-          // console.log(entityArray[j].name,j);
-        };
-        /*
-      A has 4 parts like
-
-      {
-      top:  [top1 , top2 , top3 , top4 , ...],
-      down: [down1 , down2 , down3 , down4 , ...],
-      left: [left1 , left2 , left3 , left4 , ...],
-      right:[right , right2 , right3 , right4 , ...]
-    }
-      
-      */
-        for (let j = 0; j < entityArray.length; j++) {
-          if (entityArray[j].name === ent.name) {
             continue;
-          } else {
-            // for top position
-            for (let i = 0; i < map.top.length; i++) {
-              if (!(map.top[i] + reduce > entityArray[j].top + entityArray[j].height)) {
-                // set the bomb here dev
-                detected(j);
-                break;
-              }
-            }
-
-            // for bottom position
-            for (let i = 0; i < map.top.length; i++) {
-              if (!(map.top[i] + ent.height < entityArray[j].top - reduce)) {
-                // set the bomb here dev
-                detected(j);
-                break;
-              }
-            }
-
-            // for left position
-            for (let i = 0; i < map.top.length; i++) {
-              if (!(map.left[i] - reduce > entityArray[j].left + entityArray[j].width)) {
-                // set the bomb here dev
-                detected(j);
-                break;
-              }
-            }
-            // for right position
-            for (let i = 0; i < map.top.length; i++) {
-              if (!(map.left[i] + ent.width < entityArray[j].left - reduce)) {
-                // set the bomb here dev
-                detected(j);
-                break;
-              }
-            }
           }
         }
-        return entityArray;
+      }
+    }
+    return entityArray;
+  }
+
+  /** This get a copy of the canvas during the animation */
+  function copyCanvas() {
+    const c = buildCanvas("c");
+    const cx = c.getContext("2d");
+    cx!.drawImage(screen, 0, 0, c.width, c.height);
+    return c;
+  }
+
+  /** this pauses the game rendering */
+  function toggleRendering() {
+    if (pause) {
+      globalThis.requestAnimationFrame(animate);
+      pause = false;
+    } else {
+      globalThis.cancelAnimationFrame(id);
+      pause = true;
+    }
+  }
+
+  /**this get you a copy of the current fps just like i promised */
+  function currentFPS() {
+    return fpso;
+  }
+
+  let seconds = 1000;
+  /**this calculate the fps and decides if the game should be rendered  */
+  function calcFPS(dt: number) {
+    deltaTime = Math.round(dt - lastdt);
+    lastdt = dt;
+    seconds = seconds - deltaTime;
+    fpso++;
+    if (seconds < 1) {
+      console.log(`current fps is  ${fpso}`);
+      fpso = 0;
+      seconds = 1000;
+    }
+
+    if (deltaTime > fps) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**Here is the evil game loop */
+  function animate(dt: number) {
+    id = globalThis.requestAnimationFrame(animate);
+    if (calcFPS(dt)) {
+      try {
+        /**here and drawing all the backgrounds first
+         * you can have move than one that move at
+         * different speeds or layered upon each other
+         * just to make this engine more powerful
+         */
+        if (useBg) {
+          bg.forEach(b => {
+            b.paint(painter, screen.width, screen.height);
+            b.update();
+          });
+        }
+
+        /**Here we are painting and updating all entities */
+        entitysArray.forEach((ent, i) => {
+          if (ent.delete) {
+            entitysArray.splice(i, 1);
+            --i;
+          }
+
+          ent.exec(painter, dt);
+          if (ent.border) {
+            ent.observeBorder(screen.width, screen.height);
+          }
+
+          if (ent.border) {
+            ent.observeBorder(screen.width, screen.height);
+          }
+        });
+        /**drawing to the on-screen canvas */
+        context.drawImage(screen, 0, 0, canvas.width, canvas.height);
+        /**clearing the off-screen canvas */
+        painter!.clearRect(0, 0, screen.width, screen.height);
+      } catch (error) {
+        /**this part can make you  cry*/
+        throw new Error(`uiedbook: The canvas cannot be animated due to some errors | ${error}`);
       }
     }
   }
 
+  /**hey this is where th game setup and loop begins*/
+  function _render(canv: HTMLCanvasElement, fpso: number) {
+    canvas = canv;
+    context = canv.getContext("2d")!;
+    // matching the off to on screen canvases
+    screen.height = canvas.height;
+    screen.width = canvas.width;
+    fps = fpso;
+    id = globalThis.requestAnimationFrame(animate);
+  }
+
+  /**with this you can get all the entities or the ones with a specific name or id */
+  function getAllEntities(name: string) {
+    if (name === "all" || !name) {
+      return entitysArray;
+    } else {
+      const these = [];
+      for (let i = 0; i < entitysArray.length; i++) {
+        if (entitysArray[i].name === name || entitysArray[i].id === name) {
+          these.push(entitysArray[i]);
+        }
+      }
+      return these;
+    }
+  }
+  const stop = () => {
+    globalThis.cancelIdleCallback(gameId);
+  };
+  const run = (...fuc: any[]) => {
+    fuc.forEach(f => f());
+    gameId = globalThis.requestIdleCallback(run);
+  };
+  // here am giving you access, make proper use
   return {
-    detectCollision: detectCollision
+    assemble: _assemble,
+    loadImage: loadImage,
+    loadAudio: loadAudio,
+    getImg: getImg,
+    getAud: getAud,
+    backgroundImage: bgPaint,
+    detectCollision: detectCollision,
+    copyCanvas: copyCanvas,
+    currentFPS: currentFPS,
+    getAllEntities: getAllEntities,
+    getCanvas: function () {
+      return screen;
+    },
+    toggleRendering: toggleRendering,
+    end: end,
+    deleteAllEntities: deleteAllEntities,
+    run: run,
+    stop: stop,
+    pause: () => {
+      if (!pause) {
+        globalThis.cancelAnimationFrame(id);
+        pause = true;
+      }
+    },
+    play: () => {
+      if (pause) {
+        globalThis.requestAnimationFrame(animate);
+        pause = false;
+      }
+    }
   };
 })();
 
-export const bgPainter = function (
-  this: unknown,
-  img: HTMLImageElement,
-  speed = 10,
-  up: boolean,
-  left: boolean,
-  t: number,
-  l: number,
-  delay = 0
-): void {
-  this.image = img;
-  this.speed = speed;
-  this.range = 0;
-  this.width = this.image.width;
-  this.height = this.image.height;
-  this.GoesUp = up;
-  this.GoesLeft = left;
-  this.top = t || 0;
-  this.left = l || 0;
-  this.delay = delay;
-  this.shouldPaint = false;
-};
-bgPainter.prototype = {
-  update(this: unknown) {
+class bgPainter {
+  image: HTMLImageElement;
+  speed: number;
+  range: number;
+  width: number;
+  height: number;
+  GoesUp: boolean;
+  GoesLeft: boolean;
+  top: number;
+  left: number;
+  delay: number;
+  shouldPaint: boolean;
+  constructor(img: HTMLImageElement, speed = 10, up: boolean, left: boolean, t: number, l: number, delay = 0) {
+    this.image = img;
+    this.speed = speed;
+    this.range = 0;
+    this.width = this.image.width;
+    this.height = this.image.height;
+    this.GoesUp = up;
+    this.GoesLeft = left;
+    this.top = t || 0;
+    this.left = l || 0;
+    this.delay = delay;
+    this.shouldPaint = false;
+  }
+
+  update() {
     this.range++;
     if (this.delay % this.range === 0) {
       this.shouldPaint = true;
@@ -2109,13 +2186,9 @@ bgPainter.prototype = {
         this.top += this.speed;
       }
     }
-  },
-  paint(
-    this: unknown,
-    context: { drawImage: (arg0: HTMLImageElement, arg1: number, arg2: number, arg3: number, arg4: number) => void },
-    w: number,
-    h: number
-  ): void {
+  }
+
+  paint(context: CanvasRenderingContext2D, w: number, h: number) {
     if (this.shouldPaint === true) {
       if (this.GoesLeft) {
         context.drawImage(this.image, this.left, this.top, w, h);
@@ -2127,170 +2200,7 @@ bgPainter.prototype = {
       this.shouldPaint = false;
     }
   }
-};
-
-/** game rendering algorithm */
-export const renderer = (function () {
-  let canvas: HTMLCanvasElement,
-    id: number, // for pausing or playing the game
-    context: CanvasRenderingContext2D,
-    // variables for the timing
-    fps: number,
-    fpso: number,
-    // background varible
-    lastdt = 0,
-    pause = false,
-    deltaTime,
-    started = false,
-    useBg = false;
-  const bg: unknown[] = [],
-    // entity storage array
-    entitysArray: Entity[] = [],
-    screen: HTMLCanvasElement = buildCanvas("uiedbook_game_canvas"),
-    painter: CanvasRenderingContext2D = screen.getContext("2d")!;
-
-  function bgPaint(
-    img: HTMLImageElement,
-    speed: number,
-    up: boolean,
-    left: boolean,
-    t: number,
-    l: number,
-    delay: number
-  ) {
-    const bgImg = new bgPainter(img, speed, up, left, t, l, delay);
-    bg.push(bgImg);
-    useBg = true;
-  }
-
-  function _assemble(...players: Entity[]) {
-    if (!players) throw new Error("uiedbook: No players assembled");
-    players.forEach(player => {
-      entitysArray.push(player);
-    });
-  }
-  return entitysArray;
-
-  function getAllEtities(name: string) {
-    if (name === "all") {
-      return entitysArray;
-    } else {
-      const these = [];
-      for (let i = 0; i < entitysArray.length; i++) {
-        if (entitysArray[i].name === name || entitysArray[i].id === name) {
-          these.push(entitysArray[i]);
-        }
-      }
-      return these;
-    }
-  }
-
-  function copyCanvasTo(c: HTMLCanvasElement, opacity: number | string, border: number | string) {
-    if (!c) {
-      throw new Error("uiedbook: the main game canvas cannot be copied to a null element");
-    }
-    const cx = c.getContext("2d")!;
-    cx.drawImage(canvas, 0, 0, c.width, c.height);
-    c.style.opacity = `${opacity}`;
-    c.style.borderRadius = `${border}`;
-    return c;
-  }
-
-  function toggleRendering() {
-    if (!started) {
-      throw new Error("uiedbook: game.start() has not been called");
-    }
-    if (pause) {
-      window.requestAnimationFrame(animate);
-      pause = false;
-    } else {
-      window.cancelAnimationFrame(id);
-      pause = true;
-    }
-  }
-
-  function currentFPS() {
-    console.log(`current fps is ${fpso}`);
-    return fpso;
-  }
-
-  let seconds = 1000;
-  function calcFPS(dt: number) {
-    deltaTime = Math.round(dt - lastdt);
-    lastdt = dt;
-    seconds = seconds - deltaTime;
-    fpso++;
-    if (seconds < 1) {
-      console.log(`current fps is ${fpso}`);
-      fpso = 0;
-      seconds = 1000;
-    }
-
-    if (deltaTime > fps) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  function animate(dt: number) {
-    id = window.requestAnimationFrame(animate);
-    if (calcFPS(dt)) {
-      try {
-        if (useBg) {
-          bg.forEach(b => {
-            b.paint(painter, screen.width, screen.height);
-            b.update();
-          });
-        }
-        // screen.width = screen.height = 0;
-        // screen.width = canvas.width;
-        // screen.height = canvas.height;
-        entitysArray.forEach((ent, i) => {
-          if (ent.delete) {
-            entitysArray.splice(i, 1);
-            --i;
-          }
-          if (ent.border) {
-            ent.observeBorder(screen.width, screen.height);
-          }
-          ent.update(painter, dt);
-          ent.run(painter, dt);
-          ent.paint(painter);
-        });
-
-        // drawing the on-screen canvas
-        context.clearRect(0, 0, screen.width, screen.height);
-        context.drawImage(screen, 0, 0, canvas.width, canvas.height);
-        painter.clearRect(0, 0, screen.width, screen.height);
-      } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        throw new Error(`the canvas cannot be animated due to some errors | ${error}`);
-      }
-    }
-  }
-
-  function _render(canv: HTMLCanvasElement, fpso = 0) {
-    canvas = canv;
-    context = canv.getContext("2d")!;
-    screen.height = canvas.height;
-    screen.width = canvas.width;
-    fps = fpso;
-    started = true;
-    id = window.requestAnimationFrame(animate);
-  }
-
-  return {
-    render: _render,
-    assemble: _assemble,
-    toggleRendering: toggleRendering,
-    backgroundImage: bgPaint,
-    copyCanvasTo: copyCanvasTo,
-    currentFPS: currentFPS,
-    getAllEtities: getAllEtities
-  };
-})();
-
+}
 export const uiedbook = {
   css,
   media,
@@ -2307,8 +2217,6 @@ export const uiedbook = {
   create,
   download,
   debounce,
-  keep,
-  check,
   log,
   store,
   retrieve,
@@ -2319,21 +2227,19 @@ export const uiedbook = {
   continuesKeys,
   swipe,
   buildCanvas,
-  appendCanvas,
   game,
   Entity,
-  ImgPainter,
+  imgPainter,
   spriteSheetPainter,
   audio,
-  bgPainter,
-  renderer,
   speaker,
   speakerStop,
-  physics,
-  route
+  route,
+  t,
+  lit
 };
 // 42 apis contexts
 
-if (typeof window !== "undefined") {
-  (window as unknown as { uiedbook: typeof uiedbook }).uiedbook = uiedbook;
+if (typeof globalThis !== "undefined") {
+  (globalThis as unknown as { uiedbook: typeof uiedbook }).uiedbook = uiedbook;
 }
