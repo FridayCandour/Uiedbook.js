@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "strict": true,
-    "lib": ["ES2021", "DOM"],
-    "target": "ES2021",
-    "declaration": true
-  },
-  "include": ["*.ts"]
-}
